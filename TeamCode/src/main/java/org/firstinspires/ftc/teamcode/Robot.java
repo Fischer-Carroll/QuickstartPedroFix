@@ -34,6 +34,7 @@ public class Robot {
     Servo blocker;
     Servo depollinator;
     Servo hood;
+    
 
     //Initialize Pedro trackers
     Follower follower;
@@ -45,6 +46,8 @@ public class Robot {
     double heading;
     double targetHeading;
     int intakeTarget;
+    double turretMax = 70;
+    double turretMin = 70;
 
 
     //Initialize passed values
@@ -285,7 +288,7 @@ public class Robot {
     public void aimToHive() {
         if (gamepad1.left_trigger_pressed)
         {
-            targetHeading = (getAngleToHive(x,y) + 90);
+            targetHeading = (getAngleToHive(x,y));
 
 
             // Shortest signed angular difference, in radians.
@@ -294,9 +297,7 @@ public class Robot {
                     Math.cos(targetHeading - Math.toDegrees(heading))
             );
             // Proportional turn control.
-            Controller headingCalc = Controller.pid(0.5, 230, 1.5);
-            double turn = headingCalc.calculate(targetHeading, headingError);
-            // Keep motor command in the valid range.
+                        // Keep motor command in the valid range.
             turn = Math.max(-1.0, Math.min(1.0, turn));
 
             // Field-centric translation from the left stick.
