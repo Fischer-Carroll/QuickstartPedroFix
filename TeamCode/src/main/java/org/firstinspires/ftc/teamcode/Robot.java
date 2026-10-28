@@ -27,10 +27,10 @@ public class Robot {
     //Initialize things from hardware map
     DcMotorEx bottomMotor;
     DcMotorEx topMotor;
-    public DcMotorEx intake;
-    public DcMotorEx transfer;
-    CRServo turret1;
-    CRServo turret2;
+    DcMotorEx intake;
+    DcMotorEx transfer;
+    Servo turret1;
+    Servo turret2;
     Servo blocker;
     Servo depollinator;
     Servo hood;
@@ -93,6 +93,8 @@ public class Robot {
         bottomMotor.setDirection(DcMotorEx.Direction.REVERSE);
         topMotor.setDirection(DcMotorEx.Direction.FORWARD);
         follower.setPose(new Pose(0,0,Math.toRadians(360)));
+
+        
         //Declare Shooter Commands
         cmdOpenBlocker = Command.build()
                 .setStart(this::openBlocker)
@@ -124,16 +126,12 @@ public class Robot {
         depollinatorTimer = new Timer();
     }
 
-    public void setTurretSpeed(double TPS) {
+    public void setFlywheelTPS(double TPS) {
         bottomMotor.setVelocity(TPS);
         topMotor.setVelocity(TPS);
     }
     public void setHoodAngle(double angle) {
         hood.setPosition(angle);
-    }
-
-    public void toggledepollinator() {
-        depollinator.setPosition((depollinator.getPosition() + 1) % 2);
     }
 
     public void raisedepollinator() {
@@ -157,9 +155,7 @@ public class Robot {
             }
 
     }
-    public void toggleBlocker() {
-        blocker.setPosition((blocker.getPosition() + 1) % 2);
-    }
+    
     public void resetOdometry() {
         if (gamepad1.startWasPressed()) {
             follower.setPose(new Pose(w, l, Math.toRadians(90)));
