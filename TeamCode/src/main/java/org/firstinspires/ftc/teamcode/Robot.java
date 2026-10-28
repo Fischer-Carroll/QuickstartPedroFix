@@ -27,8 +27,8 @@ public class Robot {
     //Initialize things from hardware map
     DcMotorEx bottomMotor;
     DcMotorEx topMotor;
-    DcMotorEx intake;
-    DcMotorEx transfer;
+    public DcMotorEx intake;
+    public DcMotorEx transfer;
     Servo turret1;
     Servo turret2;
     Servo blocker;
@@ -46,8 +46,7 @@ public class Robot {
     double heading;
     double targetHeading;
     int intakeTarget;
-    double turretMax = 70;
-    double turretMin = 70;
+    double turretRange = 70;
 
 
     //Initialize passed values
@@ -85,8 +84,8 @@ public class Robot {
         hood = hardwareMap.get(Servo.class, "hood");
         blocker = hardwareMap.get(Servo.class, "blocker");
         depollinator = hardwareMap.get(Servo.class, "depollinator");
-        turret1 = hardwareMap.get(CRServo.class, "turret1");
-        turret2 = hardwareMap.get(CRServo.class, "turret2");
+        turret1 = hardwareMap.get(Servo.class, "turret1");
+        turret2 = hardwareMap.get(Servo.class, "turret2");
 
         //Assign limits to servos
         blocker.scaleRange(0.2, 0.4);
@@ -296,21 +295,16 @@ public class Robot {
                     Math.sin(targetHeading - Math.toDegrees(heading)),
                     Math.cos(targetHeading - Math.toDegrees(heading))
             );
-            // Proportional turn control.
-                        // Keep motor command in the valid range.
-            turn = Math.max(-1.0, Math.min(1.0, turn));
+            //set the turret angle
+            aimTurret(headingError);
 
-            // Field-centric translation from the left stick.
-            DrivePowers powers = ManualDrive.fieldCentric(
-                    gamepad1.left_stick_x,
-                    -gamepad1.left_stick_y,
-                    turn,
-                    follower.pose().heading()
-            );
-            follower.manual(powers);
-            telemetry.addData("Turn", turn);
-            follower.update();
+
         }
+    }
+    public void aimTurret(double angle){
+        angle = Math.min(1,Math.max(angle/turretRange,-1));
+        turret1.setPosition(angle);
+        turret2.setPosition(angle);
     }
 
 

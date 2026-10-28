@@ -28,7 +28,7 @@ public class LM0TeleOp extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         Robot bot = new Robot(hardwareMap, gamepad1,telemetry);
         waitForStart();
-        bot.setTurretSpeed(2140);
+        bot.setFlywheelTPS(2140);
         bot.setHoodAngle(0.75);
         bot.transfer.setPower(1);
         bot.follower.setPose(new Pose(0,0,Math.toRadians(270)));

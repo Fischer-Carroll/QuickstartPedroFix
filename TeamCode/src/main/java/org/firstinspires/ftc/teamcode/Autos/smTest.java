@@ -66,7 +66,7 @@ public class smTest extends LinearOpMode {
         bot.setHoodAngle(0.75);
         bot.transfer.setPower(1);
         bot.intake.setPower(1);
-        bot.setTurretSpeed(2140);
+        bot.setFlywheelTPS(2140);
         bot.closeBlocker();
 
         while (opModeIsActive()) {
