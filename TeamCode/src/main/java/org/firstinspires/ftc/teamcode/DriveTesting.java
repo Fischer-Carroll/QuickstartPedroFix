@@ -26,8 +26,8 @@ public class DriveTesting extends OpMode {
         follower = Constants.create(hardwareMap);
         turretPos = 0.5;
         follower.setPose(new Pose(0,0,Math.toRadians(90)));
-        turret1 = hardwareMap.get(Servo.class, "turretLat1");
-        turret2 = hardwareMap.get(Servo.class, "turretLat2");
+        turret1 = hardwareMap.get(Servo.class, "turret1");
+        turret2 = hardwareMap.get(Servo.class, "turret2");
         turret2.setPosition(turretPos);
         turret1.setPosition(turretPos);
     }

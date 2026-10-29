@@ -8,319 +8,47 @@ import com.pedropathing.drivetrain.DrivePowers;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.ManualDrive;
 import com.pedropathing.math.Pose;
+import com.pedropathing.math.Velocity;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 @TeleOp(name="LM1 TeleOp")
 public class LM1TeleOp extends LinearOpMode {
-    double distance = 0;
-    double botX = 0;
-    double botY = 0;
-    double headingDeg = 0;
 
-    //declare hardware map
-    Follower follower = Constants.create(hardwareMap);
-
-
-
-    boolean shooting = false;
-    int shotProgress = 0;
-    double l = 9;
-    double w = 7.4;
-    final double turretOffset = 3.47762;
-    boolean manualAim = false;
-    int aimPoint = 1;
-    double botTurn;
-    double rightStickAngle = 0;
-
-    //Initialize motors and servos
-    //DcMotorEx launcher1 = hardwareMap.get(DcMotorEx.class, "bottomMotor");
-    //DcMotorEx launcher2 = hardwareMap.get(DcMotorEx.class, "topMotor");
-    //DcMotorEx intake = hardwareMap.get(DcMotorEx.class, "intake");
-    //DcMotorEx transfer = hardwareMap.get(DcMotorEx.class, "transfer");
-    //Servo hood = hardwareMap.get(Servo.class, "hood");
-    //CRServo turretLat1 = hardwareMap.get(CRServo.class, "turret1");
-    //CRServo turretLat2 = hardwareMap.get(CRServo.class, "turret2");
-    Servo blocker = hardwareMap.get(Servo.class, "blocker");
 
     @Override
     public void runOpMode() throws InterruptedException {
-
-
-        //Initialize the TeleOp follower
-        //Setting limits and directions for the hood servo
-        //hood.setDirection(Servo.Direction.FORWARD);
-        //hood.scaleRange(0, 1.0 / 3);
-
-
-
-        //Object to gather robot velocity for Shoot on the move calculations
-        //Velocity velocity = follower.velocity();
-        //Print status to telemetry
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
-
-        //Assign motor directions
-        //launcher1.setDirection(DcMotorEx.Direction.FORWARD);
-        //launcher2.setDirection(DcMotorEx.Direction.REVERSE);
-
-
-        //Inherit starting position from auto end position
-        //follower.setPose(OpModeStorage.autonomousEndPose);
-        //follower.setPose(new Pose(l,w,90));
-
+        Robot bot = new Robot(hardwareMap, gamepad1,telemetry);
         waitForStart();
-        while (opModeIsActive()) {
-            //Update bot coordinates
-            botX = follower.pose().x();
-            botY = follower.pose().y();
-            //Update bot heading
-            headingDeg = Math.toDegrees(follower.pose().heading());
-            //Update bot distance to hive
-            distance = getDistanceToHive(headingDeg,botX,botY,aimPoint);
-            //Update right stick rotation angle
-            rightStickAngle = 180+270+Math.toDegrees(Math.atan2(gamepad1.right_stick_y,-gamepad1.right_stick_x))%360;
-
-            //Corner pose Reset
-            if (gamepad1.startWasPressed()) {
-                Pose cornerPose = new Pose(w, l, 90);
-                follower.setPose(cornerPose);
-            }
-
-
-
-            //gather current robot location & heading information
-            Pose robotPose = follower.pose();
-
-
-            //toggle for manually aiming at hive
-            if (gamepad1.xWasPressed()) {
-                manualAim = !manualAim;
-            }
-
-            //toggle for which hive to aim at during manual mode
-            if (gamepad1.bWasPressed() && manualAim) {
-                aimPoint = (aimPoint % 2 + 1);
-            }
-
-            //determine which hive to aim at while not manually aiming
-            if (!manualAim) {
-                if (robotPose.y() < 56) {
-                    aimPoint = 1;
-                } else if (robotPose.y() > 92) {
-                    aimPoint = 2;
-                }
-
-            }
-
-            if ((gamepad1.rightTriggerWasPressed())) {
-                /*
-                //passThrough.setDirection(target angle ig);
-                launcher1.setVelocity(getTPS(distance));
-                launcher2.setVelocity(getTPS(distance));
-                blocker.setPosition(0.4);
-                transfer.setPower(0.9);
-                intake.setPower(0.9);
-                */
-
-            }
-            else {
-
-                //launcher1.setVelocity(0);
-                //launcher2.setVelocity(0);
-                //intake.setPower(0);
-                //transfer.setPower(0);
-                //blocker.setPosition(0.2);
-
-
-            }
-
-
-            //show current average RPS of both motors
-            //telemetry.addData("Current Motor Velocity (Measured)", (launcher2.getVelocity() + launcher1.getVelocity()) / 2);
-            // Show the elapsed game time and wheel power.
-
-            telemetry.addData("Meters to fire ", distance);
-            telemetry.addData("Hood Angle ", getAngle(distance));
-
-
-        }
-
-        //turret aiming logic
-
-        if (aimPoint == 1) {
-            distance = getDistanceToHive(Math.toDegrees(follower.pose().heading()), follower.pose().x(), follower.pose().y(), 1);
-            headingDeg = getAngleToHive(Math.toDegrees(follower.pose().heading()), follower.pose().x(), follower.pose().y(), 1);
-
-        }
-        telemetry.addLine("-Hive Info-");
-        telemetry.addData("Currently Aimed Hive", aimPoint);
-        telemetry.addData("Current angle to hive", headingDeg);
-        telemetry.addData("Current distance to hive", distance);
-        telemetry.update();
-    }
-
-    public double getTPS(double meters)
-    {
-        return 1950 + meters*250;
-    }
-
-    public double getAngleToHive(double heading, double x, double y, int hive)
-    {
-        double angle = 0;
-        if ((hive == 1))
+        bot.setFlywheelTPS(2140);
+        bot.setHoodAngle(0.75);
+        bot.transfer.setPower(1);
+        bot.intake.setPower(1);
+        bot.follower.setPose(new Pose(24,24,Math.toRadians(90)));
+        while (opModeIsActive())
         {
-            double d_x = 56 - x;
-            double d_y = 56 - y;
-            angle = Math.toDegrees(Math.atan2(d_y,d_x));
-
-        } else
-        {
-            double d_x = 56 - x;
-            double d_y = 92 - y;
-            angle = Math.toDegrees(Math.atan2(d_y,d_x));
-        }
-        return angle;
-    }
-
-    public double getAngle(double meters)
-    {
-        double pi = Math.PI;
-        double g = 9.808;
-        double h = 1.45;
-        double v_iy = Math.sqrt(2 * g * h);
-        double t = v_iy / g;
-        double v_ix = meters / t;
-        double v_i = Math.sqrt(Math.pow(v_ix,2) + Math.pow(v_iy,2));
-        return Math.asin(v_iy / v_i) * 57.2958; //angle of launch
-    }
-
-    private double getMovingAngleToHive(double heading, double x, double y, double xv, double yv, int hive)
-    {
-        double angle = 0;
-        if ((hive == 1))
-        {
-            double d_x = (56 - xv*5.438) - x + Math.sin(heading) * turretOffset;
-            double d_y = (56 - yv*5.438) - y + Math.cos(heading) * turretOffset;
-            angle = Math.toDegrees(Math.atan2(d_y,d_x));
-
-        } else
-        {
-            double d_x = (56 - xv*5.438)- x + Math.sin(heading) * turretOffset;
-            double d_y = (92 - yv*5.438) - y + Math.cos(heading) * turretOffset;
-            angle = Math.toDegrees(Math.atan2(d_y,d_x));
-        }
-        return angle;
-    }
-
-    private double getDistanceToHive(double heading, double x, double y, int hive)
-    {
-        if (hive == 1)
-        {
-            return Math.sqrt( Math.pow(56 - x + Math.sin(heading) * turretOffset, 2)
-                    + Math.pow(56 - y + Math.cos(heading) * turretOffset, 2));
-        } else if (hive == 2)
-        {
-            return Math.sqrt( Math.pow(56 - x + Math.sin(heading) * turretOffset,2)
-                    + Math.pow(90 - y + Math.cos(heading) * turretOffset , 2));
-        }
-        else
-        {
-            return 0;
+            bot.varsUpdate();
+            bot.RCTdriveUpdate();
+            bot.resetOdometry();
+            bot.targetHive();
+            bot.aimToHive();
+            bot.handleIntake();
+            bot.handledepollinator();
+            bot.blockerUpdate();
+            telemetry.addData("Hive Angle",bot.getAngleToHive(bot.x,bot.y) - bot.heading);
+            telemetry.addData("x", bot.x);
+            telemetry.addData("y", bot.y);
+            telemetry.update();
         }
     }
 
-    private double getMovingDistanceToHive(double heading, double x, double y, double xv, double yv, int hive)
-    {
-        if (hive == 1)
-        {
-            return Math.sqrt( Math.pow((56 - xv*0.54376189492 ) - x + Math.sin(heading) * turretOffset, 2)
-                    + Math.pow((56 - yv*0.54376189492 ) - y + Math.cos(heading) * turretOffset, 2));
-        } else if (hive == 2)
-        {
-            return Math.sqrt( Math.pow((56 - xv*0.54376189492 ) - x + Math.sin(heading) * turretOffset,2)
-                    + Math.pow((90 - yv*0.54376189492 ) - y + Math.cos(heading) * turretOffset , 2));
-        }
-        else
-        {
-            return 0;
-        }
-    }
 
-    private double getTurnAngle(double heading, double hiveAngle)
-    {
-        if (360-heading + hiveAngle < heading-hiveAngle)
-        {
-            return -hiveAngle + heading -360;
-        }
-        else if(360-hiveAngle + heading < hiveAngle-heading)
-        {
-            return 360-hiveAngle + heading;
-        }
-        else if (heading > hiveAngle)
-        {
-            return hiveAngle-heading;
-        }
-        else
-        {
-            return heading-hiveAngle;
-        }
-
-    }
-    public void shoot()
-    {
-        /*
-        launcher1.setVelocity(getTPS(distance));
-        launcher2.setVelocity(getTPS(distance));
-        blocker.setPosition(0.4);
-        transfer.setPower(0.9);
-        intake.setPower(0.9);
-        f
-         */
-    }
-    public void drive()
-    {
-        //Logic for turning the bot toward the direction of right stick input
-        if (gamepad1.right_stick_x + gamepad1.right_stick_y > 0.1)
-        {
-            botTurn = getTurnAngle(headingDeg,rightStickAngle);
-        }
-        else
-        {
-            botTurn = 0;
-        }
-
-
-        //Field Centric auto adjusting drive login
-        DrivePowers powers = ManualDrive.fieldCentric(
-                -gamepad1.left_stick_y,
-                gamepad1.left_stick_x,
-                botTurn/360,
-                follower.pose().heading()
-        );
-        ManualDrive.driveOrHold(follower, powers);
-        follower.update();
-    }
-    public void driveTo(double x, double y, double heading)
-    {
-        botTurn = getTurnAngle(headingDeg,heading);
-
-        double xerr = x-botX;
-        double yerr = y-botY;
-
-        //Field Centric auto adjusting drive login
-        DrivePowers powers = ManualDrive.fieldCentric(
-                -yerr,
-                xerr,
-                botTurn/360,
-                follower.pose().heading()
-        );
-        ManualDrive.driveOrHold(follower, powers);
-        follower.update();
-    }
 }

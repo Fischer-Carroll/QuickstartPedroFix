@@ -66,6 +66,7 @@ public class Robot {
     public Command cmdRaisedepollinator;
 
     int depollinatorState = 0;
+    int targetHive = 1;
 
     Timer intakeTimer;
     Timer depollinatorTimer;
@@ -94,7 +95,6 @@ public class Robot {
         follower = Constants.create(hardwareMap);
         bottomMotor.setDirection(DcMotorEx.Direction.REVERSE);
         topMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        follower.setPose(new Pose(0,0,Math.toRadians(360)));
 
         
         //Declare Shooter Commands
@@ -195,9 +195,9 @@ public class Robot {
         intake.setVelocity(-2250);
     }
     public void handleIntake() {
-        if (gamepad1.leftBumperWasPressed()) {
+        if (gamepad1.dpadUpWasPressed()) {
             intake.setPower(1);
-        } else if (gamepad1.bWasPressed()) {
+        } else if (gamepad1.dpadDownWasPressed()) {
             intake.setPower(-1);
         } else if(gamepad1.yWasPressed()) {
             intake.setPower(0);
@@ -245,17 +245,14 @@ public class Robot {
         }
     }
     public void RCTdriveUpdate() {
-        if (!gamepad1.left_trigger_pressed)
-        {
             DrivePowers powers = ManualDrive.fieldCentric(
-                    gamepad1.left_stick_y,
+                    -gamepad1.left_stick_y,
                     -gamepad1.left_stick_x,
-                    gamepad1.right_stick_x,
+                    -gamepad1.right_stick_x,
                     follower.pose().heading()
             );
             ManualDrive.driveOrHold(follower, powers);
             follower.update();
-        }
     }
     public int targetHive() {
         int hive = 1;
@@ -289,20 +286,15 @@ public class Robot {
         {
             targetHeading = (getAngleToHive(x,y));
 
-
             // Shortest signed angular difference, in radians.
-            double headingError = Math.atan2(
-                    Math.sin(targetHeading - Math.toDegrees(heading)),
-                    Math.cos(targetHeading - Math.toDegrees(heading))
-            );
+            double headingError = targetHeading - Math.toDegrees(heading);
+
             //set the turret angle
             aimTurret(headingError);
-
-
         }
     }
     public void aimTurret(double angle){
-        angle = Math.min(1,Math.max(angle/turretRange,-1));
+        angle = 0.5 + angle/(turretRange*2);
         turret1.setPosition(angle);
         turret2.setPosition(angle);
     }

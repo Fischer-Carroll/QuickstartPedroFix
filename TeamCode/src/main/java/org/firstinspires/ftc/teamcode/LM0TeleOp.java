@@ -31,11 +31,11 @@ public class LM0TeleOp extends LinearOpMode {
         bot.setFlywheelTPS(2140);
         bot.setHoodAngle(0.75);
         bot.transfer.setPower(1);
-        bot.follower.setPose(new Pose(0,0,Math.toRadians(270)));
+        bot.follower.setPose(new Pose(24,24,Math.toRadians(270)));
         while (opModeIsActive())
         {
             bot.varsUpdate();
-            bot.FCTdriveUpdate();
+            bot.RCTdriveUpdate();
             bot.resetOdometry();
             bot.targetHive();
             bot.aimToHive();
