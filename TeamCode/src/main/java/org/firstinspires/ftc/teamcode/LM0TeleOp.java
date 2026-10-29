@@ -4,21 +4,10 @@ import static com.pedropathing.api.Paths.curve;
 import static com.pedropathing.api.Paths.line;
 import static com.pedropathing.ivy.Scheduler.schedule;
 
-import com.pedropathing.drivetrain.DrivePowers;
-import com.pedropathing.follower.Follower;
-import com.pedropathing.follower.ManualDrive;
 import com.pedropathing.math.Pose;
-import com.pedropathing.math.Velocity;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 @TeleOp(name="LMO TeleOp")
 public class LM0TeleOp extends LinearOpMode {
@@ -40,7 +29,7 @@ public class LM0TeleOp extends LinearOpMode {
             bot.targetHive();
             bot.aimToHive();
             bot.handleIntake();
-            bot.handledepollinator();
+            bot.handleDepollinator();
             bot.blockerUpdate();
         }
     }

@@ -11,9 +11,7 @@ import com.pedropathing.ivy.Command;
 import com.pedropathing.math.Pose;
 import com.pedropathing.math.Velocity;
 import com.pedropathing.utils.Timer;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -61,12 +59,11 @@ public class Robot {
     public Command shoot;
 
     //Initialize Flower Intake Commands
-    public Command cmdLowerdepollinator;
+    public Command cmdLowerDepollinator;
 
-    public Command cmdRaisedepollinator;
+    public Command cmdRaiseDepollinator;
 
     int depollinatorState = 0;
-    int targetHive = 1;
 
     Timer intakeTimer;
     Timer depollinatorTimer;
@@ -115,12 +112,12 @@ public class Robot {
         );
 
         //Declare Flower Intake Commands
-        cmdLowerdepollinator = Command.build()
-                .setStart(this::lowerdepollinator)
+        cmdLowerDepollinator = Command.build()
+                .setStart(this::lowerDepollinator)
                 .setDone(() -> true)
                 .requiring(depollinator);
-        cmdRaisedepollinator = Command.build()
-                .setStart(this::lowerdepollinator)
+        cmdRaiseDepollinator = Command.build()
+                .setStart(this::raiseDepollinator)
                 .setDone(() -> true)
                 .requiring(depollinator);
 
@@ -136,15 +133,15 @@ public class Robot {
         hood.setPosition(angle);
     }
 
-    public void raisedepollinator() {
+    public void raiseDepollinator() {
         depollinator.setPosition(1);
     }
 
-    public void lowerdepollinator() {
+    public void lowerDepollinator() {
         depollinator.setPosition(0);
     }
 
-    public void handledepollinator(){
+    public void handleDepollinator(){
         if (gamepad1.aWasPressed()) {
             depollinatorState += 1;
             depollinator.setPosition(depollinatorState % 2);
@@ -245,15 +242,16 @@ public class Robot {
         }
     }
     public void RCTdriveUpdate() {
-            DrivePowers powers = ManualDrive.fieldCentric(
-                    -gamepad1.left_stick_y,
-                    -gamepad1.left_stick_x,
-                    -gamepad1.right_stick_x,
-                    follower.pose().heading()
-            );
-            ManualDrive.driveOrHold(follower, powers);
-            follower.update();
+        DrivePowers powers = ManualDrive.fieldCentric(
+                -gamepad1.left_stick_y,
+                -gamepad1.left_stick_x,
+                -gamepad1.right_stick_x,
+                follower.pose().heading()
+        );
+        ManualDrive.driveOrHold(follower, powers);
+        follower.update();
     }
+
     public int targetHive() {
         int hive = 1;
         if (gamepad1.dpadUpWasPressed()) {
@@ -264,27 +262,19 @@ public class Robot {
         }
         return hive;
     }
-    public double getAngleToHive(double x, double y)
+    public double getAngleToHive()
     {
         double angle = 0;
-        if ((targetHive() == 1))
-        {
-            double d_x = 56 - x;
-            double d_y = 56 - y;
-            angle = Math.toDegrees(Math.atan2(d_y,d_x));
-
-        } else
-        {
-            double d_x = 56 - x;
-            double d_y = 88 - y;
-            angle = Math.toDegrees(Math.atan2(d_y,d_x));
-        }
+        double dy = (56) - x + Math.sin(heading) * 3.5;
+        double dx = (56 + 32 * targetHive()) - x + Math.cos(heading)* 3.5;
+        angle = Math.toDegrees(Math.atan2(dy,dx));
+        angle = Math.toDegrees(angle);
         return angle;
     }
     public void aimToHive() {
         if (gamepad1.left_trigger_pressed)
         {
-            targetHeading = (getAngleToHive(x,y));
+            targetHeading = getAngleToHive();
 
             // Shortest signed angular difference, in radians.
             double headingError = targetHeading - Math.toDegrees(heading);
@@ -298,8 +288,4 @@ public class Robot {
         turret1.setPosition(angle);
         turret2.setPosition(angle);
     }
-
-
-
-
 }
