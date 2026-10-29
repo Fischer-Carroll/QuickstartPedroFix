@@ -32,21 +32,23 @@ public class DriveTesting extends OpMode {
         turret1.setPosition(turretPos);
     }
 
+    private void setTurretPosition(double turretPos) {
+        turret1.setPosition(turretPos);
+        turret2.setPosition(turretPos);
+    }
+
     @Override
     public void loop() {
         if (gamepad1.dpadLeftWasPressed()){
-            turretPos += 0.1;
-            turret1.setPosition(turretPos);
-            turret2.setPosition(turretPos);
+            turretPos = 1;
+            setTurretPosition(turretPos);
         }
         if (gamepad1.dpadRightWasPressed()){
-            turretPos -= 0.1;
-            turret1.setPosition(turretPos);
-            turret2.setPosition(turretPos);
+            turretPos = 0;
+            setTurretPosition(turretPos);
         }
         if (gamepad1.dpadUpWasPressed()){
-            turret1.setPosition(turretPos);
-            turret2.setPosition(turretPos);
+            setTurretPosition(turretPos);
         }
         
         DrivePowers powers = ManualDrive.fieldCentric(

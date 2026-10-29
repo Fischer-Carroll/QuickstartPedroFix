@@ -44,7 +44,7 @@ public class Robot {
     double heading;
     double targetHeading;
     int intakeTarget;
-    double turretRange = 70;
+    double turretRange = 135;
 
 
     //Initialize passed values
@@ -64,6 +64,7 @@ public class Robot {
     public Command cmdRaiseDepollinator;
 
     int depollinatorState = 0;
+    int hive;
 
     Timer intakeTimer;
     Timer depollinatorTimer;
@@ -89,9 +90,12 @@ public class Robot {
         blocker.scaleRange(0.2, 0.4);
         depollinator.scaleRange(0.2, 0.775);
         hood.scaleRange(0, 108.8 / 300.0);
+        turret1.scaleRange(0.025,0.975);
+        turret2.scaleRange(0.025,0.975);
         follower = Constants.create(hardwareMap);
         bottomMotor.setDirection(DcMotorEx.Direction.REVERSE);
         topMotor.setDirection(DcMotorEx.Direction.FORWARD);
+        hive = 0;
 
         
         //Declare Shooter Commands
@@ -253,7 +257,6 @@ public class Robot {
     }
 
     public int targetHive() {
-        int hive = 1;
         if (gamepad1.dpadUpWasPressed()) {
             hive = 1;
         }
@@ -265,10 +268,9 @@ public class Robot {
     public double getAngleToHive()
     {
         double angle = 0;
-        double dy = (56) - x + Math.sin(heading) * 3.5;
-        double dx = (56 + 32 * targetHive()) - x + Math.cos(heading)* 3.5;
+        double dx = (56) - x + Math.cos(heading) * 3.5;
+        double dy = (56 + 32 * targetHive()) - y + Math.sin(heading)* 3.5;
         angle = Math.toDegrees(Math.atan2(dy,dx));
-        angle = Math.toDegrees(angle);
         return angle;
     }
     public void aimToHive() {
@@ -276,7 +278,7 @@ public class Robot {
         {
             targetHeading = getAngleToHive();
 
-            // Shortest signed angular difference, in radians.
+            // angle to turn in degrees
             double headingError = targetHeading - Math.toDegrees(heading);
 
             //set the turret angle

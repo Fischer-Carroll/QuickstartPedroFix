@@ -35,6 +35,7 @@ public class LM1TeleOp extends LinearOpMode {
             telemetry.addData("Hive Angle",bot.getAngleToHive() - bot.heading);
             telemetry.addData("x", bot.x);
             telemetry.addData("y", bot.y);
+            telemetry.addData("Heading",Math.toDegrees(bot.heading));
             telemetry.update();
         }
     }

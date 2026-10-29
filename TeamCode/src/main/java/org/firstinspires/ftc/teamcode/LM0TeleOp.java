@@ -26,8 +26,6 @@ public class LM0TeleOp extends LinearOpMode {
             bot.varsUpdate();
             bot.RCTdriveUpdate();
             bot.resetOdometry();
-            bot.targetHive();
-            bot.aimToHive();
             bot.handleIntake();
             bot.handleDepollinator();
             bot.blockerUpdate();
