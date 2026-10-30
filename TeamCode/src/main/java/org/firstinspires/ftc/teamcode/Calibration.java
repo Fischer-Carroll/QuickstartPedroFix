@@ -18,19 +18,17 @@ public class Calibration {
     double w = 7.75;
     double l = 9;
     double heading;
-    double targetHive;
-    double distance;
     double flywheelkP;
     double flywheelkF;
     double targetFlywheelVelocity;
     int[] tuneIncrement;
     int incriment;
-    double hoodAngle;
+    double hoodPosition;
     int blockerState;
     double targetTurretAngle;
-    double turretAngle;
+    double turretPosition;
     int turretMode;
-    String[] turretModeOptions;
+    String[] turretModeOptions = {"Tune Turret Angle", "Direct Stick Input", "Robot Centric Stick Input", "Field Centric Stick Input"};
     double depollinatorState;
     double intakePower;
     double transferPower;
@@ -38,7 +36,6 @@ public class Calibration {
     double hoodTelemetry;
     double turretTelemetry;
     double stickAngle;
-    double fieldAngle;
     //Initialize passed values
     HardwareMap hardwareMap;
     Gamepad gamepad1;
@@ -87,30 +84,65 @@ public class Calibration {
         getFlywheelTelemetry();
 
         //Hood
-        hoodAngle = 0;
+        hoodPosition = 0.5;
         hood.scaleRange(0, 108.8 / 300.0);
         hoodTelemetry = hood.getPosition();
+        setHoodPosition(hoodPosition);
 
         //Blocker
         blockerState = 0;
         blocker.scaleRange(0.2, 0.4);
+        setBlockerPosition(blockerState % 2);
 
         //Turret
         turret1.scaleRange(0, 1);
         turret2.scaleRange(0, 1);
         turretTelemetry = turret1.getPosition();
         turretMode = 0;
-        String[] turretModeOptions = {"Tune Turret Angle", "Direct Stick Input", "Robot Centric Stick Input", "Field Centric Stick Input"};
+        turretPosition = 0.5;
+        setTurretPosition(turretPosition);
     }
+    // %==========% SHOOTER %==========% //
+    public void tuneShooter() { //DO NOT USE WITH tuneFlywheelPIDF() || cycleTurretMode()
+        if (gamepad1.startWasPressed()) {
+            incriment = (incriment + 1) % tuneIncrement.length;
+        }
+        if (gamepad1.dpadUpWasPressed()) {
+            targetFlywheelVelocity += tuneIncrement[incriment];
+            setFlywheelVelocity(targetFlywheelVelocity);
+        }
+        if (gamepad1.dpadUpWasPressed()) {
+            targetFlywheelVelocity -= tuneIncrement[incriment];
+            setFlywheelVelocity(targetFlywheelVelocity);
+        }
+        if (gamepad1.dpadLeftWasPressed()) {
+            hoodPosition += 0.025;
+            setHoodPosition(hoodPosition);
+        }
+        if (gamepad1.dpadRightWasPressed()) {
+            hoodPosition -= 0.025;
+            setHoodPosition(hoodPosition);
+        }
 
-    //===========Shooter==========//
-    public void setFlywheelVelocity(double flywheelVelocity) {
-        bottomMotor.setVelocity(flywheelVelocity);
-        topMotor.setPower(bottomMotor.getPower());
+        telemetry.addLine("Tune Shooter Controls:");
+        telemetry.addLine("Tune Incriment: X");
+        telemetry.addLine("Tune Flywheel Velocity: dpad up/down");
+        telemetry.addLine("Tune Hood Position: dpad left/right");
+        telemetry.addLine("Tune Shooter Data:");
+        telemetry.addData("Tune Incriment:", tuneIncrement[incriment]);
+        telemetry.addData("Measured Flywheel Velocity: ", bottomMotor.getVelocity());
+        telemetry.addData("Measured Hood Position", hood.getPosition());
+        telemetry.addData("Target Flywheel Velocity: ", targetFlywheelVelocity);
+        telemetry.addData("Target Hood Position: ", hoodPosition);
+        telemetry.addLine("===============================");
+
     }
-
-    public void tuneFlywheelVelocity() {
-        if (gamepad1.xWasPressed()) {
+    // %==========% FLYWHEEL %==========% //
+    public void setFlywheelVelocity(double targetFlywheelVelocity) {
+        setFlywheelVelocity(targetFlywheelVelocity);
+    }
+    public void tuneFlywheelPIDF() { //DO NOT USE WITH tuneShooter() || cycleTurretMode()
+        if (gamepad1.startWasPressed()) {
             incriment = (incriment + 1) % tuneIncrement.length;
         }
         if (gamepad1.leftBumperWasPressed()) {
@@ -137,14 +169,21 @@ public class Calibration {
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(flywheelkP, 0, 0, flywheelkF);
         bottomMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
+        telemetry.addLine("Tune Flywheel PIDF Controls:");
+        telemetry.addLine("Tune Incriment: X");
+        telemetry.addLine("Tune kP: left/right bumper");
+        telemetry.addLine("Tune kF: left/right trigger");
+        telemetry.addLine("Tune Flywheel Velocity: dpad up/down");
+        telemetry.addLine("Tune Flywheel PIDF Data:");
+        telemetry.addData("Tune Incriment: ", tuneIncrement[incriment]);
         getFlywheelTelemetry();
         telemetry.addData("Flywheel Velocity Target", flywheelTelemetry[0]);
         telemetry.addData("Flywheel Velocity", flywheelTelemetry[1]);
         telemetry.addData("Flywheel Velocity Error", flywheelTelemetry[2]);
         telemetry.addData("Flywheel kP", flywheelTelemetry[3]);
         telemetry.addData("Flywheel kF", flywheelTelemetry[4]);
+        telemetry.addLine("===============================");
     }
-
     public void getFlywheelTelemetry() {
         flywheelTelemetry = new double[]{
                 targetFlywheelVelocity,
@@ -155,135 +194,179 @@ public class Calibration {
                 tuneIncrement[incriment]
         };
     }
-
-    public void tuneHoodAngle() {
-        if (gamepad1.dpadLeftWasPressed()) {
-            hoodAngle += 0.025;
-            setHoodAngle(hoodAngle);
-        }
+    /*public void handleDynamicFlywheelVelocity() {
+        x = getDistanceToHive();
+        hoodPosition = //
+        setHoodPosition(hoodPosition);
+        targetFlywheelVelocity = //
+        setFlywheelVelocity(targetFlywheelVelocity)
+    }*/
+    // %==========% HOOD %==========% //
+    public void setHoodPosition(double hoodPosition) {
+        hood.setPosition(hoodPosition);
+    }
+    public void tuneHoodPosition() {
         if (gamepad1.dpadRightWasPressed()) {
-            hoodAngle -= 0.025;
-            setHoodAngle(hoodAngle);
+            hoodPosition += 0.025;
+            setHoodPosition(hoodPosition);
         }
-        telemetry.addData("Hood Angle: ", hood.getPosition());
-    }
+        if (gamepad1.dpadLeftWasPressed()) {
+            hoodPosition -= 0.025;
+            setHoodPosition(hoodPosition);
+        }
 
-    private void tuneTurretAngle() {
-        if (gamepad1.startWasPressed()) {
-            turretAngle += 0.025;
-            setTurretAngle(turretAngle);
-        }
-        if (gamepad1.backWasPressed()) {
-            turretAngle -= 0.025;
-            setTurretAngle(turretAngle);
-        }
-        telemetry.addData("Turret Angle: ", turret1.getPosition());
+        telemetry.addLine("Hood Tune Controls:");
+        telemetry.addLine("Hood Position: dpad right/left");
+        telemetry.addData("Hood Position: ", hood.getPosition());
+        telemetry.addLine("===============================");
     }
+    // %==========% TURRET %==========% //
+    public void setTurretPosition(double turretPosition) {
+        turret1.setPosition(turretPosition);
+        turret2.setPosition(turretPosition);
+    }
+    private void tuneTurretPosition() {
+        if (gamepad1.rightStickButtonWasPressed()) {
+            turretPosition += 0.025;
+            setTurretPosition(turretPosition);
+        }
+        if (gamepad1.leftStickButtonWasPressed()) {
+            turretPosition -= 0.025;
+            setTurretPosition(turretPosition);
+        }
 
+        telemetry.addLine("Turret Tune Controls:");
+        telemetry.addLine("Turret Position: right/left stick button");
+        telemetry.addData("Turret Position: ", turret1.getPosition());
+        telemetry.addLine("===============================");
+    }
     private void manualTurretWithDirectStick() {
         double rx = gamepad1.right_stick_x;
+
         if (Math.abs(rx) > 0.12) {
-            targetTurretAngle += 0.01 * Math.signum(rx);
-            setTurretAngle(targetTurretAngle);
+            turretPosition += 0.01 * Math.signum(rx);
+            setTurretPosition(turretPosition);
         }
+
+        telemetry.addLine("Turret Tune Controls:");
+        telemetry.addLine("Turret Position: right/left stick (direction)");
+        telemetry.addData("Turret Position: ", turret1.getPosition());
+        telemetry.addData("Stick Magnitude: ", rx);
+        telemetry.addLine("===============================");
     }
     private void manualTurretWithRCStickAngle() {
         double rx = gamepad1.right_stick_x;
         double ry = gamepad1.right_stick_y;
-        if (Math.hypot(rx, ry) > 0.12) {
-            targetTurretAngle = ((-1 * Math.atan2(ry, rx)) + Math.PI) / (2 * Math.PI);
-            setTurretAngle(targetTurretAngle);
-        }
-    }
 
+        if (Math.hypot(rx, ry) > 0.12) {
+            turretPosition = ((-1 * Math.atan2(ry, rx)) + Math.PI) / (2 * Math.PI);
+            setTurretPosition(turretPosition);
+        }
+
+        telemetry.addLine("Turret Tune Controls:");
+        telemetry.addLine("Turret Position: right/left stick (angle)");
+        telemetry.addData("Turret Position: ", turret1.getPosition());
+        telemetry.addData("Stick Angle: ", stickAngle);
+        telemetry.addLine("===============================");
+    }
     private void manualTurretWithFCStickAngle() {
         double rx = gamepad1.right_stick_x;
         double ry = gamepad1.right_stick_y;
+
         if (Math.hypot(rx, ry) > 0.12) {
             stickAngle = Math.atan2(rx, ry);
             targetTurretAngle = stickAngle - heading;
-            turretAngle = targetTurretAngle * ((Math.toRadians(256.5)) / (2 * Math.PI));
-            setTurretAngle(turretAngle);
+            turretPosition = targetTurretAngle * ((Math.toRadians(256.5)) / (2 * Math.PI));
+            setTurretPosition(turretPosition);
         }
+
+        telemetry.addLine("Turret Tune Controls:");
+        telemetry.addLine("Turret Position: right/left stick (field angle)");
+        telemetry.addData("Turret Position: ", turret1.getPosition());
+        telemetry.addData("Stick Angle: ", stickAngle);
+        telemetry.addLine("===============================");
     }
-    public void cycleTurretMode() {
+    public void cycleTurretMode() { //DO NOT USE WITH tuneShooter() || tuneFlywheelPIDF()
         if (gamepad1.startWasPressed()) {
             turretMode += 1;
         }
-        if (turretMode % 4 == 0) {tuneTurretAngle();}
+        if (turretMode % 4 == 0) {tuneTurretPosition();}
         if (turretMode % 4 == 1) {manualTurretWithDirectStick();}
         if (turretMode % 4 == 2) {manualTurretWithRCStickAngle();}
         if (turretMode % 4 == 3) {manualTurretWithFCStickAngle();}
-        telemetry.addData("Turret Mode: ", turretModeOptions[turretMode % 4]);
-    }
 
+        telemetry.addData("Turret Mode: ", turretModeOptions[turretMode % 4]);
+        telemetry.addLine("===============================");
+    }
+    // %==========% BLOCKER %==========% //
+    public void setBlockerPosition(double blockerPosition) {
+        blocker.setPosition(blockerPosition);
+    }
     public void toggleBlocker() {
         if (gamepad1.yWasPressed ()){
             blockerState += 1;
-            setBlockerAngle(blockerState % 2);
+            setBlockerPosition(blockerState % 2);
         }
-    }
 
+        telemetry.addLine("Toggle Blocker: Y");
+        telemetry.addLine("===============================");
+    }
+    // %==========% INTAKE %==========% //
+    public void setIntakePower(double intakePower) {
+        intake.setPower(intakePower);
+    }
     public void toggleIntake() {
         if (gamepad1.aWasPressed()) {
             intakePower += 1;
             setIntakePower(intakePower % 2);
         }
-    }
 
+        telemetry.addLine("Toggle Intake: A");
+        telemetry.addLine("===============================");
+    }
+    // %==========% TRANSFER %==========% //
+    public void setTransferPower(double transferPower) {
+        transfer.setPower(transferPower);
+    }
     public void toggleTransfer() {
         if (gamepad1.bWasPressed()) {
             transferPower += 1;
             setTransferPower(transferPower % 2);
-
         }
-    }
 
+        telemetry.addLine("Toggle Transfer: B");
+        telemetry.addLine("===============================");
+    }
+    // %==========% DEPOLLINATOR %==========% //
+    public void setDepollinatorPosition(double depollinatorPosition) {
+        depollinator.setPosition(depollinatorPosition);
+    }
     public void toggleDepollinator() {
         if (gamepad1.xWasPressed()) {
             depollinatorState += 1;
-            setDepollinatorAngle(depollinatorState % 2);
-
+            setDepollinatorPosition(depollinatorState % 2);
         }
+        telemetry.addLine("Toggle Depollinator: X");
+        telemetry.addLine("===============================");
     }
 
-    public void setTurretAngle(double turretAngle) {
-        turret1.setPosition(turretAngle);
-        turret2.setPosition(turretAngle);
-    }
-
-    public void setHoodAngle(double hoodAngle) {
-        hood.setPosition(hoodAngle);
-    }
-
-    public void setDepollinatorAngle(double depollinatorAngle) {
-        depollinator.setPosition(depollinatorAngle);
-    }
-
-    public void setBlockerAngle(double blockerAngle) {
-        blocker.setPosition(blockerAngle);
-    }
-
-    public void setIntakePower(double intakePower) {
-        intake.setPower(intakePower);
-    }
-
-    public void setTransferPower(double transferPower) {
-        transfer.setPower(transferPower);
-    }
-
+    // %==========% ODOMETRY %==========% //
     public void resetOdometry() {
-        if (gamepad1.startWasPressed()) {
+        if (gamepad1.backWasPressed()) {
             follower.setPose(new Pose(w, l, Math.toRadians(0)));
         }
-    }
 
+        telemetry.addLine("Reset Odometry: Back");
+        telemetry.addLine("===============================");
+    }
     public void varsUpdate() {
         x = follower.pose().x();
         y = follower.pose().y();
         heading = follower.pose().heading();
-    }
 
+        telemetry.addData("Robot Heading: ", heading);
+        telemetry.addLine("===============================");
+    }
     public void RCTdriveUpdate() {
         if (!gamepad1.left_trigger_pressed) {
             DrivePowers powers = ManualDrive.fieldCentric(

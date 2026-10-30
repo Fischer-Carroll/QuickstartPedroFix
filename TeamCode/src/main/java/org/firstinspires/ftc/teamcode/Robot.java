@@ -133,7 +133,7 @@ public class Robot {
         bottomMotor.setVelocity(TPS);
         topMotor.setVelocity(TPS);
     }
-    public void setHoodAngle(double angle) {
+    public void sethoodPosition(double angle) {
         hood.setPosition(angle);
     }
 

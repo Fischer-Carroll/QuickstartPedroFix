@@ -25,9 +25,13 @@ public class CalibrationTeleOp extends LinearOpMode {
         waitForStart();
         while (opModeIsActive())
         {
-            cal.tuneFlywheelVelocity();
-            cal.tuneHoodAngle();
-            cal.cycleTurretMode();
+            cal.varsUpdate();
+            cal.resetOdometry();
+            //!!!tuneShooter(), tuneFlywheelPIDF(), and cycleTurretMode() are incompatible with eachother (use one at a time)!!!
+            //cal.tuneShooter();
+            cal.tuneFlywheelPIDF();
+            //cal.cycleTurretMode();
+            cal.tuneHoodPosition();
             cal.toggleBlocker();
             cal.toggleIntake();
             cal.toggleTransfer();

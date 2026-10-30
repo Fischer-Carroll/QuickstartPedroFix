@@ -11,14 +11,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name="LMO TeleOp")
 public class LM0TeleOp extends LinearOpMode {
-
-
     @Override
     public void runOpMode() throws InterruptedException {
         Robot bot = new Robot(hardwareMap, gamepad1,telemetry);
         waitForStart();
         bot.setFlywheelTPS(2140);
-        bot.setHoodAngle(0.75);
+        bot.sethoodPosition(0.75);
         bot.transfer.setPower(1);
         bot.follower.setPose(new Pose(24,24,Math.toRadians(270)));
         while (opModeIsActive())
@@ -31,6 +29,4 @@ public class LM0TeleOp extends LinearOpMode {
             bot.blockerUpdate();
         }
     }
-
-
 }
