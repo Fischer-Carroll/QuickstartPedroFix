@@ -256,22 +256,20 @@ public class Robot {
         follower.update();
     }
 
-    public int targetHive() {
+    public void targetHive() {
         if (gamepad1.dpadUpWasPressed()) {
             hive = 1;
         }
         if (gamepad1.dpadDownWasPressed()) {
             hive = 0;
         }
-        return hive;
     }
     public double getAngleToHive()
     {
-        double angle = 0;
-        double dx = (56) - x + Math.cos(heading) * 3.5;
-        double dy = (56 + 32 * targetHive()) - y + Math.sin(heading)* 3.5;
-        angle = Math.toDegrees(Math.atan2(dy,dx));
-        return angle;
+        double dx = (56) - x + (Math.cos(Math.toRadians(heading)) * 3.5);
+        double dy = (56 + 32 * hive) - y + (Math.sin(Math.toRadians(heading))* 3.5);
+        double angle = (Math.toDegrees(Math.atan2(dy,dx)) + 360)%360;
+        return(0.5 + (heading-angle)/(turretRange*2));
     }
     public void aimToHive() {
         if (gamepad1.left_trigger_pressed)
@@ -285,9 +283,9 @@ public class Robot {
             aimTurret(headingError);
         }
     }
-    public void aimTurret(double angle){
-        angle = 0.5 + angle/(turretRange*2);
-        turret1.setPosition(angle);
-        turret2.setPosition(angle);
+    public void aimTurret(double power){
+
+        turret1.setPosition(power);
+        turret2.setPosition(power);
     }
 }
