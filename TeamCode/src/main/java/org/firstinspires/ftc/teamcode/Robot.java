@@ -63,7 +63,7 @@ public class Robot {
 
     public Command cmdRaiseDepollinator;
 
-    int depollinatorState = 0;
+    int depollinatorState = 1;
     int hive;
 
     Timer intakeTimer;
@@ -257,32 +257,43 @@ public class Robot {
     }
 
     public void targetHive() {
+        /*
         if (gamepad1.dpadUpWasPressed()) {
             hive = 1;
         }
         if (gamepad1.dpadDownWasPressed()) {
             hive = 0;
+        }*/
+        if (y < 60){
+            hive = 0;
+        }
+        else if (y > 80){
+            hive = 1;
         }
     }
     public double getAngleToHive()
     {
-        double dx = (56) - x + (Math.cos(Math.toRadians(heading)) * 3.5);
-        double dy = (56 + 32 * hive) - y + (Math.sin(Math.toRadians(heading))* 3.5);
-        double angle = (Math.toDegrees(Math.atan2(dy,dx)) + 360)%360;
-        return angle;
+        double hd = Math.toDegrees(heading);
+        double dx = (56) - x - (Math.cos(Math.toRadians(hd)) * 3.5);
+        double dy = (53 + (37 * hive)) - y - (Math.sin(Math.toRadians(hd)) * 3.5);
+        double angle = (Math.toDegrees(Math.atan2(dy,dx)));
+        if (hd-angle < 180){
+            return (hd - angle);
+        }
+        else{
+            return (-360 + (hd - angle));
+        }
     }
     public void aimToHive() {
         if (gamepad1.left_trigger_pressed)
         {
-            targetHeading = (0.5 + (heading-getAngleToHive())/(turretRange*2));
-
+            targetHeading = (0.5 - (getAngleToHive())/(turretRange*2));
 
             //set the turret angle
             aimTurret(targetHeading);
         }
     }
     public void aimTurret(double power){
-
         turret1.setPosition(power);
         turret2.setPosition(power);
     }
