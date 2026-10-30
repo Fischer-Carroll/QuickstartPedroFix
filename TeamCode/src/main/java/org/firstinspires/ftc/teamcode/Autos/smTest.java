@@ -63,7 +63,7 @@ public class smTest extends LinearOpMode {
 
         schedule(autoRoutine());
 
-        bot.setHoodAngle(0.75);
+        bot.sethoodPosition(0.75);
         bot.transfer.setPower(1);
         bot.intake.setPower(1);
         bot.setFlywheelTPS(2140);

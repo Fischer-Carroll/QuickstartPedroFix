@@ -26,6 +26,8 @@ public class Calibration {
     int[] tuneIncrement;
     int incriment;
     double stickAngle;
+    double rx;
+    double ry;
     //   DRIVE   //
     Follower follower;
     double x;
@@ -119,8 +121,21 @@ public class Calibration {
         turretMode = 0;
         turretPosition = 0.5;
         setTurretPosition(turretPosition);
+
+        //Depollinator
+        depollinator.scaleRange(0.2,0.775);
+        setDepollinatorPosition(1);
     }
 
+    // %==========% MISCELLANEOUS %==========% //
+    public void getStickAngle() {
+        rx = gamepad1.right_stick_x;
+        ry = -gamepad1.right_stick_y;
+        stickAngle = Math.atan2(rx, ry);
+    }
+    public void stickAngleTelemetry() {
+        telemetry.addData("Stick Angle", Math.toDegrees(stickAngle));
+    }
     // %==========% SHOOTER %==========% //
     public void tuneShooter() { //DO NOT USE WITH tuneFlywheelPIDF() || cycleTurretMode()
         if (gamepad1.startWasPressed()) {
@@ -229,11 +244,11 @@ public class Calibration {
     }
     public void tuneHoodPosition() {
         if (gamepad1.dpadRightWasPressed()) {
-            hoodPosition += 0.025;
+            hoodPosition -= 0.025;
             setHoodPosition(hoodPosition);
         }
         if (gamepad1.dpadLeftWasPressed()) {
-            hoodPosition -= 0.025;
+            hoodPosition += 0.025;
             setHoodPosition(hoodPosition);
         }
 
@@ -264,8 +279,6 @@ public class Calibration {
         telemetry.addLine("===============================");
     }
     private void manualTurretWithDirectStick() {
-        double rx = gamepad1.right_stick_x;
-
         if (Math.abs(rx) > 0.12) {
             turretPosition += 0.01 * Math.signum(rx);
             setTurretPosition(turretPosition);
@@ -278,11 +291,8 @@ public class Calibration {
         telemetry.addLine("===============================");
     }
     private void manualTurretWithRCStickAngle() {
-        double rx = gamepad1.right_stick_x;
-        double ry = gamepad1.right_stick_y;
-
         if (Math.hypot(rx, ry) > 0.12) {
-            turretPosition = ((-1 * Math.atan2(ry, rx)) + Math.PI) / (2 * Math.PI);
+            turretPosition = ((-1 * stickAngle) + Math.PI) / (2 * Math.PI);
             setTurretPosition(turretPosition);
         }
 
@@ -293,13 +303,9 @@ public class Calibration {
         telemetry.addLine("===============================");
     }
     private void manualTurretWithFCStickAngle() {
-        double rx = gamepad1.right_stick_x;
-        double ry = gamepad1.right_stick_y;
-
         if (Math.hypot(rx, ry) > 0.12) {
-            stickAngle = Math.atan2(rx, ry);
             targetTurretAngle = stickAngle - heading;
-            turretPosition = targetTurretAngle * ((Math.toRadians(256.5)) / (2 * Math.PI));
+            turretPosition = targetTurretAngle / ((Math.toRadians(256.5)) / (Math.toRadians(360)));
             setTurretPosition(turretPosition);
         }
 
