@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
@@ -28,6 +30,8 @@ public class Calibration {
     double stickAngle;
     double rx;
     double ry;
+    double voltage;
+    double targetVoltage;
     //   DRIVE   //
     Follower follower;
     double x;
@@ -39,7 +43,7 @@ public class Calibration {
     double flywheelkP;
     double flywheelkF;
     double targetFlywheelVelocity;
-    double[] flywheelTelemetry;
+    double flywheelTPSmultiplier;
     //   HOOD   //
     double hoodPosition;
     double hoodTelemetry;
@@ -72,6 +76,7 @@ public class Calibration {
     Servo blocker;
     Servo depollinator;
     Servo hood;
+    VoltageSensor voltageSensor;
 
     public Calibration(HardwareMap hwMap, Gamepad gp1, Gamepad gp2, Telemetry tlm) {
         //Declare passed objects
@@ -81,6 +86,7 @@ public class Calibration {
         telemetry = tlm;
 
         //Declare hardware map
+        voltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
         bottomMotor = hardwareMap.get(DcMotorEx.class, "bottomMotor");
         topMotor = hardwareMap.get(DcMotorEx.class, "topMotor");
         intake = hardwareMap.get(DcMotorEx.class, "intake");
@@ -99,9 +105,12 @@ public class Calibration {
         tuneIncrement = new int[]{1000, 100, 10, 5};
         incriment = 0;
         targetFlywheelVelocity = 1500;
+        flywheelkP = 0.5;
+        flywheelkF = 12.9;
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(flywheelkP, 0, 0, flywheelkF);
-        bottomMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
-        getFlywheelTelemetry();
+        bottomMotor.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        topMotor.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        targetVoltage = 12.0;
 
         //Hood
         hoodPosition = 0.5;
@@ -135,6 +144,7 @@ public class Calibration {
     }
     public void stickAngleTelemetry() {
         telemetry.addData("Stick Angle", Math.toDegrees(stickAngle));
+        telemetry.addLine("===============================");
     }
     // %==========% SHOOTER %==========% //
     public void tuneShooter() { //DO NOT USE WITH tuneFlywheelPIDF() || cycleTurretMode()
@@ -143,11 +153,11 @@ public class Calibration {
         }
         if (gamepad1.dpadUpWasPressed()) {
             targetFlywheelVelocity += tuneIncrement[incriment];
-            setFlywheelVelocity(targetFlywheelVelocity);
+            setCorrectedFlywheelVelocity(targetFlywheelVelocity);
         }
-        if (gamepad1.dpadUpWasPressed()) {
+        if (gamepad1.dpadDownWasPressed()) {
             targetFlywheelVelocity -= tuneIncrement[incriment];
-            setFlywheelVelocity(targetFlywheelVelocity);
+            setCorrectedFlywheelVelocity(targetFlywheelVelocity);
         }
         if (gamepad1.dpadLeftWasPressed()) {
             hoodPosition += 0.025;
@@ -164,7 +174,7 @@ public class Calibration {
         telemetry.addLine("Tune Hood Position: dpad left/right");
         telemetry.addLine("Tune Shooter Data:");
         telemetry.addData("Tune Incriment:", tuneIncrement[incriment]);
-        telemetry.addData("Measured Flywheel Velocity: ", bottomMotor.getVelocity());
+        telemetry.addData("Measured Flywheel Velocity: ", topMotor.getVelocity());
         telemetry.addData("Measured Hood Position", hood.getPosition());
         telemetry.addData("Target Flywheel Velocity: ", targetFlywheelVelocity);
         telemetry.addData("Target Hood Position: ", hoodPosition);
@@ -173,36 +183,52 @@ public class Calibration {
     }
 
     // %==========% FLYWHEEL %==========% //
+    public void handleFlywheelVoltage() {
+        voltage = voltageSensor.getVoltage();
+        flywheelTPSmultiplier = targetVoltage / voltage;
+        telemetry.addData("Current Voltage", voltage);
+        telemetry.addData("Flywheel TPS Multiplier", flywheelTPSmultiplier);
+    }
     public void setFlywheelVelocity(double targetFlywheelVelocity) {
-        setFlywheelVelocity(targetFlywheelVelocity);
+        bottomMotor.setVelocity(targetFlywheelVelocity);
+        topMotor.setVelocity(targetFlywheelVelocity);
+    }
+    public void setCorrectedFlywheelVelocity(double targetFlywheelVelocity) { //OPTIMAL VALUES FOUND: 0.5 kP, 12.9 kF
+        setFlywheelVelocity(targetFlywheelVelocity * flywheelTPSmultiplier);
+    }
+    private void updatePIDFcoefficients() {
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(flywheelkP, 0, 0, flywheelkF);
+        bottomMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        topMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
     }
     public void tuneFlywheelPIDF() { //DO NOT USE WITH tuneShooter() || cycleTurretMode()
         if (gamepad1.startWasPressed()) {
             incriment = (incriment + 1) % tuneIncrement.length;
         }
         if (gamepad1.leftBumperWasPressed()) {
-            flywheelkP += tuneIncrement[incriment];
+            flywheelkP += (tuneIncrement[incriment] / 100.0);
+            updatePIDFcoefficients();
         }
         if (gamepad1.leftTriggerWasPressed()) {
-            flywheelkP -= tuneIncrement[incriment];
+            flywheelkP -= (tuneIncrement[incriment] / 100.0);
+            updatePIDFcoefficients();
         }
         if (gamepad1.rightBumperWasPressed()) {
-            flywheelkF += tuneIncrement[incriment];
+            flywheelkF += (tuneIncrement[incriment] / 100.0);
+            updatePIDFcoefficients();
         }
         if (gamepad1.rightTriggerWasPressed()) {
-            flywheelkF -= tuneIncrement[incriment];
-        }
-        if (gamepad1.dpadUpWasPressed()) {
-            targetFlywheelVelocity = 1500;
-            setFlywheelVelocity(targetFlywheelVelocity);
+            flywheelkF -= (tuneIncrement[incriment] / 100.0);
+            updatePIDFcoefficients();
         }
         if (gamepad1.dpadDownWasPressed()) {
-            targetFlywheelVelocity = 2140;
-            setFlywheelVelocity(targetFlywheelVelocity);
+            targetFlywheelVelocity = 1500;
+            setCorrectedFlywheelVelocity(targetFlywheelVelocity);
         }
-
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(flywheelkP, 0, 0, flywheelkF);
-        bottomMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        if (gamepad1.dpadUpWasPressed()) {
+            targetFlywheelVelocity = 2140;
+            setCorrectedFlywheelVelocity(targetFlywheelVelocity);
+        }
 
         telemetry.addLine("Tune Flywheel PIDF Controls:");
         telemetry.addLine("Tune Incriment: X");
@@ -210,24 +236,13 @@ public class Calibration {
         telemetry.addLine("Tune kF: left/right trigger");
         telemetry.addLine("Tune Flywheel Velocity: dpad up/down");
         telemetry.addLine("Tune Flywheel PIDF Data:");
-        telemetry.addData("Tune Incriment: ", tuneIncrement[incriment]);
-        getFlywheelTelemetry();
-        telemetry.addData("Flywheel Velocity Target", flywheelTelemetry[0]);
-        telemetry.addData("Flywheel Velocity", flywheelTelemetry[1]);
-        telemetry.addData("Flywheel Velocity Error", flywheelTelemetry[2]);
-        telemetry.addData("Flywheel kP", flywheelTelemetry[3]);
-        telemetry.addData("Flywheel kF", flywheelTelemetry[4]);
+        telemetry.addData("Tune Incriment: ", (tuneIncrement[incriment] / 100.0));
+        telemetry.addData("Flywheel Velocity Target", targetFlywheelVelocity);
+        telemetry.addData("Flywheel Velocity", topMotor.getVelocity());
+        telemetry.addData("Flywheel Velocity Error", (topMotor.getVelocity() - targetFlywheelVelocity));
+        telemetry.addData("Flywheel kP", flywheelkP);
+        telemetry.addData("Flywheel kF", flywheelkF);
         telemetry.addLine("===============================");
-    }
-    public void getFlywheelTelemetry() {
-        flywheelTelemetry = new double[]{
-                targetFlywheelVelocity,
-                bottomMotor.getVelocity(),
-                (bottomMotor.getVelocity() - targetFlywheelVelocity),
-                flywheelkP,
-                flywheelkF,
-                tuneIncrement[incriment]
-        };
     }
     //for future use once polynomial regression is used to find correlation between distance and shooter vars
     /*public void handleDynamicFlywheelVelocity() {
@@ -235,7 +250,7 @@ public class Calibration {
         hoodPosition = //
         setHoodPosition(hoodPosition);
         targetFlywheelVelocity = //
-        setFlywheelVelocity(targetFlywheelVelocity)
+        setCorrectedFlywheelVelocity(targetFlywheelVelocity)
     }*/
 
     // %==========% HOOD %==========% //

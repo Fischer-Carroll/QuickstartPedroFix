@@ -269,18 +269,16 @@ public class Robot {
         double dx = (56) - x + (Math.cos(Math.toRadians(heading)) * 3.5);
         double dy = (56 + 32 * hive) - y + (Math.sin(Math.toRadians(heading))* 3.5);
         double angle = (Math.toDegrees(Math.atan2(dy,dx)) + 360)%360;
-        return(0.5 + (heading-angle)/(turretRange*2));
+        return angle;
     }
     public void aimToHive() {
         if (gamepad1.left_trigger_pressed)
         {
-            targetHeading = getAngleToHive();
+            targetHeading = (0.5 + (heading-getAngleToHive())/(turretRange*2));
 
-            // angle to turn in degrees
-            double headingError = targetHeading - Math.toDegrees(heading);
 
             //set the turret angle
-            aimTurret(headingError);
+            aimTurret(targetHeading);
         }
     }
     public void aimTurret(double power){
