@@ -31,6 +31,7 @@ public class CalibrationTeleOp extends LinearOpMode {
             cal.toggleBlocker();
             cal.toggleIntake();
             cal.toggleTransfer();
+            cal.toggleDepollinator();
             telemetry.update();
         }
     }

@@ -28,7 +28,7 @@ public class Calibration {
     double hoodAngle;
     int blockerState;
     double turretAngle;
-    double depollinatorAngle;
+    double depollinatorState;
     double intakePower;
     double transferPower;
     double[] flywheelTelemetry;
@@ -50,6 +50,7 @@ public class Calibration {
     Servo depollinator;
 
     Servo hood;
+
     public Calibration(HardwareMap hwMap, Gamepad gp1, Gamepad gp2, Telemetry tlm) {
         //Declare passed objects
         hardwareMap = hwMap;
@@ -74,7 +75,7 @@ public class Calibration {
         tuneIncrement = new int[]{1000, 100, 10, 5};
         incriment = 0;
         targetFlywheelVelocity = 1500;
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(flywheelkP,0,0,flywheelkF);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(flywheelkP, 0, 0, flywheelkF);
         bottomMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         getFlywheelTelemetry();
         //Hood
@@ -85,15 +86,17 @@ public class Calibration {
         blockerState = 0;
         blocker.scaleRange(0.2, 0.4);
         //Turret
-        turret1.scaleRange(0,1);
-        turret2.scaleRange(0,1);
+        turret1.scaleRange(0, 1);
+        turret2.scaleRange(0, 1);
         turretTelemetry = turret1.getPosition();
     }
+
     //===========Shooter==========//
     public void setFlywheelVelocity(double flywheelVelocity) {
         bottomMotor.setVelocity(flywheelVelocity);
         topMotor.setPower(bottomMotor.getPower());
     }
+
     public void tuneFlywheelVelocity() {
         if (gamepad1.xWasPressed()) {
             incriment = (incriment + 1) % tuneIncrement.length;
@@ -120,7 +123,7 @@ public class Calibration {
             setFlywheelVelocity(targetFlywheelVelocity);
         }
 
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(flywheelkP,0,0,flywheelkF);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(flywheelkP, 0, 0, flywheelkF);
         bottomMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         getFlywheelTelemetry();
@@ -130,8 +133,9 @@ public class Calibration {
         telemetry.addData("Flywheel kP", flywheelTelemetry[3]);
         telemetry.addData("Flywheel kF", flywheelTelemetry[4]);
     }
+
     public void getFlywheelTelemetry() {
-        flywheelTelemetry = new double[] {
+        flywheelTelemetry = new double[]{
                 targetFlywheelVelocity,
                 bottomMotor.getVelocity(),
                 (bottomMotor.getVelocity() - targetFlywheelVelocity),
@@ -140,6 +144,7 @@ public class Calibration {
                 tuneIncrement[incriment]
         };
     }
+
     public void tuneHoodAngle() {
         if (gamepad1.dpadLeftWasPressed()) {
             hoodAngle += 0.025;
@@ -151,6 +156,7 @@ public class Calibration {
         }
         telemetry.addData("Hood Angle: ", hood.getPosition());
     }
+
     public void tuneTurretAngle() {
         if (gamepad1.startWasPressed()) {
             turretAngle += 0.025;
@@ -162,54 +168,90 @@ public class Calibration {
         }
         telemetry.addData("Turret Angle: ", turret1.getPosition());
     }
-    public void toggleBlocker() {
-        if (gamepad1.startWasPressed()) {
-            blockerState += 1;
-            setBlockerAngle((blockerState + 1) % 2);
+
+    public void manualTurretWithDirectStick() {
+        double rx = gamepad1.right_stick_x;
+        if (Math.abs(rx) > 0.12) {
+            turretAngle += 0.01 * Math.signum(rx);
+            setTurretAngle(turretAngle);
         }
     }
+    public void manualTurretWithStickAngle() {
+        double rx = gamepad1.right_stick_x;
+        double ry = gamepad1.right_stick_y;
+        if (Math.hypot(rx, ry) > 0.12) {
+            turretAngle = Math.atan2(ry, rx);
+            setTurretAngle(turretAngle);
+        }
+    }
+
+    public void toggleBlocker() {
+        if (gamepad1.yWasPressed ()){
+            blockerState += 1;
+            setBlockerAngle(blockerState % 2);
+        }
+    }
+
     public void toggleIntake() {
         if (gamepad1.aWasPressed()) {
-            intakePower = (intakePower + 1) % 2;
-            setIntakePower(intakePower);
+            intakePower += 1;
+            setIntakePower(intakePower % 2);
         }
     }
+
     public void toggleTransfer() {
         if (gamepad1.bWasPressed()) {
-            transferPower = (transferPower + 1) % 2;
-            setTransferPower(transferPower);
+            transferPower += 1;
+            setTransferPower(transferPower % 2);
 
         }
     }
+
+    public void toggleDepollinator() {
+        if (gamepad1.xWasPressed()) {
+            depollinatorState += 1;
+            setDepollinatorAngle(depollinatorState % 2);
+
+        }
+    }
+
     public void setTurretAngle(double turretAngle) {
         turret1.setPosition(turretAngle);
         turret2.setPosition(turretAngle);
     }
+
     public void setHoodAngle(double hoodAngle) {
         hood.setPosition(hoodAngle);
     }
+
     public void setDepollinatorAngle(double depollinatorAngle) {
         depollinator.setPosition(depollinatorAngle);
     }
+
     public void setBlockerAngle(double blockerAngle) {
         blocker.setPosition(blockerAngle);
     }
+
     public void setIntakePower(double intakePower) {
         intake.setPower(intakePower);
     }
+
     public void setTransferPower(double transferPower) {
         transfer.setPower(transferPower);
     }
+
     public void resetOdometry() {
         if (gamepad1.startWasPressed()) {
             follower.setPose(new Pose(w, l, Math.toRadians(0)));
         }
     }
+
     public void varsUpdate() {
         x = follower.pose().x();
         y = follower.pose().y();
         heading = follower.pose().heading();
     }
+
     public void RCTdriveUpdate() {
         if (!gamepad1.left_trigger_pressed) {
             DrivePowers powers = ManualDrive.fieldCentric(
@@ -221,23 +263,5 @@ public class Calibration {
             ManualDrive.driveOrHold(follower, powers);
             follower.update();
         }
-    }
-    public double targetHive() {
-
-        if (gamepad1.xWasPressed()) {targetHive += 1;}
-        return targetHive % 2;
-    }
-    public double getAngleToHive(double x, double y) {
-        double angle = 0;
-        if (targetHive() == 1) {
-            double d_x = 56 - x;
-            double d_y = 56 - y;
-            angle = Math.toDegrees(Math.atan2(d_y, d_x));
-        } else {
-            double d_x = 56 - x;
-            double d_y = 88 - y;
-            angle = Math.toDegrees(Math.atan2(d_y, d_x));
-        }
-        return angle;
     }
 }
