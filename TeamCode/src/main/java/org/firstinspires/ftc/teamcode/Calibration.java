@@ -214,6 +214,7 @@ public class Calibration {
                 tuneIncrement[incriment]
         };
     }
+    //for future use once polynomial regression is used to find correlation between distance and shooter vars
     /*public void handleDynamicFlywheelVelocity() {
         x = getDistanceToHive();
         hoodPosition = //
@@ -372,6 +373,7 @@ public class Calibration {
             depollinatorState += 1;
             setDepollinatorPosition(depollinatorState % 2);
         }
+
         telemetry.addLine("Toggle Depollinator: X");
         telemetry.addLine("===============================");
     }

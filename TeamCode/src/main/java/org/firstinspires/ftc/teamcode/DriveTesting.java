@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 @TeleOp(name = "Drive Testing")
 public class DriveTesting extends OpMode {
-
     private Follower follower;
 
     // Ignore tiny right-stick movements
@@ -65,6 +64,4 @@ public class DriveTesting extends OpMode {
         ManualDrive.driveOrHold(follower, powers);
         follower.update();
     }
-
-
 }
