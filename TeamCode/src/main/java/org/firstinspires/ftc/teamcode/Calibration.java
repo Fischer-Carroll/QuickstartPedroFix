@@ -50,7 +50,6 @@ public class Calibration {
     Servo turret2;
     Servo blocker;
     Servo depollinator;
-
     Servo hood;
 
     public Calibration(HardwareMap hwMap, Gamepad gp1, Gamepad gp2, Telemetry tlm) {
@@ -102,6 +101,7 @@ public class Calibration {
         turretPosition = 0.5;
         setTurretPosition(turretPosition);
     }
+
     // %==========% SHOOTER %==========% //
     public void tuneShooter() { //DO NOT USE WITH tuneFlywheelPIDF() || cycleTurretMode()
         if (gamepad1.startWasPressed()) {
@@ -137,6 +137,7 @@ public class Calibration {
         telemetry.addLine("===============================");
 
     }
+
     // %==========% FLYWHEEL %==========% //
     public void setFlywheelVelocity(double targetFlywheelVelocity) {
         setFlywheelVelocity(targetFlywheelVelocity);
@@ -201,6 +202,7 @@ public class Calibration {
         targetFlywheelVelocity = //
         setFlywheelVelocity(targetFlywheelVelocity)
     }*/
+
     // %==========% HOOD %==========% //
     public void setHoodPosition(double hoodPosition) {
         hood.setPosition(hoodPosition);
@@ -220,6 +222,7 @@ public class Calibration {
         telemetry.addData("Hood Position: ", hood.getPosition());
         telemetry.addLine("===============================");
     }
+
     // %==========% TURRET %==========% //
     public void setTurretPosition(double turretPosition) {
         turret1.setPosition(turretPosition);
@@ -298,6 +301,7 @@ public class Calibration {
         telemetry.addData("Turret Mode: ", turretModeOptions[turretMode % 4]);
         telemetry.addLine("===============================");
     }
+
     // %==========% BLOCKER %==========% //
     public void setBlockerPosition(double blockerPosition) {
         blocker.setPosition(blockerPosition);
@@ -311,6 +315,7 @@ public class Calibration {
         telemetry.addLine("Toggle Blocker: Y");
         telemetry.addLine("===============================");
     }
+
     // %==========% INTAKE %==========% //
     public void setIntakePower(double intakePower) {
         intake.setPower(intakePower);
@@ -324,6 +329,7 @@ public class Calibration {
         telemetry.addLine("Toggle Intake: A");
         telemetry.addLine("===============================");
     }
+
     // %==========% TRANSFER %==========% //
     public void setTransferPower(double transferPower) {
         transfer.setPower(transferPower);
@@ -337,6 +343,7 @@ public class Calibration {
         telemetry.addLine("Toggle Transfer: B");
         telemetry.addLine("===============================");
     }
+
     // %==========% DEPOLLINATOR %==========% //
     public void setDepollinatorPosition(double depollinatorPosition) {
         depollinator.setPosition(depollinatorPosition);
