@@ -27,7 +27,7 @@ public class CalibrationTeleOp extends LinearOpMode {
         {
             cal.tuneFlywheelVelocity();
             cal.tuneHoodAngle();
-            cal.tuneTurretAngle();
+            cal.cycleTurretMode();
             cal.toggleBlocker();
             cal.toggleIntake();
             cal.toggleTransfer();

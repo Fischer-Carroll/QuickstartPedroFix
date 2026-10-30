@@ -27,13 +27,18 @@ public class Calibration {
     int incriment;
     double hoodAngle;
     int blockerState;
+    double targetTurretAngle;
     double turretAngle;
+    int turretMode;
+    String[] turretModeOptions;
     double depollinatorState;
     double intakePower;
     double transferPower;
     double[] flywheelTelemetry;
     double hoodTelemetry;
     double turretTelemetry;
+    double stickAngle;
+    double fieldAngle;
     //Initialize passed values
     HardwareMap hardwareMap;
     Gamepad gamepad1;
@@ -57,6 +62,7 @@ public class Calibration {
         gamepad1 = gp1;
         gamepad2 = gp2;
         telemetry = tlm;
+
         //Declare hardware map
         bottomMotor = hardwareMap.get(DcMotorEx.class, "bottomMotor");
         topMotor = hardwareMap.get(DcMotorEx.class, "topMotor");
@@ -69,6 +75,7 @@ public class Calibration {
         turret2 = hardwareMap.get(Servo.class, "turret2");
         follower = Constants.create(hardwareMap);
         follower.setPose(new Pose(0, 0, Math.toRadians(0)));
+
         //Flywheel
         bottomMotor.setDirection(DcMotorEx.Direction.REVERSE);
         topMotor.setDirection(DcMotorEx.Direction.FORWARD);
@@ -78,17 +85,22 @@ public class Calibration {
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(flywheelkP, 0, 0, flywheelkF);
         bottomMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         getFlywheelTelemetry();
+
         //Hood
         hoodAngle = 0;
         hood.scaleRange(0, 108.8 / 300.0);
         hoodTelemetry = hood.getPosition();
+
         //Blocker
         blockerState = 0;
         blocker.scaleRange(0.2, 0.4);
+
         //Turret
         turret1.scaleRange(0, 1);
         turret2.scaleRange(0, 1);
         turretTelemetry = turret1.getPosition();
+        turretMode = 0;
+        String[] turretModeOptions = {"Tune Turret Angle", "Direct Stick Input", "Robot Centric Stick Input", "Field Centric Stick Input"};
     }
 
     //===========Shooter==========//
@@ -107,7 +119,6 @@ public class Calibration {
         if (gamepad1.leftTriggerWasPressed()) {
             flywheelkP -= tuneIncrement[incriment];
         }
-
         if (gamepad1.rightBumperWasPressed()) {
             flywheelkF += tuneIncrement[incriment];
         }
@@ -157,7 +168,7 @@ public class Calibration {
         telemetry.addData("Hood Angle: ", hood.getPosition());
     }
 
-    public void tuneTurretAngle() {
+    private void tuneTurretAngle() {
         if (gamepad1.startWasPressed()) {
             turretAngle += 0.025;
             setTurretAngle(turretAngle);
@@ -169,20 +180,41 @@ public class Calibration {
         telemetry.addData("Turret Angle: ", turret1.getPosition());
     }
 
-    public void manualTurretWithDirectStick() {
+    private void manualTurretWithDirectStick() {
         double rx = gamepad1.right_stick_x;
         if (Math.abs(rx) > 0.12) {
-            turretAngle += 0.01 * Math.signum(rx);
-            setTurretAngle(turretAngle);
+            targetTurretAngle += 0.01 * Math.signum(rx);
+            setTurretAngle(targetTurretAngle);
         }
     }
-    public void manualTurretWithStickAngle() {
+    private void manualTurretWithRCStickAngle() {
         double rx = gamepad1.right_stick_x;
         double ry = gamepad1.right_stick_y;
         if (Math.hypot(rx, ry) > 0.12) {
-            turretAngle = Math.atan2(ry, rx);
+            targetTurretAngle = ((-1 * Math.atan2(ry, rx)) + Math.PI) / (2 * Math.PI);
+            setTurretAngle(targetTurretAngle);
+        }
+    }
+
+    private void manualTurretWithFCStickAngle() {
+        double rx = gamepad1.right_stick_x;
+        double ry = gamepad1.right_stick_y;
+        if (Math.hypot(rx, ry) > 0.12) {
+            stickAngle = Math.atan2(rx, ry);
+            targetTurretAngle = stickAngle - heading;
+            turretAngle = targetTurretAngle * ((Math.toRadians(256.5)) / (2 * Math.PI));
             setTurretAngle(turretAngle);
         }
+    }
+    public void cycleTurretMode() {
+        if (gamepad1.startWasPressed()) {
+            turretMode += 1;
+        }
+        if (turretMode % 4 == 0) {tuneTurretAngle();}
+        if (turretMode % 4 == 1) {manualTurretWithDirectStick();}
+        if (turretMode % 4 == 2) {manualTurretWithRCStickAngle();}
+        if (turretMode % 4 == 3) {manualTurretWithFCStickAngle();}
+        telemetry.addData("Turret Mode: ", turretModeOptions[turretMode % 4]);
     }
 
     public void toggleBlocker() {
