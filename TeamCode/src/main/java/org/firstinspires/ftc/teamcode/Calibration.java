@@ -11,37 +11,56 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
+
+//TERMINOLOGY
+//Flywheel = motors that power the flywheel (bottom & top motors)
+//Hood = servo that moves the hood (hood)
+//Shooter = Flywheel + Hood
+//Turret = servos that control the turret (turret 1 & 2)
+//Blocker = servo that controls the ball blocker (blocker)
+//Drive = things relating to the drive chassis or pedro
+//Transfer & Intake = motors that control the transfer and intake
+
 public class Calibration {
+    //   MISCELLANEOUS   //
+    int[] tuneIncrement;
+    int incriment;
+    double stickAngle;
+    //   DRIVE   //
     Follower follower;
     double x;
     double y;
     double w = 7.75;
     double l = 9;
     double heading;
+    //   FLYWHEEL   //
     double flywheelkP;
     double flywheelkF;
     double targetFlywheelVelocity;
-    int[] tuneIncrement;
-    int incriment;
+    double[] flywheelTelemetry;
+    //   HOOD   //
     double hoodPosition;
-    int blockerState;
+    double hoodTelemetry;
+    //   TURRET   //
     double targetTurretAngle;
     double turretPosition;
     int turretMode;
-    String[] turretModeOptions = {"Tune Turret Angle", "Direct Stick Input", "Robot Centric Stick Input", "Field Centric Stick Input"};
-    double depollinatorState;
-    double intakePower;
-    double transferPower;
-    double[] flywheelTelemetry;
-    double hoodTelemetry;
     double turretTelemetry;
-    double stickAngle;
-    //Initialize passed values
+    String[] turretModeOptions = {"Tune Turret Angle", "Direct Stick Input", "Robot Centric Stick Input", "Field Centric Stick Input"};
+    //   BLOCKER   //
+    int blockerState;
+    //   DEPOLLINATOR   //
+    double depollinatorState;
+    //   INTAKE   //
+    double intakePower;
+    //   TRANSFER   //
+    double transferPower;
+    //Initialising Passed On Values
     HardwareMap hardwareMap;
     Gamepad gamepad1;
     Gamepad gamepad2;
     Telemetry telemetry;
-    //Initialise things from hardware map
+    //Initialising Items of Hardware Map
     DcMotorEx bottomMotor;
     DcMotorEx topMotor;
     public DcMotorEx intake;
