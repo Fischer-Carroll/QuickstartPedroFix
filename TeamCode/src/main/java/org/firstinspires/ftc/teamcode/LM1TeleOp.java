@@ -14,6 +14,7 @@ public class LM1TeleOp extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Robot bot = new Robot(hardwareMap, gamepad1,telemetry);
+        Calibration cal = new Calibration(hardwareMap, gamepad1, gamepad2, telemetry);
         waitForStart();
         bot.setFlywheelTPS(2140);
         bot.sethoodPosition(0.75);
@@ -27,7 +28,7 @@ public class LM1TeleOp extends LinearOpMode {
             bot.resetOdometry();
             bot.targetHive();
             bot.aimToHive();
-            bot.handleIntake();
+            cal.toggleIntakeForLM1();
             bot.handleDepollinator();
             bot.blockerUpdate();
             telemetry.addData("Hive Angle",bot.getAngleToHive() - bot.heading);
