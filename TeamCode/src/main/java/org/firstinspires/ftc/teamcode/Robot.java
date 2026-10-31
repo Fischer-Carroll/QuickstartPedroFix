@@ -167,7 +167,7 @@ public class Robot {
     }
 
     public void blockerUpdate() {
-        if (gamepad1.right_bumper){
+        if (gamepad1.right_trigger_pressed){
             openBlocker();
         }
         else{
