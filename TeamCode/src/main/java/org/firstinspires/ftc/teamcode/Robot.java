@@ -9,6 +9,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.ManualDrive;
 import com.pedropathing.ivy.Command;
 import com.pedropathing.math.Pose;
+import com.pedropathing.api.PoseFactory;
 import com.pedropathing.math.Velocity;
 import com.pedropathing.utils.Timer;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -87,16 +88,10 @@ public class Robot {
         turret2 = hardwareMap.get(Servo.class, "turret2");
 
         //Assign limits to servos
-        blocker.scaleRange(0.2, 0.4);
-        depollinator.scaleRange(0.2, 0.775);
-        hood.scaleRange(0, 108.8 / 300.0);
-        turret1.scaleRange(0.025,0.975);
-        turret2.scaleRange(0.025,0.975);
         follower = Constants.create(hardwareMap);
         bottomMotor.setDirection(DcMotorEx.Direction.REVERSE);
         topMotor.setDirection(DcMotorEx.Direction.FORWARD);
         hive = 0;
-
         
         //Declare Shooter Commands
         cmdOpenBlocker = Command.build()
@@ -128,7 +123,6 @@ public class Robot {
         intakeTimer = new Timer();
         depollinatorTimer = new Timer();
     }
-
     public void setFlywheelTPS(double TPS) {
         bottomMotor.setVelocity(TPS);
         topMotor.setVelocity(TPS);
@@ -158,7 +152,7 @@ public class Robot {
             }
 
     }
-    
+
     public void resetOdometry() {
         if (gamepad1.startWasPressed()) {
             follower.setPose(new Pose(w, l, Math.toRadians(90)));
@@ -184,7 +178,6 @@ public class Robot {
     public void varsUpdate() {
         x = follower.pose().x();
         y = follower.pose().y();
-
         heading = follower.pose().heading();
     }
 
@@ -250,7 +243,7 @@ public class Robot {
                 -gamepad1.left_stick_y,
                 -gamepad1.left_stick_x,
                 -gamepad1.right_stick_x,
-                follower.pose().heading()
+                heading
         );
         ManualDrive.driveOrHold(follower, powers);
         follower.update();

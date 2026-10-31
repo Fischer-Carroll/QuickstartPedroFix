@@ -370,15 +370,6 @@ public class Calibration {
         telemetry.addLine("Toggle Intake: A");
         telemetry.addLine("===============================");
     }
-    public void toggleIntakeForLM1() {
-        if (gamepad1.yWasPressed()) {
-            intakePower += 1;
-            setIntakePower(intakePower % 2);
-        }
-
-        telemetry.addLine("Toggle Intake: A");
-        telemetry.addLine("===============================");
-    }
 
     // %==========% TRANSFER %==========% //
     public void setTransferPower(double transferPower) {

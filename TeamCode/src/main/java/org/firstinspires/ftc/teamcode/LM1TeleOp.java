@@ -5,6 +5,7 @@ import static com.pedropathing.api.Paths.line;
 import static com.pedropathing.ivy.Scheduler.schedule;
 
 import com.pedropathing.math.Pose;
+import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -14,23 +15,29 @@ public class LM1TeleOp extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Robot bot = new Robot(hardwareMap, gamepad1,telemetry);
-        Calibration cal = new Calibration(hardwareMap, gamepad1, gamepad2, telemetry);
         waitForStart();
+        bot.blocker.scaleRange(0.2, 0.4);
+        bot.depollinator.scaleRange(0.2, 0.775);
+        bot.hood.scaleRange(0, 108.8 / 300.0);
+        bot.turret1.scaleRange(0.025,0.975);
+        bot.turret2.scaleRange(0.025,0.975);
         bot.setFlywheelTPS(2140);
         bot.sethoodPosition(0.75);
         bot.transfer.setPower(1);
         bot.intake.setPower(1);
-        bot.follower.setPose(new Pose(24,24,Math.toRadians(90)));
+        bot.follower.setPose(new Pose(0,0,Math.toRadians(90)));
         while (opModeIsActive())
         {
             bot.varsUpdate();
-            bot.RCTdriveUpdate();
             bot.resetOdometry();
+            bot.RCTdriveUpdate();
             bot.targetHive();
             bot.aimToHive();
-            cal.toggleIntakeForLM1();
+            bot.handleIntake();
             bot.handleDepollinator();
             bot.blockerUpdate();
+            bot.follower.update();
+
             telemetry.addData("Hive Angle",bot.getAngleToHive() - bot.heading);
             telemetry.addData("x", bot.x);
             telemetry.addData("y", bot.y);
