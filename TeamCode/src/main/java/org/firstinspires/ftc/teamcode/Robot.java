@@ -215,44 +215,42 @@ public class Robot {
 
     //Field Centric Drive & Turning
     public void FCTdriveUpdate() {
-        if (!gamepad1.left_trigger_pressed)
-        {
-            double hd = heading * 0.5;
-            double rx = gamepad1.right_stick_x * Math.cos(hd) + (-gamepad1.right_stick_y * Math.sin(hd));
-            double ry = -gamepad1.right_stick_y * Math.cos(hd) - (gamepad1.right_stick_x * Math.sin(hd));
+        double hd = heading * 0.5;
+        double rx = gamepad1.right_stick_x * Math.cos(hd) + (-gamepad1.right_stick_y * Math.sin(hd));
+        double ry = -gamepad1.right_stick_y * Math.cos(hd) - (gamepad1.right_stick_x * Math.sin(hd));
 
-            if (Math.hypot(rx, ry) > 0.12) {
-                // Target angle in field coordinates.
-                // 0 = +X, PI/2 = +Y, assuming Pedro's standard coordinates.
-                targetHeading = Math.atan2(ry, rx);
-            }
-
-            // Shortest signed angular difference, in radians.
-            double headingError = Math.atan2(
-                    Math.sin(targetHeading - hd),
-                    Math.cos(targetHeading - hd)
-            );
-            // Proportional turn control.
-            Controller headingCalc = Controller.pid(0.5, 230, 1.5);
-            double turn = headingCalc.calculate(targetHeading, headingError);
-            // Keep motor command in the valid range.
-            turn = Math.max(-1.0, Math.min(1.0, turn));
-            if (headingError < 0.01 && headingError > -0.01) {
-                turn = 0;
-            }
-
-            // Field-centric translation from the left stick.
-            DrivePowers powers = ManualDrive.fieldCentric(
-                    gamepad1.left_stick_x,
-                    -gamepad1.left_stick_y,
-                    turn,
-                    follower.pose().heading()
-            );
-            follower.manual(powers);
-            follower.update();
-            telemetry.addData("Turn", turn);
+        if (Math.hypot(rx, ry) > 0.12) {
+            // Target angle in field coordinates.
+            // 0 = +X, PI/2 = +Y, assuming Pedro's standard coordinates.
+            targetHeading = Math.atan2(ry, rx);
         }
+
+        // Shortest signed angular difference, in radians.
+        double headingError = Math.atan2(
+                Math.sin(targetHeading - hd),
+                Math.cos(targetHeading - hd)
+        );
+        // Proportional turn control.
+        Controller headingCalc = Controller.pid(0.5, 230, 1.5);
+        double turn = headingCalc.calculate(targetHeading, headingError);
+        // Keep motor command in the valid range.
+        turn = Math.max(-1.0, Math.min(1.0, turn));
+        if (headingError < 0.01 && headingError > -0.01) {
+            turn = 0;
+        }
+
+        // Field-centric translation from the left stick.
+        DrivePowers powers = ManualDrive.fieldCentric(
+                gamepad1.left_stick_x,
+                -gamepad1.left_stick_y,
+                turn,
+                follower.pose().heading()
+        );
+        follower.manual(powers);
+        follower.update();
+        telemetry.addData("Turn", turn);
     }
+
     public void RCTdriveUpdate() {
         DrivePowers powers = ManualDrive.fieldCentric(
                 -gamepad1.left_stick_y,

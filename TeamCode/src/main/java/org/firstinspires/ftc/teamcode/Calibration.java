@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODER;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_WITHOUT_ENCODER;
 
 import com.pedropathing.drivetrain.DrivePowers;
 import com.pedropathing.drivetrain.Drivetrain;
@@ -113,10 +114,12 @@ public class Calibration {
         flywheelkP = 0.5;
         flywheelkF = 12.9;
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(flywheelkP, 0, 0, flywheelkF);
-        bottomMotor.setMode(RUN_USING_ENCODER);
-        topMotor.setMode(RUN_USING_ENCODER);
-        bottomMotor.setPIDFCoefficients(RUN_USING_ENCODER, pidfCoefficients);
-        topMotor.setPIDFCoefficients(RUN_USING_ENCODER, pidfCoefficients);
+        bottomMotor.setMode(RUN_WITHOUT_ENCODER);
+        topMotor.setMode(RUN_WITHOUT_ENCODER);
+        bottomMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        topMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        bottomMotor.setPIDFCoefficients(RUN_WITHOUT_ENCODER, pidfCoefficients);
+        topMotor.setPIDFCoefficients(RUN_WITHOUT_ENCODER, pidfCoefficients);
         targetVoltage = 12.0;
 
         //Hood
@@ -252,6 +255,9 @@ public class Calibration {
         telemetry.addLine("===============================");
     }
 
+    public void testFlywheelVoltageControl() {
+
+    }
     //for future use once polynomial regression is used to find correlation between distance and shooter vars
     /*public void handleDynamicFlywheelVelocity() {
         x = getDistanceToHive();
