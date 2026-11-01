@@ -94,8 +94,6 @@ public class Robot {
         bottomMotor.setDirection(DcMotorEx.Direction.REVERSE);
         topMotor.setDirection(DcMotorEx.Direction.FORWARD);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        topMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        topMotor.setPIDFCoefficients();
         hive = 0;
         
         //Declare Shooter Commands
@@ -111,7 +109,7 @@ public class Robot {
 
         shoot = sequential(
                 cmdOpenBlocker,
-                waitMs(1000),
+                waitMs(750),
                 cmdCloseBlocker
         );
 
