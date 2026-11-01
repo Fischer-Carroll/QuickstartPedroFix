@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODER;
+
 import com.pedropathing.drivetrain.DrivePowers;
+import com.pedropathing.drivetrain.Drivetrain;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.ManualDrive;
 import com.pedropathing.math.Pose;
@@ -39,6 +42,8 @@ public class Calibration {
     double w = 7.75;
     double l = 9;
     double heading;
+    DrivePowers powers;
+    public Pose resetPose = new Pose(0,0,0);
     //   FLYWHEEL   //
     double flywheelkP;
     double flywheelkF;
@@ -108,8 +113,10 @@ public class Calibration {
         flywheelkP = 0.5;
         flywheelkF = 12.9;
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(flywheelkP, 0, 0, flywheelkF);
-        bottomMotor.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients);
-        topMotor.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        bottomMotor.setMode(RUN_USING_ENCODER);
+        topMotor.setMode(RUN_USING_ENCODER);
+        bottomMotor.setPIDFCoefficients(RUN_USING_ENCODER, pidfCoefficients);
+        topMotor.setPIDFCoefficients(RUN_USING_ENCODER, pidfCoefficients);
         targetVoltage = 12.0;
 
         //Hood
@@ -198,8 +205,8 @@ public class Calibration {
     }
     private void updatePIDFcoefficients() {
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(flywheelkP, 0, 0, flywheelkF);
-        bottomMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
-        topMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        bottomMotor.setPIDFCoefficients(RUN_USING_ENCODER, pidfCoefficients);
+        topMotor.setPIDFCoefficients(RUN_USING_ENCODER, pidfCoefficients);
     }
     public void tuneFlywheelPIDF() { //DO NOT USE WITH tuneShooter() || cycleTurretMode()
         if (gamepad1.startWasPressed()) {
@@ -244,6 +251,7 @@ public class Calibration {
         telemetry.addData("Flywheel kF", flywheelkF);
         telemetry.addLine("===============================");
     }
+
     //for future use once polynomial regression is used to find correlation between distance and shooter vars
     /*public void handleDynamicFlywheelVelocity() {
         x = getDistanceToHive();
@@ -401,12 +409,10 @@ public class Calibration {
 
     // %==========% ODOMETRY %==========% //
     public void resetOdometry() {
-        if (gamepad1.backWasPressed()) {
-            follower.setPose(new Pose(w, l, Math.toRadians(0)));
+        if (gamepad1.startWasPressed()) {
+            follower.setPose(resetPose);
+            follower.hold(resetPose);
         }
-
-        telemetry.addLine("Reset Odometry: Back");
-        telemetry.addLine("===============================");
     }
     public void varsUpdate() {
         x = follower.pose().x();
@@ -418,14 +424,23 @@ public class Calibration {
     }
     public void RCTdriveUpdate() {
         if (!gamepad1.left_trigger_pressed) {
-            DrivePowers powers = ManualDrive.fieldCentric(
-                    gamepad1.left_stick_y,
-                    -gamepad1.left_stick_x,
-                    gamepad1.right_stick_x,
-                    follower.pose().heading()
-            );
+            if (gamepad1.backWasPressed()) {
+                resetOdometry();
+            } else {
+                powers = ManualDrive.fieldCentric(
+                        gamepad1.left_stick_y,
+                        -gamepad1.left_stick_x,
+                        gamepad1.right_stick_x,
+                        follower.pose().heading()
+                );
+            }
+
             ManualDrive.driveOrHold(follower, powers);
             follower.update();
         }
+
+        telemetry.addLine("Reset Odometry: Back");
+        telemetry.addData("Heading: ", follower.pose().heading());
+        telemetry.addLine("===============================");
     }
 }

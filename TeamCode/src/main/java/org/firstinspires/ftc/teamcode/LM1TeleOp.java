@@ -15,22 +15,14 @@ public class LM1TeleOp extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Robot bot = new Robot(hardwareMap, gamepad1,telemetry);
-        waitForStart();
-        bot.blocker.scaleRange(0.2, 0.4);
-        bot.depollinator.scaleRange(0.2, 0.775);
-        bot.hood.scaleRange(0, 108.8 / 300.0);
-        bot.turret1.scaleRange(0.025,0.975);
-        bot.turret2.scaleRange(0.025,0.975);
-        bot.setFlywheelTPS(2140);
-        bot.sethoodPosition(0.75);
-        bot.transfer.setPower(1);
-        bot.intake.setPower(1);
+        Calibration cal = new Calibration(hardwareMap, gamepad1, gamepad2, telemetry);
         bot.follower.setPose(new Pose(0,0,Math.toRadians(90)));
+        waitForStart();
         while (opModeIsActive())
         {
             bot.varsUpdate();
-            bot.resetOdometry();
             bot.RCTdriveUpdate();
+            bot.resetOdometry();
             bot.targetHive();
             bot.aimToHive();
             bot.handleIntake();

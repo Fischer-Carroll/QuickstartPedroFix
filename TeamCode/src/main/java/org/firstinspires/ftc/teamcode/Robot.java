@@ -46,6 +46,7 @@ public class Robot {
     double targetHeading;
     int intakeTarget;
     double turretRange = 135;
+    public Pose resetPose = new Pose(24,24,Math.toRadians(90));
 
 
     //Initialize passed values
@@ -123,6 +124,19 @@ public class Robot {
         intakeTimer = new Timer();
         depollinatorTimer = new Timer();
     }
+    public void initialiseServoScales() {
+        blocker.scaleRange(0.2, 0.4);
+        depollinator.scaleRange(0.2, 0.775);
+        hood.scaleRange(0, 108.8 / 300.0);
+        turret1.scaleRange(0.025,0.975);
+        turret2.scaleRange(0.025,0.975);
+    }
+    public void initialiseActuatorPositions() {
+        setFlywheelTPS(2140);
+        sethoodPosition(0.75);
+        transfer.setPower(1);
+        intake.setPower(1);
+    }
     public void setFlywheelTPS(double TPS) {
         bottomMotor.setVelocity(TPS);
         topMotor.setVelocity(TPS);
@@ -155,7 +169,8 @@ public class Robot {
 
     public void resetOdometry() {
         if (gamepad1.startWasPressed()) {
-            follower.setPose(new Pose(w, l, Math.toRadians(90)));
+            follower.setPose(resetPose);
+            follower.hold(resetPose);
         }
     }
     public void openBlocker() {
@@ -285,6 +300,8 @@ public class Robot {
             //set the turret angle
             aimTurret(targetHeading);
         }
+        telemetry.addData("Target Heading: ", targetHeading);
+        telemetry.addLine("===============================");
     }
     public void aimTurret(double power){
         turret1.setPosition(power);
