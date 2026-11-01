@@ -1,0 +1,158 @@
+package org.firstinspires.ftc.teamcode.Autos;
+
+import static com.pedropathing.api.Paths.*;
+import com.pedropathing.api.Paths;
+
+import com.pedropathing.api.PoseFactory;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.math.Pose;
+import com.pedropathing.paths.Path;
+import com.pedropathing.ivy.Command;
+import com.pedropathing.ivy.Scheduler;
+import static com.pedropathing.ivy.Scheduler.schedule;
+import static com.pedropathing.ivy.commands.Commands.*;
+import static com.pedropathing.ivy.groups.Groups.sequential;
+import static com.pedropathing.ivy.pedro.PedroCommands.follow;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.pedropathing.paths.interpolator.Interpolator;
+
+import org.firstinspires.ftc.teamcode.pedro.Constants;
+
+@Autonomous(name = "Double Solo Auto", group = "Autonomous")
+public class DoubleSoloAuto extends LinearOpMode {
+
+    private Follower follower;
+
+    private final PoseFactory poseFactory = PoseFactory.degrees();
+
+    private final Pose start = poseFactory.of(57, 7.75, 90);
+    private final Pose startGarden = poseFactory.of(10, 7.75, 180);
+    private final Pose gardenAP = poseFactory.of(10.75, 70.75, 90);
+    private final Pose gardenAPControl1 = poseFactory.of(26.75, 57.75, 0);
+    private final Pose gardenAPControl2 = poseFactory.of(9.75, 60.75, 0);
+    private final Pose gardenAPSegment1Heading = poseFactory.of(10.75, 70.75, 180);
+    private final Pose gardenAPSegment2Start = poseFactory.of(10.75, 70.75, 180);
+    private final Pose gardenAPSegment2End = poseFactory.of(10.75, 70.75, 82);
+    private final Pose gardenAPSegment4Start = poseFactory.of(10.75, 70.75, 97.1787);
+    private final Pose gardenAPSegment4End = poseFactory.of(10.75, 70.75, 90);
+    private final Pose aPPush = poseFactory.of(13.75, 91.75, 90);
+    private final Pose pushHive2 = poseFactory.of(59.75, 125.75, 145);
+    private final Pose pushHive2Control1 = poseFactory.of(14.75, 64.75, 0);
+    private final Pose pushHive2Control2 = poseFactory.of(45.75, 89.75, 0);
+    private final Pose pushHive2Control3 = poseFactory.of(23.75, 118.75, 0);
+    private final Pose pushHive2Control4 = poseFactory.of(59.75, 109.75, 0);
+    private final Pose pushHive2Segment1Heading = poseFactory.of(59.75, 125.75, 90);
+    private final Pose pushHive2Segment2Start = poseFactory.of(59.75, 125.75, 90);
+    private final Pose pushHive2Segment2End = poseFactory.of(59.75, 125.75, 60);
+    private final Pose pushHive2Segment4Start = poseFactory.of(59.75, 125.75, 58.8799);
+    private final Pose pushHive2Segment4End = poseFactory.of(59.75, 125.75, 145);
+    private final Pose hive2Flower2 = poseFactory.of(46.75, 125.75, 90);
+    private final Pose hive2Flower2Control1 = poseFactory.of(52.75, 111.75, 0);
+    private final Pose hive2Flower2Segment1Start = poseFactory.of(46.75, 125.75, 145);
+    private final Pose hive2Flower2Segment1End = poseFactory.of(46.75, 125.75, 90);
+    private final Pose flower2Hive2Start = poseFactory.of(46.75, 125.75, 90);
+    private final Pose flower2Hive2 = poseFactory.of(59.75, 125.75, 145);
+    private final Pose flower2Hive2Control1 = poseFactory.of(52.75, 111.75, 0);
+    private final Pose hive2Flower1 = poseFactory.of(14.75, 46.75, -180);
+    private final Pose hive2Flower1Control1 = poseFactory.of(46.75, 104.75, 0);
+    private final Pose hive2Flower1Control2 = poseFactory.of(1.75, 98.75, 0);
+    private final Pose hive2Flower1Control3 = poseFactory.of(40.75, 46.75, 0);
+    private final Pose hive2Flower1Segment1Start = poseFactory.of(14.75, 46.75, 145);
+    private final Pose hive2Flower1Segment1End = poseFactory.of(14.75, 46.75, -139);
+    private final Pose hive2Flower1Segment3Start = poseFactory.of(14.75, 46.75, -94.3283);
+    private final Pose hive2Flower1Segment3End = poseFactory.of(14.75, 46.75, 180);
+    private final Pose flower1Hive2 = poseFactory.of(59.75, 125.75, 35);
+    private final Pose flower1Hive2Control1 = poseFactory.of(40.75, 46.75, 0);
+    private final Pose flower1Hive2Control2 = poseFactory.of(1.75, 98.75, 0);
+    private final Pose flower1Hive2Control3 = poseFactory.of(46.75, 104.75, 0);
+    private final Pose flower1Hive2Segment1Start = poseFactory.of(59.75, 125.75, 180);
+    private final Pose flower1Hive2Segment1End = poseFactory.of(59.75, 125.75, 90);
+    private final Pose flower1Hive2Segment3Start = poseFactory.of(59.75, 125.75, 40.9597);
+    private final Pose flower1Hive2Segment3End = poseFactory.of(59.75, 125.75, 35);
+    private final Pose hive2Base = poseFactory.of(9.75, 118.75, 0);
+    private final Pose hive2BaseControl1 = poseFactory.of(33.75, 123.75, 0);
+    private final Pose hive2BaseControl2 = poseFactory.of(9.75, 141.5, 0);
+    private final Pose hive2BaseSegment1Start = poseFactory.of(9.75, 118.75, 35);
+    private final Pose hive2BaseSegment1End = poseFactory.of(9.75, 118.75, 0);
+    private final Pose hive2BaseSegment2Heading = poseFactory.of(9.75, 118.75, 0);
+
+    // Autonomous routine
+    public Command autoRoutine() {
+        return sequential(
+                //transfer should always be running throughout the auto
+                follow(follower, startGarden()), //before moving, should aim and shoot into hive and turn intake on
+                follow(follower, gardenAP()), //after, should turn off intake
+                follow(follower, aPPush()),
+                follow(follower, pushHive2()), //after, should aim and shoot into hive while lowering depollinator and turning on intake
+                follow(follower, hive2Flower2()),
+                follow(follower, flower2Hive2()), //after, should aim and shoot into hive
+                follow(follower, hive2Flower1()),
+                follow(follower, flower1Hive2()), //after, should aim and shoot into hive while raising depollinator and turning off intake
+                follow(follower, hive2Base()) //end
+        );
+    }
+
+    @Override
+    public void runOpMode() {
+        Scheduler.reset();
+        follower = Constants.create(hardwareMap);
+        follower.setPose(start);
+        follower.update();
+
+        waitForStart();
+        schedule(autoRoutine());
+
+        while (opModeIsActive()) {
+            follower.update();
+            Scheduler.execute();
+
+            telemetry.addData("x", follower.pose().x());
+            telemetry.addData("y", follower.pose().y());
+            telemetry.addData("heading", follower.pose().heading());
+
+            if (follower.currentPath() != null) {
+                telemetry.addData("Current path distance remaining", follower.distanceToEndpoint());
+                telemetry.addData("Path number", follower.pathIndex());
+            }
+
+            telemetry.update();
+        }
+    }
+
+    public Path startGarden() {
+        return Paths.line(start, startGarden).constant(startGarden);
+    }
+
+    public Path gardenAP() {
+        return Paths.curve(startGarden, gardenAPControl1, gardenAPControl2, gardenAP).heading(Interpolator.piecewise().until(0.0635, Interpolator.constant(gardenAPSegment1Heading)).until(0.3267, Interpolator.linear(gardenAPSegment2Start, gardenAPSegment2End)).until(0.6633, Interpolator.tangent).until(1, Interpolator.linear(gardenAPSegment4Start, gardenAPSegment4End)));
+    }
+
+    public Path aPPush() {
+        return Paths.line(gardenAP, aPPush).constant(aPPush);
+    }
+
+    public Path pushHive2() {
+        return Paths.curve(aPPush, pushHive2Control1, pushHive2Control2, pushHive2Control3, pushHive2Control4, pushHive2).heading(Interpolator.piecewise().until(0.1561, Interpolator.constant(pushHive2Segment1Heading)).until(0.3303, Interpolator.linear(pushHive2Segment2Start, pushHive2Segment2End)).until(0.5064, Interpolator.tangent).until(1, Interpolator.linear(pushHive2Segment4Start, pushHive2Segment4End)));
+    }
+
+    public Path hive2Flower2() {
+        return Paths.curve(pushHive2, hive2Flower2Control1, hive2Flower2).heading(Interpolator.piecewise().until(1, Interpolator.linear(hive2Flower2Segment1Start, hive2Flower2Segment1End)));
+    }
+
+    public Path flower2Hive2() {
+        return Paths.curve(flower2Hive2Start, flower2Hive2Control1, flower2Hive2).linear(flower2Hive2Start, flower2Hive2);
+    }
+
+    public Path hive2Flower1() {
+        return Paths.curve(flower2Hive2, hive2Flower1Control1, hive2Flower1Control2, hive2Flower1Control3, hive2Flower1).heading(Interpolator.piecewise().until(0.196, Interpolator.linear(hive2Flower1Segment1Start, hive2Flower1Segment1End)).until(0.6642, Interpolator.tangent).until(1, Interpolator.linear(hive2Flower1Segment3Start, hive2Flower1Segment3End)));
+    }
+
+    public Path flower1Hive2() {
+        return Paths.curve(hive2Flower1, flower1Hive2Control1, flower1Hive2Control2, flower1Hive2Control3, flower1Hive2).heading(Interpolator.piecewise().until(0.2523, Interpolator.linear(flower1Hive2Segment1Start, flower1Hive2Segment1End)).until(0.8203, Interpolator.tangent).until(1, Interpolator.linear(flower1Hive2Segment3Start, flower1Hive2Segment3End)));
+    }
+
+    public Path hive2Base() {
+        return Paths.curve(flower1Hive2, hive2BaseControl1, hive2BaseControl2, hive2Base).heading(Interpolator.piecewise().until(0.2051, Interpolator.linear(hive2BaseSegment1Start, hive2BaseSegment1End)).until(1, Interpolator.constant(hive2BaseSegment2Heading)));
+    }
+}

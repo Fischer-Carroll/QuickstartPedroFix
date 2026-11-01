@@ -12,6 +12,7 @@ import com.pedropathing.math.Pose;
 import com.pedropathing.api.PoseFactory;
 import com.pedropathing.math.Velocity;
 import com.pedropathing.utils.Timer;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -88,10 +89,13 @@ public class Robot {
         turret1 = hardwareMap.get(Servo.class, "turret1");
         turret2 = hardwareMap.get(Servo.class, "turret2");
 
-        //Assign limits to servos
+        //Assign directions and behaviors to motors
         follower = Constants.create(hardwareMap);
         bottomMotor.setDirection(DcMotorEx.Direction.REVERSE);
         topMotor.setDirection(DcMotorEx.Direction.FORWARD);
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        topMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        topMotor.setPIDFCoefficients();
         hive = 0;
         
         //Declare Shooter Commands
