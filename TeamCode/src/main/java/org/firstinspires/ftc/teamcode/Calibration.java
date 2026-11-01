@@ -2,6 +2,10 @@ package org.firstinspires.ftc.teamcode;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODER;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_WITHOUT_ENCODER;
 
+import android.os.CpuUsageInfo;
+
+import com.pedropathing.controllers.Controller;
+import com.pedropathing.controllers.PIDController;
 import com.pedropathing.drivetrain.DrivePowers;
 import com.pedropathing.drivetrain.Drivetrain;
 import com.pedropathing.follower.Follower;
@@ -50,6 +54,8 @@ public class Calibration {
     double flywheelkF;
     double targetFlywheelVelocity;
     double flywheelTPSmultiplier;
+    PIDFCoefficients pidfCoefficients;
+    double targetFlywheelPower;
     //   HOOD   //
     double hoodPosition;
     double hoodTelemetry;
@@ -110,17 +116,19 @@ public class Calibration {
         topMotor.setDirection(DcMotorEx.Direction.FORWARD);
         tuneIncrement = new int[]{1000, 100, 10, 5};
         incriment = 0;
-        targetFlywheelVelocity = 1500;
-        flywheelkP = 0.5;
+        targetFlywheelVelocity = 0;
+        //good values found: 1, 12.125
+        flywheelkP = 1;
         flywheelkF = 12.9;
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(flywheelkP, 0, 0, flywheelkF);
-        bottomMotor.setMode(RUN_WITHOUT_ENCODER);
-        topMotor.setMode(RUN_WITHOUT_ENCODER);
+        bottomMotor.setMode(RUN_USING_ENCODER);
+        topMotor.setMode(RUN_USING_ENCODER);
         bottomMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         topMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        bottomMotor.setPIDFCoefficients(RUN_WITHOUT_ENCODER, pidfCoefficients);
-        topMotor.setPIDFCoefficients(RUN_WITHOUT_ENCODER, pidfCoefficients);
+        bottomMotor.setPIDFCoefficients(RUN_USING_ENCODER, pidfCoefficients);
+        topMotor.setPIDFCoefficients(RUN_USING_ENCODER, pidfCoefficients);
         targetVoltage = 12.0;
+        targetFlywheelPower = 0;
 
         //Hood
         hoodPosition = 0.5;
@@ -206,6 +214,10 @@ public class Calibration {
     public void setCorrectedFlywheelVelocity(double targetFlywheelVelocity) { //OPTIMAL VALUES FOUND: 0.5 kP, 12.9 kF
         setFlywheelVelocity(targetFlywheelVelocity * flywheelTPSmultiplier);
     }
+    public void setFlywheelPower(double targetFlywheelPower) {
+        bottomMotor.setPower(targetFlywheelPower);
+        topMotor.setPower(targetFlywheelPower);
+    }
     private void updatePIDFcoefficients() {
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(flywheelkP, 0, 0, flywheelkF);
         bottomMotor.setPIDFCoefficients(RUN_USING_ENCODER, pidfCoefficients);
@@ -233,11 +245,11 @@ public class Calibration {
         }
         if (gamepad1.dpadDownWasPressed()) {
             targetFlywheelVelocity = 1500;
-            setCorrectedFlywheelVelocity(targetFlywheelVelocity);
+            setFlywheelVelocity(targetFlywheelVelocity);
         }
         if (gamepad1.dpadUpWasPressed()) {
-            targetFlywheelVelocity = 2140;
-            setCorrectedFlywheelVelocity(targetFlywheelVelocity);
+            targetFlywheelVelocity = 2200;
+            setFlywheelVelocity(targetFlywheelVelocity);
         }
 
         telemetry.addLine("Tune Flywheel PIDF Controls:");
@@ -250,13 +262,25 @@ public class Calibration {
         telemetry.addData("Flywheel Velocity Target", targetFlywheelVelocity);
         telemetry.addData("Flywheel Velocity", topMotor.getVelocity());
         telemetry.addData("Flywheel Velocity Error", (topMotor.getVelocity() - targetFlywheelVelocity));
+        telemetry.addData("Flywheel Power", (topMotor.getPower()));
         telemetry.addData("Flywheel kP", flywheelkP);
         telemetry.addData("Flywheel kF", flywheelkF);
         telemetry.addLine("===============================");
     }
-
     public void testFlywheelVoltageControl() {
+        if (gamepad1.dpadUpWasPressed()) {
+            targetFlywheelPower += 0.05;
+            setFlywheelPower(targetFlywheelPower);
+        }
+        if (gamepad1.dpadDownWasPressed()) {
+            targetFlywheelPower -= 0.05;
+            setFlywheelPower(targetFlywheelPower);
+        }
 
+        telemetry.addLine("Flywheel Power: dpad up/down");
+        telemetry.addData("Flywheel Power: ", topMotor.getPower());
+        telemetry.addData("Flywheel Velocity: ", topMotor.getVelocity());
+        telemetry.addLine("===============================");
     }
     //for future use once polynomial regression is used to find correlation between distance and shooter vars
     /*public void handleDynamicFlywheelVelocity() {
