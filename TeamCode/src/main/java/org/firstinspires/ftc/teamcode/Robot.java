@@ -161,7 +161,7 @@ public class Robot {
             depollinator.setPosition(depollinatorState % 2);
         }
         if (depollinatorState == 0)
-            if (depollinator.getPosition() == 0 && depollinatorTimer.milliseconds()%200 < 100){
+            if (depollinator.getPosition() == 0 && depollinatorTimer.milliseconds()%800 < 400){
                 depollinator.setPosition(0.05);
             } else if (depollinator.getPosition() == 0){
                 depollinator.setPosition(0);

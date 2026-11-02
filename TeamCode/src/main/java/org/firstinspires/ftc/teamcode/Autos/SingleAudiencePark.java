@@ -17,7 +17,7 @@ import com.pedropathing.paths.interpolator.Interpolator;
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
-@Autonomous(name = "AutoPath", group = "Autonomous")
+@Autonomous(name = "Single Garden", group = "Autonomous")
 public class SingleAudiencePark extends LinearOpMode {
 
     private Follower follower;

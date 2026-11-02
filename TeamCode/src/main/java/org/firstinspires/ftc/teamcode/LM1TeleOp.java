@@ -18,6 +18,8 @@ public class LM1TeleOp extends LinearOpMode {
         Calibration cal = new Calibration(hardwareMap, gamepad1, gamepad2, telemetry);
         bot.follower.setPose(new Pose(0,0,Math.toRadians(90)));
         waitForStart();
+        bot.initialiseActuatorPositions();
+        bot.initialiseServoScales();
         while (opModeIsActive())
         {
             bot.varsUpdate();

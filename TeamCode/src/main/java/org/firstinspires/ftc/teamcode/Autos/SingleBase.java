@@ -19,7 +19,7 @@ import com.pedropathing.paths.interpolator.Interpolator;
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
-@Autonomous(name = "AutoPath", group = "Autonomous")
+@Autonomous(name = "Single Base", group = "Autonomous")
 public class SingleBase extends LinearOpMode {
 
     private Follower follower;
