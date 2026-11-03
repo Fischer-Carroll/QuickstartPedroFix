@@ -46,6 +46,7 @@ public class SingleBase extends LinearOpMode {
     // Autonomous routine
     public Command autoRoutine() {
         return sequential(
+
                 follow(follower, startFlower2()), //before moving, should aim and shoot into hive and lower depollinator and turn on intake
                 follow(follower, flower2Hive2()), //after, should turn off intake and aim and shoot into hive and raise depollinator
                 follow(follower, hive2Base())

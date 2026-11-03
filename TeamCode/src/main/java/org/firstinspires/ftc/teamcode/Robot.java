@@ -128,7 +128,7 @@ public class Robot {
     }
     public void initialiseServoScales() {
         blocker.scaleRange(0.2, 0.4);
-        depollinator.scaleRange(0.2, 0.775);
+        depollinator.scaleRange(0.275, 0.775);
         hood.scaleRange(0, 108.8 / 300.0);
         turret1.scaleRange(0.025,0.975);
         turret2.scaleRange(0.025,0.975);
@@ -160,10 +160,10 @@ public class Robot {
             depollinatorState += 1;
             depollinator.setPosition(depollinatorState % 2);
         }
-        if (depollinatorState == 0)
-            if (depollinator.getPosition() == 0 && depollinatorTimer.milliseconds()%800 < 400){
+        if (depollinatorState%2 == 0)
+            if (depollinatorTimer.milliseconds()%300 < 150){
                 depollinator.setPosition(0.05);
-            } else if (depollinator.getPosition() == 0){
+            } else {
                 depollinator.setPosition(0);
             }
 
