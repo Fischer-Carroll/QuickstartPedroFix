@@ -69,6 +69,7 @@ public class Calibration {
     int blockerState;
     //   DEPOLLINATOR   //
     double depollinatorState;
+    double depollinatorPositon;
     //   INTAKE   //
     double intakePower;
     //   TRANSFER   //
@@ -150,8 +151,8 @@ public class Calibration {
         setTurretPosition(turretPosition);
 
         //Depollinator
-        depollinator.scaleRange(0.2,0.775);
-        setDepollinatorPosition(1);
+        depollinator.scaleRange(0,1);
+        //setDepollinatorPosition(1);
     }
 
     // %==========% MISCELLANEOUS %==========% //
@@ -434,6 +435,21 @@ public class Calibration {
         }
 
         telemetry.addLine("Toggle Depollinator: X");
+        telemetry.addLine("===============================");
+    }
+    public void tuneDepollinatorPosition() {
+        if (gamepad1.dpadRightWasPressed()) {
+            depollinatorPositon -= 0.025;
+            setDepollinatorPosition(depollinatorPositon);
+        }
+        if (gamepad1.dpadLeftWasPressed()) {
+            depollinatorPositon += 0.025;
+            setDepollinatorPosition(depollinatorPositon);
+        }
+
+        telemetry.addLine("Depollinator Tune Controls:");
+        telemetry.addLine("Depollinator Position: dpad right/left");
+        telemetry.addData("Depollinator Position: ", depollinator.getPosition());
         telemetry.addLine("===============================");
     }
 
