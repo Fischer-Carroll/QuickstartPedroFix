@@ -44,14 +44,12 @@ public class Calibration {
     Follower follower;
     double x;
     double y;
-    double w = 7.75;
+    double w = 8;
     double l = 9;
     double heading;
     DrivePowers powers;
-    public Pose resetPose = new Pose(0,0,0);
+    public Pose resetPose = new Pose(0, 0, 0);
     //   FLYWHEEL   //
-    double flywheelkP;
-    double flywheelkF;
     double targetFlywheelVelocity;
     double flywheelTPSmultiplier;
     PIDFCoefficients pidfCoefficients;
@@ -69,7 +67,7 @@ public class Calibration {
     int blockerState;
     //   DEPOLLINATOR   //
     double depollinatorState;
-    double depollinatorPositon;
+    double depollinatorPostion;
     //   INTAKE   //
     double intakePower;
     //   TRANSFER   //
@@ -119,15 +117,15 @@ public class Calibration {
         incriment = 0;
         targetFlywheelVelocity = 0;
         //good values found: 1, 12.125
-        flywheelkP = 1;
-        flywheelkF = 12.9;
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(flywheelkP, 0, 0, flywheelkF);
-        bottomMotor.setMode(RUN_USING_ENCODER);
-        topMotor.setMode(RUN_USING_ENCODER);
+        kP = 0;
+        kF = 0;
+        //PIDFCoefficients pidfCoefficients = new PIDFCoefficients(flywheelkP, 0, 0, flywheelkF);
+        bottomMotor.setMode(RUN_WITHOUT_ENCODER);
+        topMotor.setMode(RUN_WITHOUT_ENCODER);
         bottomMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         topMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        bottomMotor.setPIDFCoefficients(RUN_USING_ENCODER, pidfCoefficients);
-        topMotor.setPIDFCoefficients(RUN_USING_ENCODER, pidfCoefficients);
+        //bottomMotor.setPIDFCoefficients(RUN_USING_ENCODER, pidfCoefficients);
+        //topMotor.setPIDFCoefficients(RUN_USING_ENCODER, pidfCoefficients);
         targetVoltage = 12.0;
         targetFlywheelPower = 0;
 
@@ -151,8 +149,8 @@ public class Calibration {
         setTurretPosition(turretPosition);
 
         //Depollinator
-        depollinator.scaleRange(0,1);
-        //setDepollinatorPosition(1);
+        depollinator.scaleRange(0, 1);
+        setDepollinatorPosition(1);
     }
 
     // %==========% MISCELLANEOUS %==========% //
@@ -161,10 +159,12 @@ public class Calibration {
         ry = -gamepad1.right_stick_y;
         stickAngle = Math.atan2(rx, ry);
     }
+
     public void stickAngleTelemetry() {
         telemetry.addData("Stick Angle", Math.toDegrees(stickAngle));
         telemetry.addLine("===============================");
     }
+
     // %==========% SHOOTER %==========% //
     public void tuneShooter() { //DO NOT USE WITH tuneFlywheelPIDF() || cycleTurretMode()
         if (gamepad1.startWasPressed()) {
@@ -202,46 +202,90 @@ public class Calibration {
     }
 
     // %==========% FLYWHEEL %==========% //
+    double bbThreshold = 100; //tps
+    private double bbFlywheelControl(double targetFlywheelVelocity) {
+        int curFlywheelVelocity = (int) topMotor.getVelocity();
+
+        if (curFlywheelVelocity < targetFlywheelVelocity - bbThreshold && targetFlywheelPower != 1) {
+            return 1;
+        } else if (curFlywheelVelocity < targetFlywheelVelocity + bbThreshold && targetFlywheelPower != 0) {
+            return 0;
+        } else {
+            return -1;
+        }
+    }
+
+    double flywheelkF;
+    double kF;
+    private void getFlywheelkF() {
+        flywheelkF = voltageSensor.getVoltage() / 2706.0 * kF;
+    }
+
+    private double kfFlywheelControl(double targetFlywheelVelocity) {
+        return targetFlywheelVelocity * flywheelkF;
+    }
+
+    double kP;
+
+    private double kpFlywheelControl(double targetFlywheelVelocity) {
+        return (targetFlywheelVelocity - topMotor.getVelocity()) * kP;
+    }
+
+    private void handleBBFFPflywheel() {
+        if (bbFlywheelControl(targetFlywheelVelocity) == 1) {
+            setFlywheelPower(bbFlywheelControl(targetFlywheelVelocity));
+        } else if (bbFlywheelControl(targetFlywheelVelocity) == 0) {
+            setFlywheelPower(bbFlywheelControl(targetFlywheelVelocity));
+        } else {
+            setFlywheelPower(kfFlywheelControl(targetFlywheelVelocity) + kpFlywheelControl(targetFlywheelVelocity));
+        }
+    }
+
     public void handleFlywheelVoltage() {
         voltage = voltageSensor.getVoltage();
         flywheelTPSmultiplier = targetVoltage / voltage;
         telemetry.addData("Current Voltage", voltage);
         telemetry.addData("Flywheel TPS Multiplier", flywheelTPSmultiplier);
     }
+
     public void setFlywheelVelocity(double targetFlywheelVelocity) {
         bottomMotor.setVelocity(targetFlywheelVelocity);
         topMotor.setVelocity(targetFlywheelVelocity);
     }
+
     public void setCorrectedFlywheelVelocity(double targetFlywheelVelocity) { //OPTIMAL VALUES FOUND: 0.5 kP, 12.9 kF
         setFlywheelVelocity(targetFlywheelVelocity * flywheelTPSmultiplier);
     }
+
     public void setFlywheelPower(double targetFlywheelPower) {
         bottomMotor.setPower(targetFlywheelPower);
         topMotor.setPower(targetFlywheelPower);
     }
+
     private void updatePIDFcoefficients() {
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(flywheelkP, 0, 0, flywheelkF);
-        bottomMotor.setPIDFCoefficients(RUN_USING_ENCODER, pidfCoefficients);
-        topMotor.setPIDFCoefficients(RUN_USING_ENCODER, pidfCoefficients);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(kP, 0, 0, kF);
+        bottomMotor.setPIDFCoefficients(RUN_WITHOUT_ENCODER, pidfCoefficients);
+        topMotor.setPIDFCoefficients(RUN_WITHOUT_ENCODER, pidfCoefficients);
     }
-    public void tuneFlywheelPIDF() { //DO NOT USE WITH tuneShooter() || cycleTurretMode()
+
+    public void tuneBBFFPflywheel() { //DO NOT USE WITH tuneShooter() || cycleTurretMode()
         if (gamepad1.startWasPressed()) {
             incriment = (incriment + 1) % tuneIncrement.length;
         }
         if (gamepad1.leftBumperWasPressed()) {
-            flywheelkP += (tuneIncrement[incriment] / 100.0);
+            kP += (tuneIncrement[incriment] / 100.0);
             updatePIDFcoefficients();
         }
         if (gamepad1.leftTriggerWasPressed()) {
-            flywheelkP -= (tuneIncrement[incriment] / 100.0);
+            kP -= (tuneIncrement[incriment] / 100.0);
             updatePIDFcoefficients();
         }
         if (gamepad1.rightBumperWasPressed()) {
-            flywheelkF += (tuneIncrement[incriment] / 100.0);
+            kF += (tuneIncrement[incriment] / 100.0);
             updatePIDFcoefficients();
         }
         if (gamepad1.rightTriggerWasPressed()) {
-            flywheelkF -= (tuneIncrement[incriment] / 100.0);
+            kF -= (tuneIncrement[incriment] / 100.0);
             updatePIDFcoefficients();
         }
         if (gamepad1.dpadDownWasPressed()) {
@@ -264,10 +308,11 @@ public class Calibration {
         telemetry.addData("Flywheel Velocity", topMotor.getVelocity());
         telemetry.addData("Flywheel Velocity Error", (topMotor.getVelocity() - targetFlywheelVelocity));
         telemetry.addData("Flywheel Power", (topMotor.getPower()));
-        telemetry.addData("Flywheel kP", flywheelkP);
-        telemetry.addData("Flywheel kF", flywheelkF);
+        telemetry.addData("Flywheel kP", kP);
+        telemetry.addData("Flywheel kF", kF);
         telemetry.addLine("===============================");
     }
+
     public void testFlywheelVoltageControl() {
         if (gamepad1.dpadUpWasPressed()) {
             targetFlywheelPower += 0.05;
@@ -296,6 +341,7 @@ public class Calibration {
     public void setHoodPosition(double hoodPosition) {
         hood.setPosition(hoodPosition);
     }
+
     public void tuneHoodPosition() {
         if (gamepad1.dpadRightWasPressed()) {
             hoodPosition -= 0.025;
@@ -317,6 +363,7 @@ public class Calibration {
         turret1.setPosition(turretPosition);
         turret2.setPosition(turretPosition);
     }
+
     private void tuneTurretPosition() {
         if (gamepad1.rightStickButtonWasPressed()) {
             turretPosition += 0.025;
@@ -332,6 +379,7 @@ public class Calibration {
         telemetry.addData("Turret Position: ", turret1.getPosition());
         telemetry.addLine("===============================");
     }
+
     private void manualTurretWithDirectStick() {
         if (Math.abs(rx) > 0.12) {
             turretPosition += 0.01 * Math.signum(rx);
@@ -344,6 +392,7 @@ public class Calibration {
         telemetry.addData("Stick Magnitude: ", rx);
         telemetry.addLine("===============================");
     }
+
     private void manualTurretWithRCStickAngle() {
         if (Math.hypot(rx, ry) > 0.12) {
             turretPosition = ((-1 * stickAngle) + Math.PI) / (2 * Math.PI);
@@ -356,6 +405,7 @@ public class Calibration {
         telemetry.addData("Stick Angle: ", stickAngle);
         telemetry.addLine("===============================");
     }
+
     private void manualTurretWithFCStickAngle() {
         if (Math.hypot(rx, ry) > 0.12) {
             targetTurretAngle = stickAngle - heading;
@@ -369,14 +419,23 @@ public class Calibration {
         telemetry.addData("Stick Angle: ", stickAngle);
         telemetry.addLine("===============================");
     }
+
     public void cycleTurretMode() { //DO NOT USE WITH tuneShooter() || tuneFlywheelPIDF()
         if (gamepad1.startWasPressed()) {
             turretMode += 1;
         }
-        if (turretMode % 4 == 0) {tuneTurretPosition();}
-        if (turretMode % 4 == 1) {manualTurretWithDirectStick();}
-        if (turretMode % 4 == 2) {manualTurretWithRCStickAngle();}
-        if (turretMode % 4 == 3) {manualTurretWithFCStickAngle();}
+        if (turretMode % 4 == 0) {
+            tuneTurretPosition();
+        }
+        if (turretMode % 4 == 1) {
+            manualTurretWithDirectStick();
+        }
+        if (turretMode % 4 == 2) {
+            manualTurretWithRCStickAngle();
+        }
+        if (turretMode % 4 == 3) {
+            manualTurretWithFCStickAngle();
+        }
 
         telemetry.addData("Turret Mode: ", turretModeOptions[turretMode % 4]);
         telemetry.addLine("===============================");
@@ -386,8 +445,9 @@ public class Calibration {
     public void setBlockerPosition(double blockerPosition) {
         blocker.setPosition(blockerPosition);
     }
+
     public void toggleBlocker() {
-        if (gamepad1.yWasPressed ()){
+        if (gamepad1.yWasPressed()) {
             blockerState += 1;
             setBlockerPosition(blockerState % 2);
         }
@@ -400,6 +460,7 @@ public class Calibration {
     public void setIntakePower(double intakePower) {
         intake.setPower(intakePower);
     }
+
     public void toggleIntake() {
         if (gamepad1.aWasPressed()) {
             intakePower += 1;
@@ -414,6 +475,7 @@ public class Calibration {
     public void setTransferPower(double transferPower) {
         transfer.setPower(transferPower);
     }
+
     public void toggleTransfer() {
         if (gamepad1.bWasPressed()) {
             transferPower += 1;
@@ -428,6 +490,7 @@ public class Calibration {
     public void setDepollinatorPosition(double depollinatorPosition) {
         depollinator.setPosition(depollinatorPosition);
     }
+
     public void toggleDepollinator() {
         if (gamepad1.xWasPressed()) {
             depollinatorState += 1;
@@ -437,14 +500,15 @@ public class Calibration {
         telemetry.addLine("Toggle Depollinator: X");
         telemetry.addLine("===============================");
     }
+
     public void tuneDepollinatorPosition() {
         if (gamepad1.dpadRightWasPressed()) {
-            depollinatorPositon -= 0.025;
-            setDepollinatorPosition(depollinatorPositon);
+            depollinatorPostion -= 0.025;
+            setDepollinatorPosition(depollinatorPostion);
         }
         if (gamepad1.dpadLeftWasPressed()) {
-            depollinatorPositon += 0.025;
-            setDepollinatorPosition(depollinatorPositon);
+            depollinatorPostion += 0.025;
+            setDepollinatorPosition(depollinatorPostion);
         }
 
         telemetry.addLine("Depollinator Tune Controls:");
@@ -460,6 +524,7 @@ public class Calibration {
             follower.hold(resetPose);
         }
     }
+
     public void varsUpdate() {
         x = follower.pose().x();
         y = follower.pose().y();
@@ -468,6 +533,7 @@ public class Calibration {
         telemetry.addData("Robot Heading: ", heading);
         telemetry.addLine("===============================");
     }
+
     public void RCTdriveUpdate() {
         if (!gamepad1.left_trigger_pressed) {
             if (gamepad1.backWasPressed()) {

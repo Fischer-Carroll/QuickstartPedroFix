@@ -25,13 +25,13 @@ public class Park extends LinearOpMode {
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(9, 80, 90);
-    private final Pose startPark = poseFactory.of(12, 96, 0);
+    private final Pose start = poseFactory.of(8.75, 133.75, 90);
+    private final Pose startBase = poseFactory.of(12.75, 117.75, 0);
 
     // Autonomous routine
     public Command autoRoutine() {
         return sequential(
-                follow(follower, startPark())
+                follow(follower, startBase())
         );
     }
 
@@ -62,7 +62,7 @@ public class Park extends LinearOpMode {
         }
     }
 
-    public Path startPark() {
-        return Paths.line(start, startPark).constant(startPark);
+    public Path startBase() {
+        return Paths.line(start, startBase).constant(startBase);
     }
 }
