@@ -32,7 +32,7 @@ public class CalibrationTeleOp extends LinearOpMode {
             //cal.stickAngleTelemetry();
             //!!!tuneShooter(), tuneFlywheelPIDF(), cycleTurretMode(), and RTCdriveUpdate() are INCOMPATIBLE with eachother (use one at a time)!!!
             //cal.tuneShooter();
-            cal.tuneFlywheelPIDF();
+            cal.tuneBBFFPflywheel();
             //cal.cycleTurretMode();
             //cal.RCTdriveUpdate();
             cal.tuneHoodPosition();
@@ -40,7 +40,8 @@ public class CalibrationTeleOp extends LinearOpMode {
             cal.toggleBlocker();
             cal.toggleIntake();
             cal.toggleTransfer();
-            cal.toggleDepollinator();
+            //cal.toggleDepollinator();
+            cal.tuneDepollinatorPosition();
             telemetry.update();
         }
     }

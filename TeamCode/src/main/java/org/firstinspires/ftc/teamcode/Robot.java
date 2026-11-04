@@ -138,7 +138,7 @@ public class Robot {
                 .setDone(() -> true)
                 .requiring(intake);
         
-        cmdStopIntakentake = Command.build()
+        cmdStopIntake = Command.build()
                 .setStart(this::notake)
                 .setDone(() -> true)
                 .requiring(intake);

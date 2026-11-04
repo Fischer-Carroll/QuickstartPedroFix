@@ -274,19 +274,15 @@ public class Calibration {
         }
         if (gamepad1.leftBumperWasPressed()) {
             kP += (tuneIncrement[incriment] / 100.0);
-            updatePIDFcoefficients();
         }
         if (gamepad1.leftTriggerWasPressed()) {
             kP -= (tuneIncrement[incriment] / 100.0);
-            updatePIDFcoefficients();
         }
         if (gamepad1.rightBumperWasPressed()) {
             kF += (tuneIncrement[incriment] / 100.0);
-            updatePIDFcoefficients();
         }
         if (gamepad1.rightTriggerWasPressed()) {
             kF -= (tuneIncrement[incriment] / 100.0);
-            updatePIDFcoefficients();
         }
         if (gamepad1.dpadDownWasPressed()) {
             targetFlywheelVelocity = 1500;

@@ -22,7 +22,7 @@ public class LM1TeleOp extends LinearOpMode {
         while (opModeIsActive())
         {
             bot.varsUpdate();
-            bot.RCTdriveUpdate();.
+            bot.RCTdriveUpdate();
             bot.resetOdometry();
             bot.targetHive();
             bot.aimToHive();
