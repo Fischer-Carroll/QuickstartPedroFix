@@ -72,7 +72,6 @@ public class Calibration {
         kP = 0;
         kF = 0;
 
-
         // HOOD //
         hood.scaleRange(0, 108.8 / 300.0);
         hoodPosition = 0.5;
@@ -148,25 +147,24 @@ public class Calibration {
         telemetry.addData("Target Flywheel Velocity: ", targetFlywheelVelocity);
         telemetry.addData("Target Hood Position: ", hoodPosition);
         telemetry.addLine("===============================");
-
     }
 
     // %==========% FLYWHEEL %==========% //
     double targetFlywheelVelocity;
     double targetFlywheelPower;
-    double bbThreshold = 100; //tps
+    double bbThreshold = 100.0; //tps
     double kF;
     double kP;
 
     private double bbFlywheelControl(double targetFlywheelVelocity) {
         int curFlywheelVelocity = (int) topMotor.getVelocity();
 
-        if (curFlywheelVelocity < targetFlywheelVelocity - bbThreshold && targetFlywheelPower != 1) {
-            return 1;
-        } else if (curFlywheelVelocity < targetFlywheelVelocity + bbThreshold && targetFlywheelPower != 0) {
-            return 0;
+        if (curFlywheelVelocity < targetFlywheelVelocity - bbThreshold && targetFlywheelPower != 1.0) {
+            return 1.0;
+        } else if (curFlywheelVelocity < targetFlywheelVelocity + bbThreshold && targetFlywheelPower != 0.0) {
+            return 0.0;
         } else {
-            return -1;
+            return -1.0;
         }
     }
 
@@ -219,11 +217,11 @@ public class Calibration {
             kF -= (tuneIncrement[incriment] / 100.0);
         }
         if (gamepad1.dpadDownWasPressed()) {
-            targetFlywheelVelocity = 1500;
+            targetFlywheelVelocity = 1500.0;
             setFlywheelVelocity(targetFlywheelVelocity);
         }
         if (gamepad1.dpadUpWasPressed()) {
-            targetFlywheelVelocity = 2200;
+            targetFlywheelVelocity = 2200.0;
             setFlywheelVelocity(targetFlywheelVelocity);
         }
 
@@ -246,10 +244,10 @@ public class Calibration {
     //for future use once polynomial regression is used to find correlation between distance and shooter vars
     /*public void handleDynamicFlywheelVelocity() {
         x = getDistanceToHive();
-        hoodPosition = //
+        hoodPosition = //calc for hood position
         setHoodPosition(hoodPosition);
-        targetFlywheelVelocity = //
-        setCorrectedFlywheelVelocity(targetFlywheelVelocity)
+        targetFlywheelVelocity = //calc for flywheel velocity
+        setFlywheelVelocity(targetFlywheelVelocity)
     }*/
 
     // %==========% HOOD %==========% //
@@ -317,7 +315,7 @@ public class Calibration {
 
     private void manualTurretWithRCStickAngle() {
         if (Math.hypot(rx, ry) > 0.12) {
-            turretPosition = ((-1 * stickAngle) + Math.PI) / (2 * Math.PI);
+            turretPosition = ((-1.0 * stickAngle) + Math.PI) / (2.0 * Math.PI);
             setTurretPosition(turretPosition);
         }
 
@@ -331,7 +329,7 @@ public class Calibration {
     private void manualTurretWithFCStickAngle() {
         if (Math.hypot(rx, ry) > 0.12) {
             targetTurretAngle = stickAngle - heading;
-            turretPosition = targetTurretAngle / ((Math.toRadians(256.5)) / (Math.toRadians(360)));
+            turretPosition = targetTurretAngle / ((Math.toRadians(256.5)) / (Math.toRadians(360.0)));
             setTurretPosition(turretPosition);
         }
 
@@ -448,11 +446,11 @@ public class Calibration {
     Follower follower;
     double x;
     double y;
-    double w = 8;
-    double l = 9;
+    double w = 7.75;
+    double l = 9.0;
     double heading;
     DrivePowers powers;
-    public Pose resetPose = new Pose(0, 0, 0);
+    public Pose resetPose = new Pose(w, l, 90);
 
     public void resetOdometry() {
         if (gamepad1.startWasPressed()) {
