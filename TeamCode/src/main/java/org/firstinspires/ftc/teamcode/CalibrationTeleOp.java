@@ -34,7 +34,8 @@ public class CalibrationTeleOp extends LinearOpMode {
             //cal.tuneBBFFPflywheel();
             //cal.handleBBFFPflywheel();
             //cal.handlePIDFFlywheel();
-            cal.passivePIDFFlywheel();
+            //cal.passivePIDFFlywheel();
+            //cal.pidCorrection();
 
             // SHOOTER //
             cal.tuneShooter();
