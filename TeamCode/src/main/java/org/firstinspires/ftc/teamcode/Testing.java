@@ -17,6 +17,8 @@ public class Testing extends LinearOpMode {
     double transferSpeed;
     int flywheelSpeed;
     int transferToggle;
+    int flywheelUpper;
+    int flywheelLower;
     @Override
     public void runOpMode() throws InterruptedException {
         b = new Robot(hardwareMap, gamepad1,telemetry);
@@ -28,6 +30,16 @@ public class Testing extends LinearOpMode {
         waitForStart();
         
         while (opModeIsActive()){
+            if (gamepad1.startWasPressed){
+                flywheelLower = flywheelSpeed;
+                flywheelUpper = flywheelSpeed;
+            }
+            if (b.bottomMotor.getVelocity() < flywheelLower){
+                flywheelLower = bottomMotor.getVelocity();
+            }
+            if (b.bottomMotor.getVelocity() > flywheelUpper){
+                flywheelUpper = bottomMotor.getVelocity();
+            }
             if (gamepad1.dpadUpWasPressed){
                 transferSpeed += 0.05;
                 b.transfer.setPower(transferSpeed);
@@ -52,8 +64,10 @@ public class Testing extends LinearOpMode {
             }else{
                 b.closeBlocekr();
             }
-            telemetry.addData("Flywheel Speed (TPS)", flywheelSpeed);
-            telemetry.addData("Transfer Speed (Power)", transferSpeed)
+            telemetry.addData("Flywheel Speed (TPS) ", flywheelSpeed);
+            telemetry.addData("Transfer Speed (Power) ", transferSpeed);
+            telemetry.addData("Highest flywheel Speed ", flywheelUpper);
+            telemetry.addData("Lowest flywheel Speed ", flywheelLower);
         }
     }
 }
