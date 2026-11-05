@@ -13,13 +13,47 @@ import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 @TeleOp(name = "Drive Testing")
 public class Testing extends LinearOpMode {
+    Robot bot;
+    double transferSpeed;
+    int flywheelSpeed;
+    int transferToggle;
     @Override
     public void runOpMode() throws InterruptedException {
-        Robot bot = new Robot(hardwareMap, gamepad1,telemetry);
+        b = new Robot(hardwareMap, gamepad1,telemetry);
+        transferSpeed = 1;
+        int transferToggle = 0;
+        int flywheelSpeed;
+        int intakeState = 0;
         bot.initialiseServoScales();
         waitForStart();
+        
         while (opModeIsActive()){
-            bot.handleDepollinator();
+            if (gamepad1.dpadUpWasPressed){
+                transferSpeed += 0.05;
+                b.transfer.setPower(transferSpeed);
+            }
+            if (gamepad1.dpadDownWasPressed){
+                transferSpeed -= 0.05;
+                b.transfer.setPower(transferSpeed);
+            }
+            if (gamepad1.dpadLeftWasPressed){
+                flywheelSpeed -= 10;
+                b.setFlywheelTPS(flywheelSpeed);
+            }
+            if (gamepad1.dpadRightWasPressed){
+                flywheelSpeed += 10;
+                b.setFlywheelTPS(flywheelSpeed);
+            }
+            if (gamepad1.leftBumperWasPressed){
+                intakeState = (intakeState+1)%2 - 1;
+            }
+            if (gamepad1.rightBumperWasPressed){
+                b.openBlocker();
+            }else{
+                b.closeBlocekr();
+            }
+            telemetry.addData("Flywheel Speed (TPS)", flywheelSpeed);
+            telemetry.addData("Transfer Speed (Power)", transferSpeed)
         }
     }
 }
