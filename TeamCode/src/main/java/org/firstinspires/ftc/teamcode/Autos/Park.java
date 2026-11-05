@@ -25,7 +25,7 @@ public class Park extends LinearOpMode {
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(8.75, 133.75, 90);
+    private final Pose start = poseFactory.of(8.75, 133.75,  0);
     private final Pose startBase = poseFactory.of(12.75, 117.75, 0);
 
     // Autonomous routine

@@ -31,11 +31,13 @@ public class CalibrationTeleOp extends LinearOpMode {
             //cal.RCTdriveUpdate();
 
             // FLYWHEEL //
-            cal.tuneBBFFPflywheel();
-            cal.handleBBFFPflywheel();
+            //cal.tuneBBFFPflywheel();
+            //cal.handleBBFFPflywheel();
+            //cal.handlePIDFFlywheel();
+            cal.passivePIDFFlywheel();
 
             // SHOOTER //
-            //cal.tuneShooter();
+            cal.tuneShooter();
 
             // HOOD //
             cal.tuneHoodPosition();
@@ -54,7 +56,7 @@ public class CalibrationTeleOp extends LinearOpMode {
 
             // DEPOLLINATOR //
             //cal.toggleDepollinator();
-            cal.tuneDepollinatorPosition();
+            //cal.tuneDepollinatorPosition();
 
             // MISCELLANEOUS //
             //cal.getStickAngle();

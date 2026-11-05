@@ -149,13 +149,13 @@ public class Robot {
     public void initialiseServoScales() {
         blocker.scaleRange(0.2, 0.4);
         depollinator.scaleRange(0.275, 0.775);
-        hood.scaleRange(0, 108.8 / 300.0);
+        hood.scaleRange(0.2,0.625);
         turret1.scaleRange(0.025,0.975);
         turret2.scaleRange(0.025,0.975);
     }
     public void initialiseActuatorPositions() {
         setFlywheelTPS(2140);
-        sethoodPosition(0.75);
+        sethoodPosition(0.5);
         transfer.setPower(1);
         intake.setPower(1);
     }

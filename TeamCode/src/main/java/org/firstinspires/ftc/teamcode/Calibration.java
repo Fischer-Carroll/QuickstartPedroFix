@@ -18,6 +18,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
@@ -64,16 +65,14 @@ public class Calibration {
         bottomMotor.setDirection(DcMotorEx.Direction.REVERSE);
         topMotor.setDirection(DcMotorEx.Direction.FORWARD);
         bottomMotor.setMode(RUN_WITHOUT_ENCODER);
-        topMotor.setMode(RUN_WITHOUT_ENCODER);
-        bottomMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        topMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        topMotor.setMode(RUN_USING_ENCODER);
         targetFlywheelVelocity = 0;
         targetFlywheelPower = 0;
         kP = 0;
         kF = 0;
 
         // HOOD //
-        hood.scaleRange(0, 108.8 / 300.0);
+        hood.scaleRange(0.2,0.625);
         hoodPosition = 0.5;
         setHoodPosition(hoodPosition);
 
@@ -95,12 +94,12 @@ public class Calibration {
 
         // MISCELLANEOUS //
         tuneIncrement = new int[]{1000, 100, 10, 5};
-        incriment = 0;
+        increment = 0;
     }
 
     // %==========% MISCELLANEOUS %==========% //
     int[] tuneIncrement;
-    int incriment;
+    int increment;
     double stickAngle;
     double rx;
     double ry;
@@ -117,14 +116,17 @@ public class Calibration {
     // %==========% SHOOTER %==========% //
     public void tuneShooter() {
         if (gamepad1.startWasPressed()) {
-            incriment = (incriment + 1) % tuneIncrement.length;
+            increment = (Math.abs(increment + 1)) % tuneIncrement.length;
+        }
+        if (gamepad1.backWasPressed()) {
+            increment = (Math.abs(increment - 1)) % tuneIncrement.length;
         }
         if (gamepad1.dpadUpWasPressed()) {
-            targetFlywheelVelocity += tuneIncrement[incriment];
+            targetFlywheelVelocity += tuneIncrement[increment];
             setFlywheelVelocity(targetFlywheelVelocity);
         }
         if (gamepad1.dpadDownWasPressed()) {
-            targetFlywheelVelocity -= tuneIncrement[incriment];
+            targetFlywheelVelocity -= tuneIncrement[increment];
             setFlywheelVelocity(targetFlywheelVelocity);
         }
         if (gamepad1.dpadLeftWasPressed()) {
@@ -137,11 +139,11 @@ public class Calibration {
         }
 
         telemetry.addLine("Tune Shooter Controls:");
-        telemetry.addLine("Tune Incriment: X");
+        telemetry.addLine("Tune increment: X");
         telemetry.addLine("Tune Flywheel Velocity: dpad up/down");
         telemetry.addLine("Tune Hood Position: dpad left/right");
         telemetry.addLine("Tune Shooter Data:");
-        telemetry.addData("Tune Incriment:", tuneIncrement[incriment]);
+        telemetry.addData("Tune increment:", tuneIncrement[increment]);
         telemetry.addData("Measured Flywheel Velocity: ", topMotor.getVelocity());
         telemetry.addData("Measured Hood Position", hood.getPosition());
         telemetry.addData("Target Flywheel Velocity: ", targetFlywheelVelocity);
@@ -152,10 +154,11 @@ public class Calibration {
     // %==========% FLYWHEEL %==========% //
     double targetFlywheelVelocity;
     double targetFlywheelPower;
-    double bbThreshold = 100.0; //tps
+    double bbThreshold = 750; //tps
     double kF;
     double kP;
 
+    // BBFFP Control
     private double bbFlywheelControl(double targetFlywheelVelocity) {
         int curFlywheelVelocity = (int) topMotor.getVelocity();
 
@@ -169,15 +172,15 @@ public class Calibration {
     }
 
     private double getFlywheelkF() {
-        return voltageSensor.getVoltage() / (2706.0 * kF);
+        return voltageSensor.getVoltage() / (2500.0 * kF);
     }
 
     private double kfFlywheelControl(double targetFlywheelVelocity) {
-        return targetFlywheelVelocity * getFlywheelkF();
+        return (targetFlywheelVelocity * getFlywheelkF()) / voltageSensor.getVoltage();
     }
 
     private double kpFlywheelControl(double targetFlywheelVelocity) {
-        return (targetFlywheelVelocity - topMotor.getVelocity()) * kP;
+        return kfFlywheelControl((targetFlywheelVelocity - topMotor.getVelocity()) * kP);
     }
 
     public void handleBBFFPflywheel() {
@@ -191,8 +194,8 @@ public class Calibration {
     }
 
     private void setFlywheelVelocity(double targetFlywheelVelocity) {
-        bottomMotor.setVelocity(targetFlywheelVelocity);
-        topMotor.setVelocity(targetFlywheelVelocity);
+        bottomMotor.setVelocity(targetFlywheelVelocity + 200);
+        topMotor.setVelocity(targetFlywheelVelocity + 200);
     }
 
     private void setFlywheelPower(double targetFlywheelPower) {
@@ -202,19 +205,19 @@ public class Calibration {
 
     public void tuneBBFFPflywheel() {
         if (gamepad1.startWasPressed()) {
-            incriment = (incriment + 1) % tuneIncrement.length;
+            increment = (increment + 1) % tuneIncrement.length;
         }
         if (gamepad1.leftBumperWasPressed()) {
-            kP += (tuneIncrement[incriment] / 100.0);
+            kP += (tuneIncrement[increment] / 100.0);
         }
         if (gamepad1.leftTriggerWasPressed()) {
-            kP -= (tuneIncrement[incriment] / 100.0);
+            kP -= (tuneIncrement[increment] / 100.0);
         }
         if (gamepad1.rightBumperWasPressed()) {
-            kF += (tuneIncrement[incriment] / 100.0);
+            kF += (tuneIncrement[increment] / 100.0);
         }
         if (gamepad1.rightTriggerWasPressed()) {
-            kF -= (tuneIncrement[incriment] / 100.0);
+            kF -= (tuneIncrement[increment] / 100.0);
         }
         if (gamepad1.dpadDownWasPressed()) {
             targetFlywheelVelocity = 1500.0;
@@ -226,12 +229,12 @@ public class Calibration {
         }
 
         telemetry.addLine("Tune Flywheel Controls:");
-        telemetry.addLine("Tune Incriment: X");
+        telemetry.addLine("Tune Increment: X");
         telemetry.addLine("Tune kP: left/right bumper");
         telemetry.addLine("Tune kF: left/right trigger");
         telemetry.addLine("Tune Flywheel Velocity: dpad up/down");
         telemetry.addLine("Tune Flywheel Data:");
-        telemetry.addData("Tune Incriment: ", (tuneIncrement[incriment] / 100.0));
+        telemetry.addData("Tune Increment: ", (tuneIncrement[increment] / 100.0));
         telemetry.addData("Flywheel Velocity Target", targetFlywheelVelocity);
         telemetry.addData("Flywheel Velocity", topMotor.getVelocity());
         telemetry.addData("Flywheel Velocity Error", (topMotor.getVelocity() - targetFlywheelVelocity));
@@ -241,6 +244,88 @@ public class Calibration {
         telemetry.addLine("===============================");
     }
 
+    //PID Control
+
+    double highVelocity = 2200.0;
+    double lowVelocity = 1500.0;
+    double P = 0;
+    double I = 0;
+    double D = 0;
+    double F = 0;
+    double maxError = 0;
+    double avgError = 0;
+    int sampleCount = 0;
+    double errorSum = 0;
+
+    private void updatePIDFCoefficients() {
+        PIDFCoefficients pidf = new PIDFCoefficients(P,I,D,F);
+        topMotor.setPIDFCoefficients(RUN_USING_ENCODER,pidf);
+        bottomMotor.setPIDFCoefficients(RUN_USING_ENCODER,pidf);
+    }
+    
+    public void handlePIDFFlywheel() {
+        double topMotorVelocity = topMotor.getVelocity();
+        double bottomMotorVelocity = bottomMotor.getVelocity();
+        double avgFlywheelVelocity = (topMotorVelocity + bottomMotorVelocity) / 2;
+        double error = targetFlywheelVelocity - avgFlywheelVelocity;
+        double errorPercent = (error / targetFlywheelVelocity) * 100;
+
+        if (gamepad1.startWasPressed()) {
+            increment = (increment + 1) % tuneIncrement.length;
+        }
+        if (gamepad1.leftBumperWasPressed()) {
+            P += (tuneIncrement[increment] / 1000.0);
+        }
+        if (gamepad1.leftTriggerWasPressed()) {
+            P -= (tuneIncrement[increment] / 1000.0);
+        }
+        if (gamepad1.rightBumperWasPressed()) {
+            F += (tuneIncrement[increment] / 1000.0);
+        }
+        if (gamepad1.rightTriggerWasPressed()) {
+            F -= (tuneIncrement[increment] / 1000.0);
+        }
+        if (gamepad1.dpadDownWasPressed()) {
+            targetFlywheelVelocity = lowVelocity;
+            setFlywheelVelocity(targetFlywheelVelocity);
+        }
+        if (gamepad1.dpadUpWasPressed()) {
+            targetFlywheelVelocity = highVelocity;
+            setFlywheelVelocity(targetFlywheelVelocity);
+        }
+
+        updatePIDFCoefficients();
+
+        telemetry.addLine("Tune Flywheel Controls:");
+        telemetry.addLine("Tune Increment: X");
+        telemetry.addLine("Tune kP: left/right bumper");
+        telemetry.addLine("Tune kF: left/right trigger");
+        telemetry.addLine("Tune Flywheel Velocity: dpad up/down");
+        telemetry.addLine("Tune Flywheel Data:");
+        telemetry.addData("Tune Increment: ", (tuneIncrement[increment] / 1000.0));
+        telemetry.addData("Flywheel Velocity Target", targetFlywheelVelocity);
+        telemetry.addData("Flywheel Velocity", avgFlywheelVelocity);
+        telemetry.addData("Top Motor Velocity", topMotorVelocity);
+        telemetry.addData("Bottom Motor Velocity", bottomMotorVelocity);
+        telemetry.addData("Flywheel Velocity Error", error);
+        telemetry.addData("Flywheel Velocity Error", errorPercent);
+        telemetry.addData("Flywheel Power", (topMotor.getPower()));
+        telemetry.addData("Flywheel P", P);
+        telemetry.addData("Flywheel F", F);
+        telemetry.addLine("===============================");
+    }
+
+    public void passivePIDFFlywheel() {
+        double P = 0.9;
+        double I = 0.0;
+        double D = 0.0;
+        double F = 12.5;
+
+        PIDFCoefficients pidf = new PIDFCoefficients(P,I,D,F);
+        topMotor.setPIDFCoefficients(RUN_USING_ENCODER,pidf);
+        bottomMotor.setPIDFCoefficients(RUN_USING_ENCODER,pidf);
+    }
+    
     //for future use once polynomial regression is used to find correlation between distance and shooter vars
     /*public void handleDynamicFlywheelVelocity() {
         x = getDistanceToHive();
@@ -453,7 +538,7 @@ public class Calibration {
     public Pose resetPose = new Pose(w, l, 90);
 
     public void resetOdometry() {
-        if (gamepad1.startWasPressed()) {
+        if (gamepad1.backWasPressed()) {
             follower.setPose(resetPose);
             follower.hold(resetPose);
         }

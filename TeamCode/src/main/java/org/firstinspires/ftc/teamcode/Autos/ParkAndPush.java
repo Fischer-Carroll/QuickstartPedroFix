@@ -25,7 +25,7 @@ public class ParkAndPush extends LinearOpMode {
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(9, 66, 90);
+    private final Pose start = poseFactory.of(9, 66, 0);
     private final Pose startPark = poseFactory.of(12, 96, 0);
 
     // Autonomous routine
