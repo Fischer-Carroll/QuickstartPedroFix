@@ -42,9 +42,10 @@ public class CalibrationTeleOp extends LinearOpMode {
             cal.testShootControls();
 
             // HOOD //
-            cal.tuneHoodPosition();
+            //cal.tuneHoodPosition();
 
             // TURRET //
+            cal.tuneTurretPosition();
             //cal.cycleTurretMode();
 
             // BLOCKER //
@@ -54,7 +55,8 @@ public class CalibrationTeleOp extends LinearOpMode {
             cal.toggleIntake();
 
             // TRANSFER //
-            cal.toggleTransfer();
+            //cal.toggleTransfer();
+            //cal.tuneShootingTransferPower();
 
             // DEPOLLINATOR //
             //cal.toggleDepollinator();

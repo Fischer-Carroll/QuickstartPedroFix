@@ -126,8 +126,20 @@ public class Calibration {
     // %==========% SHOOTER %==========% //
     double shootDelay = 200; //ms
     boolean startShooting;
-    double shootingTransferPower = 0.7;
+    double shootingTransferPower = 0.725;
     double idleTransferPower = 0.3;
+    public void tuneShootingTransferPower() {
+        if (gamepad1.rightBumperWasPressed()) {
+            shootingTransferPower += 0.05;
+        }
+        if (gamepad1.leftBumperWasPressed()) {
+            shootingTransferPower -= 0.05;
+        }
+
+        telemetry.addLine("Shooting Transfer Power Control: l/r bumper");
+        telemetry.addData("Shooting Transfer Power: ", shootingTransferPower);
+        telemetry.addLine("===============================");
+    }
     public void testShootControls() {
         if (gamepad1.right_trigger_pressed) {
             if (shootTimer.milliseconds() > shootDelay) {
@@ -321,7 +333,7 @@ public class Calibration {
         turret2.setPosition(turretPosition);
     }
 
-    private void tuneTurretPosition() {
+    public void tuneTurretPosition() {
         if (gamepad1.rightStickButtonWasPressed()) {
             turretPosition += 0.025;
             setTurretPosition(turretPosition);
