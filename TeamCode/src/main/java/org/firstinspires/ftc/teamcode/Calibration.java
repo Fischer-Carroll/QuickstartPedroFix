@@ -308,7 +308,7 @@ public class Calibration {
         turret2.setPosition(turretPosition);
     }
 
-    private void tuneTurretPosition() {
+    public void tuneTurretPosition() {
         if (gamepad1.rightStickButtonWasPressed()) {
             setTurretPosition(turretPosition += 0.025);
         }
@@ -382,10 +382,24 @@ public class Calibration {
     }
 
     // %==========% BLOCKER %==========% //
-    static int blockerPosition;
-    public void setBlockerPosition(double blockerPosition) {
+    static double blockerPosition;
+    private void setBlockerPosition(double blockerPosition) {
         Calibration.blockerPosition = (int) blockerPosition;
         blocker.setPosition(blockerPosition);
+    }
+
+    public void tuneBlockerPosition() {
+        if (gamepad1.dpadLeftWasPressed()) {
+            setBlockerPosition(blockerPosition += 0.025);
+        }
+        if (gamepad1.dpadRightWasPressed()) {
+            setBlockerPosition(blockerPosition -= 0.025);
+        }
+
+        telemetry.addLine("Turret Tune Controls:");
+        telemetry.addLine("Turret Position: right/left stick button");
+        telemetry.addData("Turret Position: ", turret1.getPosition());
+        telemetry.addLine("===============================");
     }
 
     public void toggleBlocker() {

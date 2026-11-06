@@ -31,8 +31,6 @@ public class CalibrationTeleOp extends LinearOpMode {
             //cal.RCTdriveUpdate();
 
             // FLYWHEEL //
-            //cal.tuneBBFFPflywheel();
-            //cal.handleBBFFPflywheel();
             //cal.handlePIDFFlywheel();
             //cal.passivePIDFFlywheel();
             //cal.pidCorrection();
@@ -45,10 +43,12 @@ public class CalibrationTeleOp extends LinearOpMode {
             cal.tuneHoodPosition();
 
             // TURRET //
+            //cal.tuneTurretPosition();
             //cal.cycleTurretMode();
 
             // BLOCKER //
             cal.toggleBlocker();
+            //cal.tuneBlockerPosition();
 
             // INTAKE //
             cal.toggleIntake();
