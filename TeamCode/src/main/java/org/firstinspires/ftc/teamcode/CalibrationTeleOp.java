@@ -54,7 +54,8 @@ public class CalibrationTeleOp extends LinearOpMode {
             cal.toggleIntake();
 
             // TRANSFER //
-            cal.toggleTransfer();
+            cal.cycleTransferPowerTuningModes();
+            //cal.toggleTransfer();
 
             // DEPOLLINATOR //
             //cal.toggleDepollinator();

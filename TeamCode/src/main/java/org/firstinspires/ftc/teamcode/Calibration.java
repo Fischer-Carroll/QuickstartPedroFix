@@ -43,7 +43,7 @@ public class Calibration {
     Servo hood;
     VoltageSensor voltageSensor;
     Timer shootTimer = new Timer();
-    Timer shootWaitTimer = new Timer();
+    com.pedropathing.utils.Timer shootWaitTimer = new Timer();
 
     public Calibration(HardwareMap hwMap, Gamepad gp1, Gamepad gp2, Telemetry tlm) {
         // PASSED OBJECTS //
@@ -124,6 +124,38 @@ public class Calibration {
     double shootDelay = 500; //ms
     double shootingTransferPower = 0.7;
     double idleTransferPower = 0.3;
+    int transferTuningMode = 0;
+    private void tuneIdleTransferPower() {
+        if (gamepad1.rightBumperWasPressed()) {
+            idleTransferPower += 0.05;
+        }
+        if (gamepad1.leftBumperWasPressed()) {
+            idleTransferPower -= 0.05;
+        }
+    }
+    private void tuneShootingTransferPower() {
+        if (gamepad1.rightBumperWasPressed()) {
+            shootingTransferPower += 0.05;
+        }
+        if (gamepad1.leftBumperWasPressed()) {
+            shootingTransferPower -= 0.05;
+        }
+    }
+    public void cycleTransferPowerTuningModes() {
+        telemetry.addLine("Transfer Power Tuning");
+        if (gamepad1.startWasPressed()) {
+            transferTuningMode += 1;
+        }
+        if (transferTuningMode % 2 == 0) {
+            tuneIdleTransferPower();
+            telemetry.addLine("Tuning Idle Power");
+        }
+        if (transferTuningMode % 2 == 1) {
+            tuneShootingTransferPower();
+            telemetry.addLine("Tuning Shooting Power");
+        }
+        telemetry.addLine("===============================");
+    }
     public void testShootControls() {
         if (gamepad1.right_trigger_pressed) {
             if (shootTimer.milliseconds() > shootDelay) {
@@ -350,7 +382,7 @@ public class Calibration {
     private void manualTurretWithFCStickAngle() {
         if (Math.hypot(rx, ry) > 0.12) {
             targetTurretAngle = stickAngle - heading;
-            setTurretPosition(targetTurretAngle / ((Math.toRadians(256.5)) / (Math.toRadians(360.0))));
+            setTurretPosition(targetTurretAngle / (Math.toRadians(256.5) / Math.toRadians(360.0)));
         }
 
         telemetry.addLine("Turret Tune Controls:");
