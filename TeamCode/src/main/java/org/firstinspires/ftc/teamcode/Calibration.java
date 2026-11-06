@@ -139,14 +139,10 @@ public class Calibration {
             } else {
                 startShooting = false;
             }
-            if (shootWaitTimer.get(TimeUnit.MILLISECONDS) > shootDelay) {
-                setBlockerPosition(1);
-            }
         } else {
             if (transferPower > idleTransferPower) {
                 transferPower = idleTransferPower;
                 setTransferPower(transferPower);
-                setBlockerPosition(0);
             }
         }
     }
