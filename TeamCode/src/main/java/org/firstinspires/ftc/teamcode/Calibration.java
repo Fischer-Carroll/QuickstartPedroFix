@@ -83,20 +83,17 @@ public class Calibration {
 
         // HOOD //
         hood.scaleRange(0.2,0.625);
-        hoodPosition = 0.5;
-        setHoodPosition(hoodPosition);
+        setHoodPosition(0.5);
 
         // BLOCKER //
         blocker.scaleRange(0.2, 0.4);
-        blockerState = 0;
-        setBlockerPosition(blockerState);
+        setBlockerPosition(0);
 
         // TURRET //
         turret1.scaleRange(0, 1);
         turret2.scaleRange(0, 1);
         turretMode = 0;
-        turretPosition = 0.5;
-        setTurretPosition(turretPosition);
+        setTurretPosition(0.5);
 
         // DEPOLLINATOR //
         depollinator.scaleRange(0, 1);
@@ -124,25 +121,19 @@ public class Calibration {
     }
 
     // %==========% SHOOTER %==========% //
-    double shootDelay = 200; //ms
-    boolean startShooting;
+    double shootDelay = 500; //ms
     double shootingTransferPower = 0.7;
     double idleTransferPower = 0.3;
     public void testShootControls() {
         if (gamepad1.right_trigger_pressed) {
             if (shootTimer.milliseconds() > shootDelay) {
-                startShooting = true;
-                transferPower = shootingTransferPower;
-                setTransferPower(transferPower);
+                setTransferPower(shootingTransferPower);
                 shootWaitTimer.reset();
                 shootTimer.reset();
-            } else {
-                startShooting = false;
             }
         } else {
             if (transferPower > idleTransferPower) {
-                transferPower = idleTransferPower;
-                setTransferPower(transferPower);
+                setTransferPower(idleTransferPower);
             }
         }
     }
@@ -154,20 +145,16 @@ public class Calibration {
             increment = (Math.abs(increment - 1)) % tuneIncrement.length;
         }
         if (gamepad1.dpadUpWasPressed()) {
-            targetFlywheelVelocity += tuneIncrement[increment];
-            setFlywheelVelocity(targetFlywheelVelocity);
+            setFlywheelVelocity(targetFlywheelVelocity += tuneIncrement[increment]);
         }
         if (gamepad1.dpadDownWasPressed()) {
-            targetFlywheelVelocity -= tuneIncrement[increment];
-            setFlywheelVelocity(targetFlywheelVelocity);
+            setFlywheelVelocity(targetFlywheelVelocity -= tuneIncrement[increment]);
         }
         if (gamepad1.dpadLeftWasPressed()) {
-            hoodPosition += 0.025;
-            setHoodPosition(hoodPosition);
+            setHoodPosition(hoodPosition += 0.25);
         }
         if (gamepad1.dpadRightWasPressed()) {
-            hoodPosition -= 0.025;
-            setHoodPosition(hoodPosition);
+            setHoodPosition(hoodPosition -= 0.25);
         }
 
         telemetry.addLine("Tune Shooter Controls:");
@@ -185,15 +172,17 @@ public class Calibration {
     }
 
     // %==========% FLYWHEEL %==========% //
-    double targetFlywheelVelocity;
-    double targetFlywheelPower;
+    static double targetFlywheelVelocity;
+    static double targetFlywheelPower;
 
     private void setFlywheelVelocity(double targetFlywheelVelocity) {
+        Calibration.targetFlywheelVelocity = targetFlywheelVelocity;
         bottomMotor.setVelocity(targetFlywheelVelocity);
         topMotor.setVelocity(targetFlywheelVelocity);
     }
 
     private void setFlywheelPower(double targetFlywheelPower) {
+        Calibration.targetFlywheelPower = targetFlywheelPower;
         bottomMotor.setPower(targetFlywheelPower);
         topMotor.setPower(targetFlywheelPower);
     }
@@ -238,12 +227,10 @@ public class Calibration {
             P -= (tuneIncrement[increment] / 1000.0);
         }
         if (gamepad1.dpadDownWasPressed()) {
-            targetFlywheelVelocity = lowVelocity;
-            setFlywheelVelocity(targetFlywheelVelocity);
+            setFlywheelVelocity(lowVelocity);
         }
         if (gamepad1.dpadUpWasPressed()) {
-            targetFlywheelVelocity = highVelocity;
-            setFlywheelVelocity(targetFlywheelVelocity);
+            setFlywheelVelocity(highVelocity);
         }
 
         updatePIDFCoefficients();
@@ -288,20 +275,19 @@ public class Calibration {
     }*/
 
     // %==========% HOOD %==========% //
-    double hoodPosition;
+    static double hoodPosition;
 
     private void setHoodPosition(double hoodPosition) {
+        Calibration.hoodPosition = hoodPosition;
         hood.setPosition(hoodPosition);
     }
 
     public void tuneHoodPosition() {
         if (gamepad1.dpadRightWasPressed()) {
-            hoodPosition -= 0.025;
-            setHoodPosition(hoodPosition);
+            setHoodPosition(hoodPosition -= 0.025);
         }
         if (gamepad1.dpadLeftWasPressed()) {
-            hoodPosition += 0.025;
-            setHoodPosition(hoodPosition);
+            setHoodPosition(hoodPosition += 0.025);
         }
 
         telemetry.addLine("Hood Tune Controls:");
@@ -312,23 +298,22 @@ public class Calibration {
 
     // %==========% TURRET %==========% //
     double targetTurretAngle;
-    double turretPosition;
+    static double turretPosition;
     int turretMode;
     String[] turretModeOptions = {"Tune Turret Angle", "Direct Stick Input", "Robot Centric Stick Input", "Field Centric Stick Input"};
 
     private void setTurretPosition(double turretPosition) {
+        Calibration.turretPosition = turretPosition;
         turret1.setPosition(turretPosition);
         turret2.setPosition(turretPosition);
     }
 
     private void tuneTurretPosition() {
         if (gamepad1.rightStickButtonWasPressed()) {
-            turretPosition += 0.025;
-            setTurretPosition(turretPosition);
+            setTurretPosition(turretPosition += 0.025);
         }
         if (gamepad1.leftStickButtonWasPressed()) {
-            turretPosition -= 0.025;
-            setTurretPosition(turretPosition);
+            setTurretPosition(turretPosition -= 0.025);
         }
 
         telemetry.addLine("Turret Tune Controls:");
@@ -352,8 +337,7 @@ public class Calibration {
 
     private void manualTurretWithRCStickAngle() {
         if (Math.hypot(rx, ry) > 0.12) {
-            turretPosition = ((-1.0 * stickAngle) + Math.PI) / (2.0 * Math.PI);
-            setTurretPosition(turretPosition);
+            setTurretPosition(((-1.0 * stickAngle) + Math.PI) / (2.0 * Math.PI));
         }
 
         telemetry.addLine("Turret Tune Controls:");
@@ -366,8 +350,7 @@ public class Calibration {
     private void manualTurretWithFCStickAngle() {
         if (Math.hypot(rx, ry) > 0.12) {
             targetTurretAngle = stickAngle - heading;
-            turretPosition = targetTurretAngle / ((Math.toRadians(256.5)) / (Math.toRadians(360.0)));
-            setTurretPosition(turretPosition);
+            setTurretPosition(targetTurretAngle / ((Math.toRadians(256.5)) / (Math.toRadians(360.0))));
         }
 
         telemetry.addLine("Turret Tune Controls:");
@@ -399,15 +382,15 @@ public class Calibration {
     }
 
     // %==========% BLOCKER %==========% //
-    int blockerState;
+    static int blockerPosition;
     public void setBlockerPosition(double blockerPosition) {
+        Calibration.blockerPosition = (int) blockerPosition;
         blocker.setPosition(blockerPosition);
     }
 
     public void toggleBlocker() {
         if (gamepad1.yWasPressed()) {
-            blockerState += 1;
-            setBlockerPosition(blockerState % 2);
+            setBlockerPosition((blockerPosition += 1) % 2);
         }
 
         telemetry.addLine("Toggle Blocker: Y");
@@ -415,15 +398,15 @@ public class Calibration {
     }
 
     // %==========% INTAKE %==========% //
-    double intakePower;
+    static double intakePower;
     private void setIntakePower(double intakePower) {
+        Calibration.intakePower = intakePower;
         intake.setPower(intakePower);
     }
 
     public void toggleIntake() {
         if (gamepad1.aWasPressed()) {
-            intakePower += 1;
-            setIntakePower(intakePower % 2);
+            setIntakePower((intakePower += 1) % 2);
         }
 
         telemetry.addLine("Toggle Intake: A");
@@ -431,15 +414,15 @@ public class Calibration {
     }
 
     // %==========% TRANSFER %==========% //
-    double transferPower;
+    static double transferPower;
     private void setTransferPower(double transferPower) {
+        Calibration.transferPower = transferPower;
         transfer.setPower(transferPower);
     }
 
     public void toggleTransfer() {
         if (gamepad1.bWasPressed()) {
-            transferPower += 1;
-            setTransferPower(transferPower % 2);
+            setTransferPower((transferPower += 1) % 2);
         }
 
         telemetry.addLine("Toggle Transfer: B");
@@ -447,16 +430,16 @@ public class Calibration {
     }
 
     // %==========% DEPOLLINATOR %==========% //
-    double depollinatorState;
-    double depollinatorPostion;
+    int depollinatorState;
+    static double depollinatorPostion;
     private void setDepollinatorPosition(double depollinatorPosition) {
+        Calibration.depollinatorPostion = depollinatorPosition;
         depollinator.setPosition(depollinatorPosition);
     }
 
     public void toggleDepollinator() {
         if (gamepad1.xWasPressed()) {
-            depollinatorState += 1;
-            setDepollinatorPosition(depollinatorState % 2);
+            setDepollinatorPosition((depollinatorState += 1) % 2);
         }
 
         telemetry.addLine("Toggle Depollinator: X");
@@ -465,12 +448,10 @@ public class Calibration {
 
     public void tuneDepollinatorPosition() {
         if (gamepad1.dpadRightWasPressed()) {
-            depollinatorPostion -= 0.025;
-            setDepollinatorPosition(depollinatorPostion);
+            setDepollinatorPosition(depollinatorPostion -= 0.025);
         }
         if (gamepad1.dpadLeftWasPressed()) {
-            depollinatorPostion += 0.025;
-            setDepollinatorPosition(depollinatorPostion);
+            setDepollinatorPosition(depollinatorPostion += 0.025);
         }
 
         telemetry.addLine("Depollinator Tune Controls:");
