@@ -40,7 +40,7 @@ public class CalibrationTeleOp extends LinearOpMode {
             //cal.testShootControls();
 
             // HOOD //
-            cal.tuneHoodPosition();
+            //cal.tuneHoodPosition();
 
             // TURRET //
             //cal.tuneTurretPosition();
