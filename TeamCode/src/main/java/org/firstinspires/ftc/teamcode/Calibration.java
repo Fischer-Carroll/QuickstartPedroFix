@@ -149,12 +149,12 @@ public class Calibration {
         if (transferTuningMode % 2 == 0) {
             tuneIdleTransferPower();
             telemetry.addLine("Tuning Idle Power");
-            telemetry.addData("Idle Transfer Power", idleTransferPower);
+            telemetry.addData("Idle Transfer Power", transferPower);
         }
         if (transferTuningMode % 2 == 1) {
             tuneShootingTransferPower();
             telemetry.addLine("Tuning Shooting Power");
-            telemetry.addData("Shooting Transfer Power", shootingTransferPower);
+            telemetry.addData("Shooting Transfer Power", transferPower);
         }
         telemetry.addLine("===============================");
     }
