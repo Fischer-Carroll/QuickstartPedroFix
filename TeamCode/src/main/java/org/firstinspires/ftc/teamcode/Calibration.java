@@ -127,10 +127,10 @@ public class Calibration {
     int transferTuningMode = 0;
     private void tuneIdleTransferPower() {
         if (gamepad1.rightBumperWasPressed()) {
-            idleTransferPower += 0.05;
+            setTransferPower(transferPower += 0.05);
         }
         if (gamepad1.leftBumperWasPressed()) {
-            idleTransferPower -= 0.05;
+            setTransferPower(transferPower -= 0.05);
         }
     }
     private void tuneShootingTransferPower() {
