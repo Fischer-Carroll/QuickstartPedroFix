@@ -27,7 +27,7 @@ public class CalibrationTeleOp extends LinearOpMode {
         {
             // DRIVE //
             cal.varsUpdate();
-            cal.resetOdometry();
+            //cal.resetOdometry();
             //cal.RCTdriveUpdate();
 
             // FLYWHEEL //

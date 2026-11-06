@@ -123,38 +123,42 @@ public class Calibration {
     // %==========% SHOOTER %==========% //
     double shootDelay = 500; //ms
     double shootingTransferPower = 0.7;
-    double idleTransferPower = 0.3;
+    double idleTransferPower = 0.25;
     int transferTuningMode = 0;
     private void tuneIdleTransferPower() {
         if (gamepad1.rightBumperWasPressed()) {
-            setTransferPower(transferPower += 0.05);
+            idleTransferPower += 0.05;
+            setTransferPower(idleTransferPower);
         }
         if (gamepad1.leftBumperWasPressed()) {
-            setTransferPower(transferPower -= 0.05);
+            idleTransferPower -= 0.05;
+            setTransferPower(idleTransferPower);
         }
     }
     private void tuneShootingTransferPower() {
         if (gamepad1.rightBumperWasPressed()) {
             shootingTransferPower += 0.05;
+            setTransferPower(shootingTransferPower);
         }
         if (gamepad1.leftBumperWasPressed()) {
             shootingTransferPower -= 0.05;
+            setTransferPower(shootingTransferPower);
         }
     }
     public void cycleTransferPowerTuningModes() {
         telemetry.addLine("Transfer Power Tuning");
-        if (gamepad1.startWasPressed()) {
+        if (gamepad1.backWasPressed()) {
             transferTuningMode += 1;
         }
         if (transferTuningMode % 2 == 0) {
             tuneIdleTransferPower();
             telemetry.addLine("Tuning Idle Power");
-            telemetry.addData("Idle Transfer Power", transferPower);
+            telemetry.addData("Idle Transfer Power", idleTransferPower);
         }
         if (transferTuningMode % 2 == 1) {
             tuneShootingTransferPower();
             telemetry.addLine("Tuning Shooting Power");
-            telemetry.addData("Shooting Transfer Power", transferPower);
+            telemetry.addData("Shooting Transfer Power", shootingTransferPower);
         }
         telemetry.addLine("===============================");
     }
@@ -174,9 +178,6 @@ public class Calibration {
     public void tuneShooter() {
         if (gamepad1.startWasPressed()) {
             increment = (Math.abs(increment + 1)) % tuneIncrement.length;
-        }
-        if (gamepad1.backWasPressed()) {
-            increment = (Math.abs(increment - 1)) % tuneIncrement.length;
         }
         if (gamepad1.dpadUpWasPressed()) {
             setFlywheelVelocity(targetFlywheelVelocity += tuneIncrement[increment]);
