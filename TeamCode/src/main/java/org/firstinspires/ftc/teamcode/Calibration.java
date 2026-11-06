@@ -24,6 +24,8 @@ import com.pedropathing.utils.Timer;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
+import java.util.concurrent.TimeUnit;
+
 public class Calibration {
     // INITIALISING OBJECTS //
     HardwareMap hardwareMap;
@@ -40,7 +42,8 @@ public class Calibration {
     Servo depollinator;
     Servo hood;
     VoltageSensor voltageSensor;
-    Timer shootTimer;
+    Timer shootTimer = new Timer();
+    Timer shootWaitTimer = new Timer();
 
     public Calibration(HardwareMap hwMap, Gamepad gp1, Gamepad gp2, Telemetry tlm) {
         // PASSED OBJECTS //
@@ -62,6 +65,13 @@ public class Calibration {
         turret2 = hardwareMap.get(Servo.class, "turret2");
         follower = Constants.create(hardwareMap);
         follower.setPose(new Pose(0, 0, Math.toRadians(0)));
+
+        // SHOOTER //
+        Timer shootTimer = new Timer();
+        Timer shootWaitTimer = new Timer();
+        shootTimer.reset();
+        shootWaitTimer.reset();
+        setTransferPower(idleTransferPower);
 
         // FLYWHEEL //
         bottomMotor.setDirection(DcMotorEx.Direction.REVERSE);
@@ -95,7 +105,6 @@ public class Calibration {
         // MISCELLANEOUS //
         tuneIncrement = new int[]{1000, 100, 10, 5};
         increment = 0;
-        Timer shootTimer = new Timer();
     }
 
     // %==========% MISCELLANEOUS %==========% //
@@ -115,14 +124,29 @@ public class Calibration {
     }
 
     // %==========% SHOOTER %==========% //
-    double shootDelay = 100; //ms
+    double shootDelay = 200; //ms
+    boolean startShooting;
+    double shootingTransferPower = 0.7;
+    double idleTransferPower = 0.3;
     public void testShootControls() {
         if (gamepad1.right_trigger_pressed) {
-            shootTimer.reset();
-            transferPower = 1;
-            setTransferPower(transferPower);
             if (shootTimer.milliseconds() > shootDelay) {
+                startShooting = true;
+                transferPower = shootingTransferPower;
+                setTransferPower(transferPower);
+                shootWaitTimer.reset();
+                shootTimer.reset();
+            } else {
+                startShooting = false;
+            }
+            if (shootWaitTimer.get(TimeUnit.MILLISECONDS) > shootDelay) {
                 setBlockerPosition(1);
+            }
+        } else {
+            if (transferPower > idleTransferPower) {
+                transferPower = idleTransferPower;
+                setTransferPower(transferPower);
+                setBlockerPosition(0);
             }
         }
     }
