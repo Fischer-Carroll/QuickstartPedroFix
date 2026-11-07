@@ -24,7 +24,7 @@ public class SingleAudiencePark extends LinearOpMode {
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(57, 7.75, 90);
+    private final Pose start = poseFactory.of(57, 7.75, 180);
     private final Pose startGarden = poseFactory.of(10, 9, 180);
     private final Pose gardenHive1 = poseFactory.of(57, 9, 180);
     private final Pose hive1Park = poseFactory.of(9.75, 94.75, 0);

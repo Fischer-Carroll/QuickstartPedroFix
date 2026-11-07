@@ -25,23 +25,45 @@ public class CalibrationTeleOp extends LinearOpMode {
         waitForStart();
         while (opModeIsActive())
         {
+            // DRIVE //
             cal.varsUpdate();
-            //cal.resetOdometry();
-            //cal.handleFlywheelVoltage();
-            //cal.getStickAngle();
-            //cal.stickAngleTelemetry();
-            //!!!tuneShooter(), tuneFlywheelPIDF(), cycleTurretMode(), and RTCdriveUpdate() are INCOMPATIBLE with eachother (use one at a time)!!!
-            //cal.tuneShooter();
-            //cal.tuneFlywheelPIDF();
-            //cal.cycleTurretMode();
+            cal.resetOdometry();
             //cal.RCTdriveUpdate();
+
+            // FLYWHEEL //
+            //cal.tuneBBFFPflywheel();
+            //cal.handleBBFFPflywheel();
+            //cal.handlePIDFFlywheel();
+            //cal.passivePIDFFlywheel();
+            //cal.pidCorrection();
+
+            // SHOOTER //
+            cal.tuneShooter();
+            cal.testShootControls();
+
+            // HOOD //
             //cal.tuneHoodPosition();
-            //cal.testFlywheelVoltageControl();
-            cal.tuneDepollinatorPosition();
+
+            // TURRET //
+            cal.tuneTurretPosition();
+            //cal.cycleTurretMode();
+
+            // BLOCKER //
             cal.toggleBlocker();
+
+            // INTAKE //
             cal.toggleIntake();
-            cal.toggleTransfer();
+
+            // TRANSFER //
+            //cal.toggleTransfer();
+            //cal.tuneShootingTransferPower();
+
+            // DEPOLLINATOR //
             //cal.toggleDepollinator();
+            //cal.tuneDepollinatorPosition();
+
+            // MISCELLANEOUS //
+            //cal.getStickAngle();
             telemetry.update();
         }
     }

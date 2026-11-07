@@ -57,14 +57,18 @@ public class Robot {
 
     //Initialize Shooter Commands
     public Command cmdOpenBlocker;
-
     public Command cmdCloseBlocker;
-    public Command shoot;
-
+    public Command cmdShoot;
+    public Command cmdAimTurret;
+    
     //Initialize Flower Intake Commands
     public Command cmdLowerDepollinator;
-
     public Command cmdRaiseDepollinator;
+
+    //Initialize Intake commands
+    public Command cmdIntake;
+    public Command cmdStopIntake;
+    
 
     int depollinatorState = 1;
     int hive;
@@ -107,7 +111,12 @@ public class Robot {
                 .setDone(() -> true)
                 .requiring(blocker);
 
-        shoot = sequential(
+        cmdAimTurret = Command.build()
+                .setStart(this::autoAimTurret)
+                .setDone(() -> true)
+                .requiring(turret1,turret2);
+
+        cmdShoot = sequential(
                 cmdOpenBlocker,
                 waitMs(750),
                 cmdCloseBlocker
@@ -118,24 +127,35 @@ public class Robot {
                 .setStart(this::lowerDepollinator)
                 .setDone(() -> true)
                 .requiring(depollinator);
+        
         cmdRaiseDepollinator = Command.build()
                 .setStart(this::raiseDepollinator)
                 .setDone(() -> true)
                 .requiring(depollinator);
 
+        cmdIntake = Command.build()
+                .setStart(this::intake)
+                .setDone(() -> true)
+                .requiring(intake);
+        
+        cmdStopIntake = Command.build()
+                .setStart(this::notake)
+                .setDone(() -> true)
+                .requiring(intake);
+        
         intakeTimer = new Timer();
         depollinatorTimer = new Timer();
     }
     public void initialiseServoScales() {
         blocker.scaleRange(0.2, 0.4);
         depollinator.scaleRange(0.275, 0.775);
-        hood.scaleRange(0, 108.8 / 300.0);
+        hood.scaleRange(0.2,0.625);
         turret1.scaleRange(0.025,0.975);
         turret2.scaleRange(0.025,0.975);
     }
     public void initialiseActuatorPositions() {
         setFlywheelTPS(2140);
-        sethoodPosition(0.75);
+        sethoodPosition(0.5);
         transfer.setPower(1);
         intake.setPower(1);
     }
@@ -199,12 +219,17 @@ public class Robot {
     }
 
     public void intake() {
-        intake.setVelocity(2250);
+        intake.setPower(1);
     }
 
     public void outtake() {
-        intake.setVelocity(-2250);
+        intake.setPower(-1);
     }
+
+    public void notake() {
+        intake.setPower(0);
+    }
+    
     public void handleIntake() {
         if (gamepad1.dpadUpWasPressed()) {
             intake.setPower(1);
@@ -302,6 +327,13 @@ public class Robot {
         }
         telemetry.addData("Target Heading: ", targetHeading);
         telemetry.addLine("===============================");
+    }
+    
+    public void autoAimTurret(){
+        targetHeading = (0.5 - (getAngleToHive())/(turretRange*2));
+        
+        //set the turret angle
+        aimTurret(targetHeading);
     }
     public void aimTurret(double power){
         turret1.setPosition(power);

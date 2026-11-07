@@ -18,14 +18,14 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
-@Autonomous(name = "Park + Push", group = "Autonomous")
+@Autonomous(name = "Park and Push", group = "Autonomous")
 public class ParkAndPush extends LinearOpMode {
 
     private Follower follower;
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(9, 66, 90);
+    private final Pose start = poseFactory.of(9, 66, 0);
     private final Pose startPark = poseFactory.of(12, 96, 0);
 
     // Autonomous routine

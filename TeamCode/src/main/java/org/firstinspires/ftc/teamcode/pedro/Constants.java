@@ -57,11 +57,11 @@ public class Constants {
                 c.quadraticBrakeCoefficients.set(Matrix.diag(0.001326892820331103, 0.0017574227596116841));
 
                 c.maxAchievableForwardVelocity.set(81.4474407688292);
-                c.maxAchievableStrafeVelocity.set(62.460664642692564);
+                c.maxAchievableStrafeVelocity.set(62.4604642692564);
                 c.naturalForwardDeceleration.set(37.02413147388609);
                 c.naturalStrafeDeceleration.set(74.13602801946682);
             }
-    );
+    );//b
     public static Follower create(HardwareMap h) {
         return new Follower(
                 new PinpointLocalizer(h, localizerConfig),

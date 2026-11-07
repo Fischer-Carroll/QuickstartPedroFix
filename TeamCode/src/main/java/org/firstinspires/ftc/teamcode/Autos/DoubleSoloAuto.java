@@ -26,7 +26,7 @@ public class DoubleSoloAuto extends LinearOpMode {
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(57, 7.75, 90);
+    private final Pose start = poseFactory.of(57, 7.75, 180);
     private final Pose startGarden = poseFactory.of(10, 7.75, 180);
     private final Pose gardenAP = poseFactory.of(10.75, 70.75, 90);
     private final Pose gardenAPControl1 = poseFactory.of(26.75, 57.75, 0);
