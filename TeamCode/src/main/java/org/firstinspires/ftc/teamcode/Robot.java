@@ -9,7 +9,6 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.ManualDrive;
 import com.pedropathing.ivy.Command;
 import com.pedropathing.math.Pose;
-import com.pedropathing.api.PoseFactory;
 import com.pedropathing.math.Velocity;
 import com.pedropathing.utils.Timer;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -112,7 +111,7 @@ public class Robot {
                 .requiring(blocker);
 
         cmdAimTurret = Command.build()
-                .setStart(this::autoAimTurret)
+                .setStart(this::aimTurret)
                 .setDone(() -> true)
                 .requiring(turret1,turret2);
 
@@ -152,6 +151,7 @@ public class Robot {
         hood.scaleRange(0.2,0.625);
         turret1.scaleRange(0.025,0.975);
         turret2.scaleRange(0.025,0.975);
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
     public void initialiseActuatorPositions() {
         setFlywheelTPS(2140);
@@ -166,17 +166,14 @@ public class Robot {
     public void sethoodPosition(double angle) {
         hood.setPosition(angle);
     }
-
     public void raiseDepollinator() {
         depollinator.setPosition(1);
     }
-
     public void lowerDepollinator() {
         depollinator.setPosition(0);
     }
-
-    public void handleDepollinator(){
-        if (gamepad1.aWasPressed()) {
+    public void depollinatorControl(){
+        if (gamepad1.yWasPressed()) {
             depollinatorState += 1;
             depollinator.setPosition(depollinatorState % 2);
         }
@@ -188,8 +185,7 @@ public class Robot {
             }
 
     }
-
-    public void resetOdometry() {
+    public void odoResetControl() {
         if (gamepad1.startWasPressed()) {
             follower.setPose(resetPose);
             follower.hold(resetPose);
@@ -198,48 +194,55 @@ public class Robot {
     public void openBlocker() {
         blocker.setPosition(1);
     }
-
     public void closeBlocker() {
         blocker.setPosition(0);
     }
-
-    public void blockerUpdate() {
-        if (gamepad1.right_trigger_pressed){
+    public void blockerControl() {
+        if (gamepad1.right_trigger > 0.3){
             openBlocker();
         }
         else{
             closeBlocker();
         }
     }
-
     public void varsUpdate() {
         x = follower.pose().x();
         y = follower.pose().y();
         heading = follower.pose().heading();
     }
-
+    public void loopUpdate(){
+        varsUpdate();
+        targetHive();
+        telemetry.update();
+    }
     public void intake() {
         intake.setPower(1);
     }
-
     public void outtake() {
         intake.setPower(-1);
     }
-
     public void notake() {
         intake.setPower(0);
     }
-    
-    public void handleIntake() {
-        if (gamepad1.dpadUpWasPressed()) {
-            intake.setPower(1);
-        } else if (gamepad1.dpadDownWasPressed()) {
-            intake.setPower(-1);
-        } else if(gamepad1.yWasPressed()) {
-            intake.setPower(0);
+    public void intakeControl() {
+        if (gamepad1.leftBumperWasPressed()){
+            if (intakeTarget != -1){
+                intakeTimer.reset();
+            }
+            intakeTarget = -1;
+        }
+        if (gamepad1.rightBumperWasPressed()){
+            if (intakeTarget != 1){
+                intakeTimer.reset();
+            }
+            intakeTarget = 1;
+        }
+
+        if (intakeTimer.milliseconds() < 2000){
+            double targetPower = (intakeTimer.seconds() - 1)*intakeTarget;
+            intake.setPower(targetPower);
         }
     }
-
     //Field Centric Drive & Turning
     public void FCTdriveUpdate() {
         double hd = heading * 0.5;
@@ -277,8 +280,7 @@ public class Robot {
         follower.update();
         telemetry.addData("Turn", turn);
     }
-
-    public void RCTdriveUpdate() {
+    public void driveControl() {
         DrivePowers powers = ManualDrive.fieldCentric(
                 -gamepad1.left_stick_y,
                 -gamepad1.left_stick_x,
@@ -304,8 +306,7 @@ public class Robot {
             hive = 1;
         }
     }
-    public double getAngleToHive()
-    {
+    public double getAngleToHive() {
         double hd = Math.toDegrees(heading);
         double dx = (56) - x - (Math.cos(Math.toRadians(hd)) * 3.5);
         double dy = (53 + (37 * hive)) - y - (Math.sin(Math.toRadians(hd)) * 3.5);
@@ -317,19 +318,7 @@ public class Robot {
             return (-360 + (hd - angle));
         }
     }
-    public void aimToHive() {
-        if (gamepad1.left_trigger_pressed)
-        {
-            targetHeading = (0.5 - (getAngleToHive())/(turretRange*2));
-
-            //set the turret angle
-            aimTurret(targetHeading);
-        }
-        telemetry.addData("Target Heading: ", targetHeading);
-        telemetry.addLine("===============================");
-    }
-    
-    public void autoAimTurret(){
+    public void aimTurret(){
         targetHeading = (0.5 - (getAngleToHive())/(turretRange*2));
         
         //set the turret angle
@@ -339,16 +328,24 @@ public class Robot {
         turret1.setPosition(power);
         turret2.setPosition(power);
     }
-    public int calcFlywheelTPS(double x) {
+    public int calcFlywheelTPS() {
+        double x = calcHiveDistance();
         return (int)(1052*x*x*x*x - 4823*x*x*x + 7978*x*x - 5447*x + 3286);
     }
-    public double calcHoodAngle(double x){
+    public double calcHoodAngle(){
+        double x = calcHiveDistance();
         return (-0.9156*x*x*x*x + 4.322*x*x*x - 7.229*x*x + 4.634*x + 0.01);
     }
-    public double hiveDistance(){
+    public double calcHiveDistance(){
         double hd = Math.toDegrees(heading);
         double dx = (56) - x - (Math.cos(Math.toRadians(hd)) * 3.5);
         double dy = (53 + (37 * hive)) - y - (Math.sin(Math.toRadians(hd)) * 3.5);
-        return Math.hypot(dy,dx);
+        return (Math.hypot(dy,dx))/39.37;
+
+    }
+    public void primeTurret(){
+        aimTurret();
+        setFlywheelTPS(calcFlywheelTPS());
+        sethoodPosition(calcHoodAngle());
     }
 }

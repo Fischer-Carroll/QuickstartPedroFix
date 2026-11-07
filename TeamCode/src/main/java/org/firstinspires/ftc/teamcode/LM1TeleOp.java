@@ -5,7 +5,6 @@ import static com.pedropathing.api.Paths.line;
 import static com.pedropathing.ivy.Scheduler.schedule;
 
 import com.pedropathing.math.Pose;
-import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -18,20 +17,19 @@ public class LM1TeleOp extends LinearOpMode {
         Calibration cal = new Calibration(hardwareMap, gamepad1,gamepad2,telemetry);
         bot.follower.setPose(new Pose(0,0,Math.toRadians(90)));
         waitForStart();
-        bot.initialiseActuatorPositions();
         bot.initialiseServoScales();
+        bot.initialiseActuatorPositions();
         while (opModeIsActive())
         {
-            bot.varsUpdate();
-            bot.RCTdriveUpdate();
-            bot.resetOdometry();
+            //Driver  controls
+            bot.driveControl();
+
+
+            //Background processes
+
+            bot.odoResetControl();
             bot.targetHive();
-            bot.aimToHive();
-            bot.handleIntake();
-            bot.handleDepollinator();
-            bot.blockerUpdate();
-            cal.tuneHoodPosition();
-            bot.follower.update();
+            bot.aimTurret();
 
             telemetry.addData("Hive Angle",bot.getAngleToHive() - bot.heading);
             telemetry.addData("x", bot.x);

@@ -22,11 +22,11 @@ public class LM0TeleOp extends LinearOpMode {
         while (opModeIsActive())
         {
             bot.varsUpdate();
-            bot.RCTdriveUpdate();
-            bot.resetOdometry();
-            bot.handleIntake();
+            bot.driveControl();
+            bot.odoResetControl();
+            bot.intakeControl();
             bot.handleDepollinator();
-            bot.blockerUpdate();
+            bot.blockerControl();
         }
     }
 }
