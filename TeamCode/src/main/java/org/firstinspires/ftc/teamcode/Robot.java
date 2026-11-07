@@ -307,4 +307,16 @@ public class Robot {
         turret1.setPosition(power);
         turret2.setPosition(power);
     }
+    public int calcFlywheelTPS(double x) {
+        return (int)(1052*x*x*x*x - 4823*x*x*x + 7978*x*x - 5447*x + 3286);
+    }
+    public double calcHoodAngle(double x){
+        return (-0.9156*x*x*x*x + 4.322*x*x*x - 7.229*x*x + 4.634*x + 0.01);
+    }
+    public double hiveDistance(){
+        double hd = Math.toDegrees(heading);
+        double dx = (56) - x - (Math.cos(Math.toRadians(hd)) * 3.5);
+        double dy = (53 + (37 * hive)) - y - (Math.sin(Math.toRadians(hd)) * 3.5);
+        return Math.hypot(dy,dx);
+    }
 }
