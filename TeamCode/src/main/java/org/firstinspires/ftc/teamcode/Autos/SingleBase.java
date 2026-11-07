@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Autos;
 
-import static com.pedropathing.api.Paths.*;
 import com.pedropathing.api.Paths;
 
 import com.pedropathing.api.PoseFactory;
@@ -51,8 +50,8 @@ public class SingleBase extends LinearOpMode {
     // Autonomous routine
     public Command autoRoutine() {
         return sequential(
-                b.cmdAimTurret,
-                waitMs(500),
+                b.cmdPrimeTurret,
+                waitMs(2000),
                 b.cmdShoot,
                 waitMs(500),
                 follow(follower, startFlower2()), //before moving, should aim and shoot into hive and lower depollinator and turn on intake
@@ -64,16 +63,14 @@ public class SingleBase extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        b = new Robot(hardwareMap, gamepad1,telemetry);
         Scheduler.reset();
         follower = Constants.create(hardwareMap);
         follower.setPose(start);
-        follower.update();
-        b = new Robot(hardwareMap, gamepad1,telemetry);
         b.closeBlocker();
-        b.transfer.setPower(1);
-        b.setFlywheelTPS(2150.0);
-        b.sethoodPosition(0.75);
+        b.initialiseServoScales();
         waitForStart();
+        b.initialiseActuatorPositions();
         schedule(autoRoutine());
 
         while (opModeIsActive()) {

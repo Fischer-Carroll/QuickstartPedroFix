@@ -100,7 +100,8 @@ public class Calibration {
 
         // DEPOLLINATOR //
         depollinator.scaleRange(0, 1);
-        setDepollinatorPosition(1);
+        depollinatorPostion = 0.5;
+        setDepollinatorPosition(depollinatorPostion);
 
         // MISCELLANEOUS //
         tuneIncrement = new int[]{1000, 100, 10, 5};
@@ -466,6 +467,7 @@ public class Calibration {
     }
 
     public void toggleDepollinator() {
+        depollinator.scaleRange(0.227,0.57);
         if (gamepad1.xWasPressed()) {
             depollinatorState += 1;
             setDepollinatorPosition(depollinatorState % 2);

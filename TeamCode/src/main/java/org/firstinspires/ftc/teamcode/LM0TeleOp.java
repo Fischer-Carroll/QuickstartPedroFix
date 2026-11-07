@@ -25,7 +25,7 @@ public class LM0TeleOp extends LinearOpMode {
             bot.driveControl();
             bot.odoResetControl();
             bot.intakeControl();
-            bot.handleDepollinator();
+            bot.depollinatorControl();
             bot.blockerControl();
         }
     }

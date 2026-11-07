@@ -38,14 +38,14 @@ public class CalibrationTeleOp extends LinearOpMode {
             //cal.pidCorrection();
 
             // SHOOTER //
-            cal.tuneShooter();
-            cal.testShootControls();
+            //cal.tuneShooter();
+            //cal.testShootControls();
 
             // HOOD //
             //cal.tuneHoodPosition();
 
             // TURRET //
-            cal.tuneTurretPosition();
+            //cal.tuneTurretPosition();
             //cal.cycleTurretMode();
 
             // BLOCKER //
@@ -60,7 +60,7 @@ public class CalibrationTeleOp extends LinearOpMode {
 
             // DEPOLLINATOR //
             //cal.toggleDepollinator();
-            //cal.tuneDepollinatorPosition();
+            cal.tuneDepollinatorPosition();
 
             // MISCELLANEOUS //
             //cal.getStickAngle();

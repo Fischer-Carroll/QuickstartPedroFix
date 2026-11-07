@@ -58,7 +58,7 @@ public class Robot {
     public Command cmdOpenBlocker;
     public Command cmdCloseBlocker;
     public Command cmdShoot;
-    public Command cmdAimTurret;
+    public Command cmdPrimeTurret;
     
     //Initialize Flower Intake Commands
     public Command cmdLowerDepollinator;
@@ -110,12 +110,14 @@ public class Robot {
                 .setDone(() -> true)
                 .requiring(blocker);
 
-        cmdAimTurret = Command.build()
-                .setStart(this::aimTurret)
+        cmdPrimeTurret = Command.build()
+                .setStart(this::primeTurret)
                 .setDone(() -> true)
-                .requiring(turret1,turret2);
+                .requiring(turret1,turret2,transfer,bottomMotor,topMotor);
 
         cmdShoot = sequential(
+                cmdPrimeTurret,
+                waitMs(500),
                 cmdOpenBlocker,
                 waitMs(750),
                 cmdCloseBlocker
@@ -146,8 +148,8 @@ public class Robot {
         depollinatorTimer = new Timer();
     }
     public void initialiseServoScales() {
-        blocker.scaleRange(0.2, 0.4);
-        depollinator.scaleRange(0.275, 0.775);
+        blocker.scaleRange(0.21, 0.4);
+        depollinator.scaleRange(0.227, 0.57);
         hood.scaleRange(0.2,0.625);
         turret1.scaleRange(0.025,0.975);
         turret2.scaleRange(0.025,0.975);
@@ -156,8 +158,10 @@ public class Robot {
     public void initialiseActuatorPositions() {
         setFlywheelTPS(2140);
         sethoodPosition(0.5);
+        aimTurret(0.5);
         transfer.setPower(1);
         intake.setPower(1);
+        depollinator.setPosition(depollinatorState);
     }
     public void setFlywheelTPS(double TPS) {
         bottomMotor.setVelocity(TPS);
@@ -178,8 +182,8 @@ public class Robot {
             depollinator.setPosition(depollinatorState % 2);
         }
         if (depollinatorState%2 == 0)
-            if (depollinatorTimer.milliseconds()%300 < 150){
-                depollinator.setPosition(0.05);
+            if (depollinatorTimer.milliseconds()%200 < 100){
+                depollinator.setPosition(0.04);
             } else {
                 depollinator.setPosition(0);
             }
@@ -198,7 +202,7 @@ public class Robot {
         blocker.setPosition(0);
     }
     public void blockerControl() {
-        if (gamepad1.right_trigger > 0.3){
+        if (gamepad1.right_trigger_pressed){
             openBlocker();
         }
         else{
@@ -238,8 +242,8 @@ public class Robot {
             intakeTarget = 1;
         }
 
-        if (intakeTimer.milliseconds() < 2000){
-            double targetPower = (intakeTimer.seconds() - 1)*intakeTarget;
+        if (intakeTimer.seconds() < 1){
+            double targetPower = (intakeTimer.seconds() - 0.5)*intakeTarget*2;
             intake.setPower(targetPower);
         }
     }
@@ -308,8 +312,8 @@ public class Robot {
     }
     public double getAngleToHive() {
         double hd = Math.toDegrees(heading);
-        double dx = (56) - x - (Math.cos(Math.toRadians(hd)) * 3.5);
-        double dy = (53 + (37 * hive)) - y - (Math.sin(Math.toRadians(hd)) * 3.5);
+        double dx = (58) - x - (Math.cos(Math.toRadians(hd)) * 3.5);
+        double dy = (53 + (37 * hive)) - y - (Math.sin(Math.toRadians(hd)) * 3.5) + Math.abs(dx/25);
         double angle = (Math.toDegrees(Math.atan2(dy,dx)));
         if (hd-angle < 180){
             return (hd - angle);
@@ -318,7 +322,7 @@ public class Robot {
             return (-360 + (hd - angle));
         }
     }
-    public void aimTurret(){
+    public void autoAimTurret(){
         targetHeading = (0.5 - (getAngleToHive())/(turretRange*2));
         
         //set the turret angle
@@ -330,7 +334,7 @@ public class Robot {
     }
     public int calcFlywheelTPS() {
         double x = calcHiveDistance();
-        return (int)(1052*x*x*x*x - 4823*x*x*x + 7978*x*x - 5447*x + 3286);
+        return (int)((1052*x*x*x*x - 4823*x*x*x + 7978*x*x - 5447*x + 3286) * 1.01);
     }
     public double calcHoodAngle(){
         double x = calcHiveDistance();
@@ -338,14 +342,49 @@ public class Robot {
     }
     public double calcHiveDistance(){
         double hd = Math.toDegrees(heading);
-        double dx = (56) - x - (Math.cos(Math.toRadians(hd)) * 3.5);
-        double dy = (53 + (37 * hive)) - y - (Math.sin(Math.toRadians(hd)) * 3.5);
+        double dx = (58) - x - (Math.cos(Math.toRadians(hd)) * 3.5);
+        double dy = (53 + (37 * hive)) - y - (Math.sin(Math.toRadians(hd)) * 3.5) + Math.abs(dx/25);
         return (Math.hypot(dy,dx))/39.37;
 
     }
     public void primeTurret(){
-        aimTurret();
+        autoAimTurret();
         setFlywheelTPS(calcFlywheelTPS());
         sethoodPosition(calcHoodAngle());
+    }
+    private void idleTurret(){
+        aimTurret(0.5);
+        setFlywheelTPS(2000);
+        sethoodPosition(0.5);
+    }
+    //stuff imported from calibration
+    double shootDelay = 500; //ms
+    public static double transferPower;
+    double shootingTransferPower = 0.725;
+    double idleTransferPower = 0.3;
+    boolean primed = false;
+
+    Timer shootTimer = new Timer();
+    private void setTransferPower(double transferPower) {
+        Robot.transferPower = transferPower;
+        transfer.setPower(transferPower);
+    }
+
+    public void shootingControl() {
+        if (gamepad1.leftTriggerWasPressed()) {
+            setTransferPower(shootingTransferPower);
+        }
+        else if (gamepad1.leftTriggerWasReleased()){
+            setTransferPower(idleTransferPower);
+            idleTurret();
+        }
+        if (gamepad1.left_trigger_pressed && !follower.holding()){
+            primeTurret();
+            primed = false;
+        }
+        if (follower.holding() && !primed){
+            primeTurret();
+            primed = true;
+        }
     }
 }
