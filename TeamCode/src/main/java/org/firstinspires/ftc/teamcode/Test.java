@@ -148,19 +148,19 @@ public class Test {
     }
 
     // Flywheel
-    public static double flywheelVelocity;
-    public static double flywheelPower;
+    double flywheelVelocity;
+    double flywheelPower;
     final double idleFlywheelVelocity = 2080;
 
-    private void setFlywheelVelocity(double flywheelVelocity) {
-        Test.flywheelVelocity = flywheelVelocity;
-        flywheel1.setVelocity(flywheelVelocity);
-        flywheel2.setVelocity(flywheelVelocity);
+    private void setFlywheelVelocity(double velocity) {
+        flywheelVelocity = velocity;
+        flywheel1.setVelocity(velocity);
+        flywheel2.setVelocity(velocity);
     }
-    private void setFlywheelPower(double flywheelPower) {
-        Test.flywheelPower = flywheelPower;
-        flywheel1.setVelocity(flywheelPower);
-        flywheel2.setVelocity(flywheelPower);
+    private void setFlywheelPower(double power) {
+        flywheelPower = power;
+        flywheel1.setVelocity(power);
+        flywheel2.setVelocity(power);
     }
     private void setDynamicFlywheelVelocity() {
         double x = getHiveDistance();
@@ -168,12 +168,12 @@ public class Test {
     }
 
     // Hood
-    public static double hoodPosition;
+    double hoodPosition;
     final double idleHoodPosition = 0.75;
 
-    private void setHoodPosition(double hoodPosition) {
-        Test.hoodPosition = hoodPosition;
-        hood.setPosition(hoodPosition);
+    private void setHoodPosition(double position) {
+        hoodPosition = position;
+        hood.setPosition(position);
     }
     private void setDynamicHoodPosition(){
         double x = getHiveDistance();
@@ -181,14 +181,14 @@ public class Test {
     }
 
     // Turret
-    public static double turretPosition;
+    double turretPosition;
     final double idleTurretPosition = 0.5;
-    final double turretFieldOfFire = 135; //deg
+    final double turretFieldOfFire = 135; //deg in each direction
 
-    private void setTurretPosition(double turretPosition) {
-        Test.turretPosition = turretPosition;
-        turret1.setPosition(turretPosition);
-        turret2.setPosition(turretPosition);
+    private void setTurretPosition(double position) {
+        turretPosition = position;
+        turret1.setPosition(position);
+        turret2.setPosition(position);
     }
     private void aimTurret() {
         setTurretPosition(0.5 - (getHiveAngle() / (turretFieldOfFire * 2)));
@@ -198,14 +198,14 @@ public class Test {
     }
 
     // Taker (formerly referred to as the intake)
-    public static double takerPower;
+    double takerPower;
     double targetTakerPower;
     final double intakePower = 0.95;
     final double outtakePower = -0.95;
 
-    private void setTakerPower(double takerPower) {
-        Test.takerPower = takerPower;
-        taker.setPower(takerPower);
+    private void setTakerPower(double power) {
+        takerPower = power;
+        taker.setPower(power);
     }
     private void intake() {setTakerPower(intakePower);}
     private void outtake() {setTakerPower(outtakePower);}
@@ -238,22 +238,22 @@ public class Test {
     }
 
     // Transfer
-    public static double transferPower;
+    double transferPower;
     final double idleTransferPower = 0.3;
     final double activeTransferPower = 0.725;
 
-    private void setTransferPower(double transferPower) {
-        Test.transferPower = transferPower;
-        transfer.setPower(transferPower);
+    private void setTransferPower(double power) {
+        transferPower = power;
+        transfer.setPower(power);
     }
 
     // Blocker
-    public static int blockerState;
+    double blockerPosition;
     int blockerUpPosition = 1;
     int blockerDownPosition = 0;
-    private void setBlockerPosition(int blockerState) {
-        Test.blockerState = blockerState;
-        blocker.setPosition(blockerState);
+    private void setBlockerPosition(double position) {
+        blockerPosition = position;
+        blocker.setPosition(position);
     }
     private void blockerUp() {setBlockerPosition(blockerUpPosition);}
     private void blockerDown() {setBlockerPosition(blockerDownPosition);}
@@ -263,14 +263,14 @@ public class Test {
     }
 
     // Depollinator
-    public static double depollinatorPosition;
+    double depollinatorPosition;
     final double depollinatorUpPosition = 1;
     final double depollinatorDownPosition = 0.04;
     final double depollinatorJiggleValue = 0.3;
 
-    private void setDepollinatorPosition(double depollinatorPosition) {
-        Test.depollinatorPosition = depollinatorPosition;
-        depollinator.setPosition(depollinatorPosition);
+    private void setDepollinatorPosition(double position) {
+        depollinatorPosition = position;
+        depollinator.setPosition(position);
     }
     private void depollinatorUp() {setDepollinatorPosition(depollinatorUpPosition);}
     private void depollinatorDown() {setDepollinatorPosition(depollinatorDownPosition);}
@@ -350,7 +350,7 @@ public class Test {
         double hd = Math.toDegrees(heading);
         double dx = (58) - x - (Math.cos(Math.toRadians(hd)) * shooterOffset);
         double dy = (53 + (37 * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset);
-        dy += Math.sign(dy) * Math.abs(dx/25)
+        dy += Math.signum(dy) * Math.abs(dx/25);
         double da = Math.toDegrees(Math.atan2(dy,dx));
         if (hd - da < 180) {
             return (hd - da);
@@ -365,7 +365,7 @@ public class Test {
         double hd = Math.toDegrees(heading);
         double dx = (58) - x - (Math.cos(Math.toRadians(hd)) * shooterOffset);
         double dy = (53 + (37 * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset);
-        dy += Math.sign(dy) * Math.abs(dx/25)
+        dy += Math.signum(dy) * Math.abs(dx/25);
         return (Math.hypot(dy, dx)) / 39.37;
     }
     
@@ -394,7 +394,7 @@ public class Test {
         } if (gamepad1.left_trigger_pressed && !follower.holding()) {
             shooterActive();
             moving = true;
-        } if (follower.holding() && (!moving || Math.abs(getAngleError()) > 10)) {
+        } if (follower.holding() && (moving || Math.abs(getAngleError()) > 10)) {
             shooterActive();
             moving = false;
         }
