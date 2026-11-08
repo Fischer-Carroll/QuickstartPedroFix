@@ -303,12 +303,7 @@ public class Robot {
         if (gamepad1.dpadDownWasPressed()) {
             hive = 0;
         }*/
-        if (y < 60){
-            hive = 0;
-        }
-        else if (y > 80){
-            hive = 1;
-        }
+
     }
     public double getAngleToHive() {
         double hd = Math.toDegrees(heading);
