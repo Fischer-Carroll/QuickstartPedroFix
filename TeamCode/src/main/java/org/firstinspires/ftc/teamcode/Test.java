@@ -115,7 +115,7 @@ public class Test {
 
         // Shooter
         cmdActivateShooter = Command.build()
-                .setStart(this::fullShooterActive)
+                .setStart(this::commandShooterActive)
                 .setDone(() -> true)
                 .requiring(turret1,turret2,transfer,flywheel1,flywheel2,hood);
         cmdShoot = sequential(
@@ -149,18 +149,12 @@ public class Test {
 
     // Flywheel
     double flywheelVelocity;
-    double flywheelPower;
     final double idleFlywheelVelocity = 2080;
 
     private void setFlywheelVelocity(double velocity) {
         flywheelVelocity = velocity;
         flywheel1.setVelocity(velocity);
         flywheel2.setVelocity(velocity);
-    }
-    private void setFlywheelPower(double power) {
-        flywheelPower = power;
-        flywheel1.setVelocity(power);
-        flywheel2.setVelocity(power);
     }
     private void setDynamicFlywheelVelocity() {
         double x = getHiveDistance();
@@ -216,8 +210,7 @@ public class Test {
                 takerTimer.reset();
             }
             targetTakerPower = intakePower;
-        }
-        if (gamepad1.leftBumperWasPressed()) {
+        } if (gamepad1.leftBumperWasPressed()) {
             if (targetTakerPower != outtakePower) {
                 takerTimer.reset();
             }
@@ -370,7 +363,7 @@ public class Test {
         return (Math.hypot(dy, dx)) / 39.37;
     }
     
-    // Shooter
+    // Shooter (Flywheel, Hood, Transfer and Turret functions combined)
     boolean moving;
     private void shooterIdle() {
         setFlywheelVelocity(idleFlywheelVelocity);
@@ -383,7 +376,7 @@ public class Test {
         setDynamicFlywheelVelocity();
         setDynamicHoodPosition();
     }
-    public void fullShooterActive() {
+    public void commandShooterActive() {
         shooterActive();
         setTransferPower(activeTransferPower);
     }
@@ -395,7 +388,7 @@ public class Test {
         } if (gamepad1.left_trigger_pressed && !follower.holding()) {
             shooterActive();
             moving = true;
-        } if (follower.holding() && (moving || Math.abs(getAngleError()) > 10)) {
+        } if (follower.holding() && (moving || Math.abs(getAngleError()) > 5)) {
             shooterActive();
             moving = false;
         }
