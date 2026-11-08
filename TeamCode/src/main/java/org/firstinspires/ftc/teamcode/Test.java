@@ -349,7 +349,8 @@ public class Test {
     private double getHiveAngle() { //returns angle in degrees
         double hd = Math.toDegrees(heading);
         double dx = (58) - x - (Math.cos(Math.toRadians(hd)) * shooterOffset);
-        double dy = (53 + (37 * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset) + Math.abs(dx/25);
+        double dy = (53 + (37 * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset);
+        dy += Math.sign(dy) * Math.abs(dx/25)
         double da = Math.toDegrees(Math.atan2(dy,dx));
         if (hd - da < 180) {
             return (hd - da);
@@ -363,7 +364,8 @@ public class Test {
     private double getHiveDistance() { //returns distance in metres
         double hd = Math.toDegrees(heading);
         double dx = (58) - x - (Math.cos(Math.toRadians(hd)) * shooterOffset);
-        double dy = (53 + (37 * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset) + Math.abs(dx / 25);
+        double dy = (53 + (37 * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset);
+        dy += Math.sign(dy) * Math.abs(dx/25)
         return (Math.hypot(dy, dx)) / 39.37;
     }
     
@@ -392,7 +394,7 @@ public class Test {
         } if (gamepad1.left_trigger_pressed && !follower.holding()) {
             shooterActive();
             moving = true;
-        } if (follower.holding() && (!moving || getAngleError() > 10)) {
+        } if (follower.holding() && (!moving || Math.abs(getAngleError()) > 10)) {
             shooterActive();
             moving = false;
         }
