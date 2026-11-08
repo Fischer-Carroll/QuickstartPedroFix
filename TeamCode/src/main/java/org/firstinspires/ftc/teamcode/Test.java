@@ -224,8 +224,9 @@ public class Test {
             targetTakerPower = outtakePower;
         } if (gamepad1.xWasPressed()) {
             setTakerPower(0);
-        }
-        if (takerTimer.seconds() < 1) {
+        } if (Math.abs(taker.getPower()) < 0.05) {
+            setTakerPower(targetTakerPower);
+        } else if (takerTimer.seconds() < 1) {
             setTakerPower((takerTimer.seconds() - 0.5) * targetTakerPower);
         }
     }
