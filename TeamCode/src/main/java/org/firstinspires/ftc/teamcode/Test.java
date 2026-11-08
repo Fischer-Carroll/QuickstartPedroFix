@@ -42,7 +42,6 @@ public class Test {
     Timer depollinatorTimer = new Timer();
     Timer takerTimer = new Timer();
 
-
     public Test(HardwareMap hwMap, Gamepad gp1, Gamepad gp2, Telemetry tlm) {
         // Passed Objects
         hardwareMap = hwMap;
@@ -76,6 +75,7 @@ public class Test {
         blocker.scaleRange(0.21,0.4);
         depollinator.scaleRange(0.227,0.57);
     }
+
     public void start() {
         // Depollinator
         depollinatorTimer.reset();
