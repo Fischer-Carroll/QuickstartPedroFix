@@ -83,6 +83,7 @@ public class Test {
 
         // Taker
         takerTimer.reset();
+        targetTakerPower = 0;
         intake();
 
         // Shooter
@@ -208,16 +209,17 @@ public class Test {
         if (gamepad1.rightBumperWasPressed()) {
             if (targetTakerPower != intakePower) {
                 takerTimer.reset();
-            }
+            } 
             targetTakerPower = intakePower;
         } if (gamepad1.leftBumperWasPressed()) {
             if (targetTakerPower != outtakePower) {
                 takerTimer.reset();
-            }
+            } 
             targetTakerPower = outtakePower;
         } if (gamepad1.xWasPressed()) {
-            setTakerPower(0);
-        } if (Math.abs(taker.getPower()) < 0.05) {
+            targetTakerPower = 0;
+            setTakerPower(targetTakerPower);
+        } if (takerPower == 0 && targetTakerPower != 0) {
             setTakerPower(targetTakerPower);
         } else if (takerTimer.seconds() < 1) {
             setTakerPower((takerTimer.seconds() - 0.5) * targetTakerPower);
