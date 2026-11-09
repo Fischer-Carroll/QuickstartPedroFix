@@ -228,7 +228,7 @@ public class Test {
         telemetry.addLine("Intake - Right Bumper");
         telemetry.addLine("Outtake - Left Bumper");
         telemetry.addLine("Nulltake - X");
-        telemetry.addLine("==================================================");
+        telemetry.addLine("==========================================");
     }
 
     // Transfer
@@ -286,14 +286,14 @@ public class Test {
     public void depollinatorTelemetry() {
         telemetry.addLine("Depollinator Controls: ");
         telemetry.addLine("Toggle Depollinator: Y");
-        telemetry.addLine("==================================================");
+        telemetry.addLine("==========================================");
     }
 
     // Drive
     double x;
     double y;
     double heading;
-    public Pose odometryResetPose = new Pose(24,24,Math.toDegrees(90));
+    public Pose odometryResetPose = new Pose(24,24,Math.toRadians(90));
 
     private void positionUpdate() {
         x = follower.pose().x();
@@ -326,7 +326,7 @@ public class Test {
         telemetry.addData("X ", x);
         telemetry.addData("Y ", y);
         telemetry.addData("Heading", heading);
-        telemetry.addLine("==================================================");
+        telemetry.addLine("==========================================");
     }
 
     // Auto Aiming
@@ -383,7 +383,7 @@ public class Test {
     public void shooterControl() {
         if (gamepad1.leftTriggerWasPressed()) {
             setTransferPower(activeTransferPower);
-        } else if (gamepad1.leftTriggerWasReleased()){
+        } else if (gamepad1.left_trigger_pressed){
             shooterIdle();
         } if (gamepad1.left_trigger_pressed && !follower.holding()) {
             shooterActive();
@@ -398,6 +398,6 @@ public class Test {
         telemetry.addLine("Initiate Shooting - Hold Left Trigger");
         telemetry.addLine("Shoot - Hold Right Trigger");
         telemetry.addData("Hive Angle", getHiveAngle());
-        telemetry.addLine("==================================================");
+        telemetry.addLine("==========================================");
     }
 }
