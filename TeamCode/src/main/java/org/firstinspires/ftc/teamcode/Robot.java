@@ -24,9 +24,9 @@ import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 public class Robot {
     //Initialize things from hardware map
-    DcMotorEx bottomMotor;
-    DcMotorEx topMotor;
-    public DcMotorEx intake;
+    DcMotorEx flywheel1;
+    DcMotorEx flywheel2;
+    public DcMotorEx taker;
     public DcMotorEx transfer;
     Servo turret1;
     Servo turret2;
@@ -82,9 +82,9 @@ public class Robot {
         telemetry = tlm;
 
         //Declare hardware map
-        bottomMotor = hardwareMap.get(DcMotorEx.class, "bottomMotor");
-        topMotor = hardwareMap.get(DcMotorEx.class, "topMotor");
-        intake = hardwareMap.get(DcMotorEx.class, "intake");
+        flywheel1 = hardwareMap.get(DcMotorEx.class, "flywheel1");
+        flywheel2 = hardwareMap.get(DcMotorEx.class, "flywheel2");
+        taker = hardwareMap.get(DcMotorEx.class, "taker");
         transfer = hardwareMap.get(DcMotorEx.class, "transfer");
         hood = hardwareMap.get(Servo.class, "hood");
         blocker = hardwareMap.get(Servo.class, "blocker");
@@ -94,9 +94,9 @@ public class Robot {
 
         //Assign directions and behaviors to motors
         follower = Constants.create(hardwareMap);
-        bottomMotor.setDirection(DcMotorEx.Direction.REVERSE);
-        topMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheel1.setDirection(DcMotorEx.Direction.REVERSE);
+        flywheel2.setDirection(DcMotorEx.Direction.FORWARD);
+        taker.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         hive = 0;
         
         //Declare Shooter Commands
@@ -113,7 +113,7 @@ public class Robot {
         cmdPrimeTurret = Command.build()
                 .setStart(this::primeTurret)
                 .setDone(() -> true)
-                .requiring(turret1,turret2,transfer,bottomMotor,topMotor);
+                .requiring(turret1,turret2,transfer,flywheel1,flywheel2);
 
         cmdShoot = sequential(
                 cmdPrimeTurret,
@@ -137,12 +137,12 @@ public class Robot {
         cmdIntake = Command.build()
                 .setStart(this::intake)
                 .setDone(() -> true)
-                .requiring(intake);
+                .requiring(taker);
         
         cmdStopIntake = Command.build()
                 .setStart(this::notake)
                 .setDone(() -> true)
-                .requiring(intake);
+                .requiring(taker);
         
         intakeTimer = new Timer();
         depollinatorTimer = new Timer();
@@ -153,19 +153,19 @@ public class Robot {
         hood.scaleRange(0.2,0.625);
         turret1.scaleRange(0.025,0.975);
         turret2.scaleRange(0.025,0.975);
-        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        taker.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
     public void initialiseActuatorPositions() {
         setFlywheelTPS(2140);
         sethoodPosition(0.5);
         aimTurret(0.5);
         transfer.setPower(1);
-        intake.setPower(1);
+        taker.setPower(1);
         depollinator.setPosition(depollinatorState);
     }
     public void setFlywheelTPS(double TPS) {
-        bottomMotor.setVelocity(TPS);
-        topMotor.setVelocity(TPS);
+        flywheel1.setVelocity(TPS);
+        flywheel2.setVelocity(TPS);
     }
     public void sethoodPosition(double angle) {
         hood.setPosition(angle);
@@ -220,13 +220,13 @@ public class Robot {
         telemetry.update();
     }
     public void intake() {
-        intake.setPower(1);
+        taker.setPower(1);
     }
     public void outtake() {
-        intake.setPower(-1);
+        taker.setPower(-1);
     }
     public void notake() {
-        intake.setPower(0);
+        taker.setPower(0);
     }
     public void intakeControl() {
         if (gamepad1.leftBumperWasPressed()){
@@ -244,7 +244,7 @@ public class Robot {
 
         if (intakeTimer.seconds() < 1){
             double targetPower = (intakeTimer.seconds() - 0.5)*intakeTarget*2;
-            intake.setPower(targetPower);
+            taker.setPower(targetPower);
         }
     }
     //Field Centric Drive & Turning

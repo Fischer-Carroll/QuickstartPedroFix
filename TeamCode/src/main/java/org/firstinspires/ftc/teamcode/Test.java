@@ -194,8 +194,8 @@ public class Test {
     // Taker (formerly referred to as the intake)
     double takerPower;
     double targetTakerPower;
-    final double intakePower = 0.95;
-    final double outtakePower = -0.95;
+    final double intakePower = 1;
+    final double outtakePower = -1;
 
     private void setTakerPower(double power) {
         takerPower = power;
@@ -344,7 +344,7 @@ public class Test {
         double hd = Math.toDegrees(heading);
         double dx = (58) - x - (Math.cos(Math.toRadians(hd)) * shooterOffset);
         double dy = (53 + (37 * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset);
-        dy += Math.signum(dy) * Math.abs(dx/25);
+        dy -= Math.signum(dy) * Math.abs(dx/25);
         double da = Math.toDegrees(Math.atan2(dy,dx));
         if (hd - da < 180) {
             return (hd - da);
@@ -359,7 +359,7 @@ public class Test {
         double hd = Math.toDegrees(heading);
         double dx = (58) - x - (Math.cos(Math.toRadians(hd)) * shooterOffset);
         double dy = (53 + (37 * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset);
-        dy += Math.signum(dy) * Math.abs(dx/25);
+        dy -= Math.signum(dy) * Math.abs(dx/25);
         return (Math.hypot(dy, dx)) / 39.37;
     }
     

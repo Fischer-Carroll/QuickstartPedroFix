@@ -33,11 +33,11 @@ public class Testing extends LinearOpMode {
                 flywheelLower = flywheelSpeed;
                 flywheelUpper = flywheelSpeed;
             }
-            if (b.bottomMotor.getVelocity() < flywheelLower){
-                flywheelLower = b.bottomMotor.getVelocity();
+            if (b.flywheel1.getVelocity() < flywheelLower){
+                flywheelLower = b.flywheel1.getVelocity();
             }
-            if (b.bottomMotor.getVelocity() > flywheelUpper){
-                flywheelUpper = b.bottomMotor.getVelocity();
+            if (b.flywheel1.getVelocity() > flywheelUpper){
+                flywheelUpper = b.flywheel1.getVelocity();
             }
             if (gamepad1.dpadUpWasPressed()){
                 transferSpeed += 0.05;
