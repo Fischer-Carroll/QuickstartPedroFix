@@ -87,8 +87,6 @@ public class Test {
         depollinatorUp();
         targetTakerPower = 0;
         intake();
-
-        // Shooter
         shooterIdle();
     }
 
