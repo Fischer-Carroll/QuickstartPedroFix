@@ -162,7 +162,7 @@ public class Test {
     }
     private void setDynamicFlywheelVelocity() {
         double x = getHiveDistance();
-        setFlywheelVelocity((int)((1052*x*x*x*x - 4823*x*x*x + 7978*x*x - 5447*x + 3286) * 1.01));
+        setFlywheelVelocity((int)((1052*x*x*x*x - 4823*x*x*x + 7978*x*x - 5447*x + 3286) * 1.0175));
     }
 
     // Hood
@@ -333,17 +333,12 @@ public class Test {
     final double shooterOffset = 3.5; //inches
 
     private int getHive() {
-        if (y < 60){
-            return 0;
-        }
-        else if (y > 80){
-            return 1;
-        } else return -1;
+        return (y < 72) ? 0 : 1;
     }
     private double getHiveAngle() { //returns angle in degrees
         double hd = Math.toDegrees(heading);
         double dx = (58) - x - (Math.cos(Math.toRadians(hd)) * shooterOffset);
-        double dy = (53 + (37 * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset);
+        double dy = (54 + (36 * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset);
         dy -= Math.signum(dy) * Math.abs(dx/25);
         double da = Math.toDegrees(Math.atan2(dy,dx));
         if (hd - da < 180) {
