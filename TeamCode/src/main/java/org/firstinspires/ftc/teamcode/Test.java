@@ -229,10 +229,10 @@ public class Test {
         }
     }
     public void takerControlV2() {
-        if (gamepad1.rightBumperWasPressed()) {
+        if (gamepad1.rightBumperWasPressed() && targetTakerPower != intakePower) {
             targetTakerPower = intakePower;
             takerTimer.reset();
-        } if (gamepad1.leftBumperWasPressed()) {
+        } if (gamepad1.leftBumperWasPressed() && targetTakerPower != outtakePower) {
             targetTakerPower = outtakePower;
             takerTimer.reset();
         } if (gamepad1.xWasPressed()) {
