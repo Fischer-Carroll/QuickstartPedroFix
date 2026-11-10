@@ -222,7 +222,7 @@ public class Test {
         } if (takerPower == 0 && targetTakerPower != 0) {
             setTakerPower(targetTakerPower);
         } else if (takerTimer.seconds() < 1) {
-            setTakerPower((takerTimer.seconds() - 0.5) * targetTakerPower);
+            setTakerPower((takerTimer.seconds() - 0.5) * targetTakerPower*2);
         }
     }
     public void takerTelemetry() {
@@ -230,6 +230,7 @@ public class Test {
         telemetry.addLine("Intake - Right Bumper");
         telemetry.addLine("Outtake - Left Bumper");
         telemetry.addLine("Nulltake - X");
+        telemetry.addData("Taker Power", taker.getPower());
         telemetry.addLine("==========================================");
     }
 
@@ -265,13 +266,13 @@ public class Test {
     final double depollinatorJiggleValue = 0.3;
 
     private void setDepollinatorPosition(double position) {
-        depollinatorPosition = position;
+        depollinatorPosition = position%2;
         depollinator.setPosition(position);
     }
     private void depollinatorUp() {setDepollinatorPosition(depollinatorUpPosition);}
     private void depollinatorDown() {setDepollinatorPosition(depollinatorDownPosition);}
     private void depollinatorJiggle() {
-        if (depollinatorPosition == depollinatorDownPosition) {
+        if (depollinatorPosition%2 == depollinatorDownPosition) {
             if (depollinatorTimer.milliseconds() % 200 < 100) {
                 setDepollinatorPosition(depollinatorDownPosition + depollinatorJiggleValue);
             } else {
@@ -385,16 +386,20 @@ public class Test {
     public void shooterControl() {
         if (gamepad1.leftTriggerWasPressed()) {
             setTransferPower(activeTransferPower);
-        } else if (gamepad1.left_trigger_pressed){
+        } else if (!gamepad1.left_trigger_pressed){
             shooterIdle();
-        } if (gamepad1.left_trigger_pressed && !follower.holding()) {
-            shooterActive();
+        }
+        if (!follower.holding()) {
             moving = true;
-        } if (follower.holding() && (moving || Math.abs(getAngleError()) > 5)) {
+        }
+        if (moving && gamepad1.left_trigger_pressed){
             shooterActive();
+        } else if (moving && gamepad1.left_trigger_pressed && follower.holding()) {
             moving = false;
+            shooterActive();
         }
     }
+
     public void shooterTelemetry() {
         telemetry.addLine("Shooter Controls: ");
         telemetry.addLine("Initiate Shooting - Hold Left Trigger");
