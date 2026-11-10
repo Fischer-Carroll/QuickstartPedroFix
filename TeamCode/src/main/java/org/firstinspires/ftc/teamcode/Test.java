@@ -191,9 +191,6 @@ public class Test {
     private void aimTurret() {
         setTurretPosition(0.5 - (getHiveAngle() / (turretFieldOfFire * 2)));
     }
-    private double getTurretPosition() { //returns turret position in degrees
-        return (turretPosition - 0.5) * 2 * turretFieldOfFire;
-    }
 
     // Taker (formerly referred to as the intake)
     double takerPower;
@@ -209,42 +206,17 @@ public class Test {
     private void outtake() {setTakerPower(outtakePower);}
     private void nulltake() {setTakerPower(0);}
     public void takerControl() {
-        if (gamepad1.rightBumperWasPressed()) {
-            if (targetTakerPower != intakePower) {
-                takerTimer.reset();
-            } 
-            targetTakerPower = intakePower;
-        }
-        if (gamepad1.leftBumperWasPressed()) {
-            if (targetTakerPower != outtakePower) {
-                takerTimer.reset();
-            } 
-            targetTakerPower = outtakePower;
-        }
-        if (gamepad1.xWasPressed()) {
-            targetTakerPower = 0;
-            setTakerPower(targetTakerPower);
-        }
-        if (takerPower == 0 && targetTakerPower != 0) {
-            setTakerPower(targetTakerPower);
-        } else if (takerTimer.seconds() < 1) {
-            setTakerPower((takerTimer.seconds() - 0.5) * targetTakerPower*2);
-        }
-    }
-    public void takerControlV2() {
-        if (gamepad1.rightBumperWasPressed() && targetTakerPower != intakePower) {
-            targetTakerPower = intakePower;
-            takerTimer.reset();
-        }
-        if (gamepad1.leftBumperWasPressed() && targetTakerPower != outtakePower) {
-            targetTakerPower = outtakePower;
-            takerTimer.reset();
-        }
         if (gamepad1.xWasPressed()) {
             setTakerPower(0);
+        } else if (gamepad1.rightBumperWasPressed() && targetTakerPower != intakePower) {
+            targetTakerPower = intakePower;
+            takerTimer.reset();
+        } else if (gamepad1.leftBumperWasPressed() && targetTakerPower != outtakePower) {
+            targetTakerPower = outtakePower;
+            takerTimer.reset();
         }
         if (takerTimer.seconds() < 1 && runtime.seconds() > 1) {
-            setTakerPower(-targetTakerPower + (Math.signum(targetTakerPower) * takerTimer.seconds() * -2));
+            setTakerPower(-targetTakerPower - (Math.signum(targetTakerPower) * takerTimer.seconds() * 2));
         }
     }
     public void takerTelemetry() {
@@ -380,9 +352,6 @@ public class Test {
             return (-360 + (hd - da));
         }
     }
-    private double getAngleError() {
-        return (getTurretPosition() - getHiveAngle());
-    }
     private double getHiveDistance() { //returns distance in metres
         double hd = Math.toDegrees(heading);
         double dx = (58) - x - (Math.cos(Math.toRadians(hd)) * shooterOffset);
@@ -393,17 +362,23 @@ public class Test {
     
     // Shooter (Flywheel, Hood, Transfer and Turret functions combined)
     boolean moving;
+    boolean active;
     private void shooterIdle() {
-        setFlywheelVelocity(idleFlywheelVelocity);
-        setHoodPosition(idleHoodPosition);
-        setTurretPosition(idleTurretPosition);
-        setTransferPower(idleTransferPower);
+        if (active) {
+            setFlywheelVelocity(idleFlywheelVelocity);
+            setHoodPosition(idleHoodPosition);
+            setTurretPosition(idleTurretPosition);
+            setTransferPower(idleTransferPower);
+            active = false;
+        }
     }
     private void shooterActive() {
+        if (!active) {setTransferPower(activeTransferPower);}
         aimTurret();
         setDynamicFlywheelVelocity();
         setDynamicHoodPosition();
-        setTransferPower(activeTransferPower);
+        active = true;
+
     }
     public void shooterControl() {
         if (!gamepad1.left_trigger_pressed){
