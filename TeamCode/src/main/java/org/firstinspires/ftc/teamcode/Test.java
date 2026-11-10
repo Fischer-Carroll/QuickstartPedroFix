@@ -137,7 +137,7 @@ public class Test {
                 .setDone(() -> true)
                 .requiring(depollinator);
 
-        // Intake
+        // Taker
         cmdIntake = Command.build()
                 .setStart(this::intake)
                 .setDone(() -> true)
