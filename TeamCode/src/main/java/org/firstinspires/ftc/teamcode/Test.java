@@ -208,10 +208,10 @@ public class Test {
     public void takerControl() {
         if (gamepad1.xWasPressed()) {
             setTakerPower(0);
-        } else if (gamepad1.rightBumperWasPressed() && targetTakerPower != intakePower) {
+        } else if (gamepad1.leftBumperWasPressed() && targetTakerPower != intakePower) {
             targetTakerPower = intakePower;
             takerTimer.reset();
-        } else if (gamepad1.leftBumperWasPressed() && targetTakerPower != outtakePower) {
+        } else if (gamepad1.rightBumperWasPressed() && targetTakerPower != outtakePower) {
             targetTakerPower = outtakePower;
             takerTimer.reset();
         }
@@ -350,7 +350,7 @@ public class Test {
     private double getHiveDistance() { //returns distance in metres
         double hd = Math.toDegrees(heading);
         double dx = (58) - x - (Math.cos(Math.toRadians(hd)) * shooterOffset);
-        double dy = (53 + (37 * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset);
+        double dy = (54 + (34 * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset);
         dy -= Math.signum(dy) * Math.abs(dx/25);
         return (Math.hypot(dy, dx)) / 39.37;
     }
