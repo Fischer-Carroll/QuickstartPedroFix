@@ -325,7 +325,7 @@ public class Test {
         telemetry.addLine("(Odometry Reset Position is at (24,24) facing 90 degrees)");
         telemetry.addData("X ", x);
         telemetry.addData("Y ", y);
-        telemetry.addData("Heading", heading);
+        telemetry.addData("Heading", Math.toDegrees(heading));
         telemetry.addLine("==========================================");
     }
 
