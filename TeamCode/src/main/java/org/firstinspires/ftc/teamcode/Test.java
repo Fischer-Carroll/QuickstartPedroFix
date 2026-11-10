@@ -261,18 +261,20 @@ public class Test {
 
     // Depollinator
     double depollinatorPosition;
+    int depollinatorState = 0;
     final double depollinatorUpPosition = 1;
     final double depollinatorDownPosition = 0.04;
-    final double depollinatorJiggleValue = 0.3;
+    final double[] depollinatorStates = new double[] {depollinatorUpPosition, depollinatorDownPosition};
+    final double depollinatorJiggleValue = 0.03;
 
     private void setDepollinatorPosition(double position) {
-        depollinatorPosition = position%2;
+        depollinatorPosition = position;
         depollinator.setPosition(position);
     }
     private void depollinatorUp() {setDepollinatorPosition(depollinatorUpPosition);}
     private void depollinatorDown() {setDepollinatorPosition(depollinatorDownPosition);}
     private void depollinatorJiggle() {
-        if (depollinatorPosition%2 == depollinatorDownPosition) {
+        if (depollinatorPosition == depollinatorDownPosition) {
             if (depollinatorTimer.milliseconds() % 200 < 100) {
                 setDepollinatorPosition(depollinatorDownPosition + depollinatorJiggleValue);
             } else {
@@ -282,7 +284,8 @@ public class Test {
     }
     public void depollinatorControl() {
         if (gamepad1.yWasPressed()) {
-            setDepollinatorPosition(depollinatorPosition += 1);
+            depollinatorState += 1;
+            setDepollinatorPosition(depollinatorStates[depollinatorState]);
         }
         depollinatorJiggle();
     }
