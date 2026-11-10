@@ -330,16 +330,22 @@ public class Test {
 
     // Auto Aiming
     final double shooterOffset = 3.5; //inches
+    double hd;
+    double dx;
+    double dy;
+    double da;
 
     private int getHive() {
         return (y < 72) ? 0 : 1;
     }
+    private double getAimpoint() {
+        hd = Math.toDegrees(heading);
+        dx = (58) - x - (Math.cos(Math.toRadians(hd)) * shooterOffset);
+        dy = (54 + (36 * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset);
+        dy += Math.signum(dy) * Math.abs(dx/20); //shifts aimpoint as x grows farther from hive
+    }
     private double getHiveAngle() { //returns angle in degrees
-        double hd = Math.toDegrees(heading);
-        double dx = (58) - x - (Math.cos(Math.toRadians(hd)) * shooterOffset);
-        double dy = (54 + (36 * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset);
-        dy -= Math.signum(dy) * Math.abs(dx/25);
-        double da = Math.toDegrees(Math.atan2(dy,dx));
+        da = Math.toDegrees(Math.atan2(dy,dx));
         if (hd - da < 180) {
             return (hd - da);
         } else {
@@ -347,10 +353,6 @@ public class Test {
         }
     }
     private double getHiveDistance() { //returns distance in metres
-        double hd = Math.toDegrees(heading);
-        double dx = (58) - x - (Math.cos(Math.toRadians(hd)) * shooterOffset);
-        double dy = (54 + (34 * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset);
-        dy -= Math.signum(dy) * Math.abs(dx/25);
         return (Math.hypot(dy, dx)) / 39.37;
     }
     
@@ -368,6 +370,7 @@ public class Test {
     }
     private void shooterActive() {
         if (!active) {setTransferPower(activeTransferPower);}
+        getAimpoint();
         aimTurret();
         setDynamicFlywheelVelocity();
         setDynamicHoodPosition();
