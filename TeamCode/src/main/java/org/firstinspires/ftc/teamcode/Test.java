@@ -39,9 +39,9 @@ public class Test {
     Servo depollinator;
 
     // Timers
-    Timer runtime = new Timer();
-    Timer depollinatorTimer = new Timer();
-    Timer takerTimer = new Timer();
+    Timer runtime;
+    Timer depollinatorTimer;
+    Timer takerTimer;
 
     public Test(HardwareMap hwMap, Gamepad gp1, Gamepad gp2, Telemetry tlm) {
         // Passed Objects
@@ -78,14 +78,13 @@ public class Test {
     }
 
     public void start() {
-        runtime.reset();
-
-        // Depollinator
-        depollinatorTimer.reset();
+        // Timers
+        runtime = new Timer();
+        depollinatorTimer = new Timer();
+        takerTimer = new Timer();
+        
+        // Mechanisms
         depollinatorUp();
-
-        // Taker
-        takerTimer.reset();
         targetTakerPower = 0;
         intake();
 
