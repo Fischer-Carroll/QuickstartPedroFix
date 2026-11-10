@@ -39,6 +39,7 @@ public class Test {
     Servo depollinator;
 
     // Timers
+    Timer runtime = new Timer();
     Timer depollinatorTimer = new Timer();
     Timer takerTimer = new Timer();
 
@@ -77,6 +78,8 @@ public class Test {
     }
 
     public void start() {
+        runtime.reset();
+
         // Depollinator
         depollinatorTimer.reset();
         depollinatorUp();
@@ -223,6 +226,19 @@ public class Test {
             setTakerPower(targetTakerPower);
         } else if (takerTimer.seconds() < 1) {
             setTakerPower((takerTimer.seconds() - 0.5) * targetTakerPower*2);
+        }
+    }
+    public void takerControlV2() {
+        if (gamepad1.rightBumperWasPressed()) {
+            targetTakerPower = intakePower;
+            takerTimer.reset();
+        } if (gamepad1.leftBumperWasPressed()) {
+            targetTakerPower = outtakePower;
+            takerTimer.reset();
+        } if (gamepad1.xWasPressed()) {
+            setTakerPower(0);
+        } if (takerTimer.seconds() < 1 && runtime.seconds() > 1) {
+            setTakerPower(-targetTakerPower + (Math.signum(targetTakerPower) * takerTimer.seconds() * -2));
         }
     }
     public void takerTelemetry() {
