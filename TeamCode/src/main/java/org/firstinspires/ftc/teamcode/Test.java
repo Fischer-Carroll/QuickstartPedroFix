@@ -193,6 +193,7 @@ public class Test {
     double takerPower;
     double targetTakerPower;
     final double intakePower = 1;
+    final double nulltakePower = 0;
     final double outtakePower = -1;
 
     private void setTakerPower(double power) {
@@ -204,7 +205,8 @@ public class Test {
     private void nulltake() {setTakerPower(0);}
     public void takerControl() {
         if (gamepad1.xWasPressed()) {
-            setTakerPower(0);
+            targetTakerPower = nulltakePower;
+            takerTimer.reset();
         } else if (gamepad1.leftBumperWasPressed() && targetTakerPower != intakePower) {
             targetTakerPower = intakePower;
             takerTimer.reset();
@@ -213,7 +215,7 @@ public class Test {
             takerTimer.reset();
         }
         if (takerTimer.seconds() < 1 && runtime.seconds() > 1) {
-            setTakerPower(-targetTakerPower - (Math.signum(targetTakerPower) * takerTimer.seconds() * 2));
+            setTakerPower(-targetTakerPower + (Math.signum(targetTakerPower) * takerTimer.seconds() * 2));
         }
     }
     public void takerTelemetry() {
