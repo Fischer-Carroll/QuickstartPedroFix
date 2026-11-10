@@ -307,7 +307,7 @@ public class Test {
     public void depollinatorControl() {
         if (gamepad1.yWasPressed()) {
             depollinatorState += 1;
-            setDepollinatorPosition(depollinatorStates[depollinatorState]);
+            setDepollinatorPosition(depollinatorStates[depollinatorState % 2]);
         }
         depollinatorJiggle();
     }
