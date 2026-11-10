@@ -119,7 +119,7 @@ public class Test {
 
         // Shooter
         cmdActivateShooter = Command.build()
-                .setStart(this::commandShooterActive)
+                .setStart(this::shooterActive)
                 .setDone(() -> true)
                 .requiring(turret1,turret2,transfer,flywheel1,flywheel2,hood);
         cmdShoot = sequential(
@@ -214,15 +214,18 @@ public class Test {
                 takerTimer.reset();
             } 
             targetTakerPower = intakePower;
-        } if (gamepad1.leftBumperWasPressed()) {
+        }
+        if (gamepad1.leftBumperWasPressed()) {
             if (targetTakerPower != outtakePower) {
                 takerTimer.reset();
             } 
             targetTakerPower = outtakePower;
-        } if (gamepad1.xWasPressed()) {
+        }
+        if (gamepad1.xWasPressed()) {
             targetTakerPower = 0;
             setTakerPower(targetTakerPower);
-        } if (takerPower == 0 && targetTakerPower != 0) {
+        }
+        if (takerPower == 0 && targetTakerPower != 0) {
             setTakerPower(targetTakerPower);
         } else if (takerTimer.seconds() < 1) {
             setTakerPower((takerTimer.seconds() - 0.5) * targetTakerPower*2);
@@ -232,12 +235,15 @@ public class Test {
         if (gamepad1.rightBumperWasPressed() && targetTakerPower != intakePower) {
             targetTakerPower = intakePower;
             takerTimer.reset();
-        } if (gamepad1.leftBumperWasPressed() && targetTakerPower != outtakePower) {
+        }
+        if (gamepad1.leftBumperWasPressed() && targetTakerPower != outtakePower) {
             targetTakerPower = outtakePower;
             takerTimer.reset();
-        } if (gamepad1.xWasPressed()) {
+        }
+        if (gamepad1.xWasPressed()) {
             setTakerPower(0);
-        } if (takerTimer.seconds() < 1 && runtime.seconds() > 1) {
+        }
+        if (takerTimer.seconds() < 1 && runtime.seconds() > 1) {
             setTakerPower(-targetTakerPower + (Math.signum(targetTakerPower) * takerTimer.seconds() * -2));
         }
     }
@@ -397,15 +403,10 @@ public class Test {
         aimTurret();
         setDynamicFlywheelVelocity();
         setDynamicHoodPosition();
-    }
-    public void commandShooterActive() {
-        shooterActive();
         setTransferPower(activeTransferPower);
     }
     public void shooterControl() {
-        if (gamepad1.leftTriggerWasPressed()) {
-            setTransferPower(activeTransferPower);
-        } else if (!gamepad1.left_trigger_pressed){
+        if (!gamepad1.left_trigger_pressed){
             shooterIdle();
         }
         if (!follower.holding()) {

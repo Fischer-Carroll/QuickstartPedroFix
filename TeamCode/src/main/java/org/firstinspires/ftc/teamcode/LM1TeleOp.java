@@ -14,11 +14,9 @@ public class LM1TeleOp extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Robot bot = new Robot(hardwareMap, gamepad1,telemetry);
-        Calibration cal = new Calibration(hardwareMap, gamepad1,gamepad2,telemetry);
         bot.follower.setPose(new Pose(24,24,Math.toRadians(90)));
         bot.initialiseServoScales();
         waitForStart();
-
         bot.initialiseActuatorPositions();
         while (opModeIsActive())
         {
