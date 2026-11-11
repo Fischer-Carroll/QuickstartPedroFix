@@ -50,6 +50,7 @@ public class SingleBase extends LinearOpMode {
     // Autonomous routine
     public Command autoRoutine() {
         return sequential(
+                waitMs(15000),
                 bot.cmdStart,
                 bot.cmdBlockerDown,
                 waitMs(250),
@@ -65,7 +66,7 @@ public class SingleBase extends LinearOpMode {
                 bot.cmdNulltake,
                 follow(f, hive2Wait()),
                 bot.cmdStop,
-                waitMs(20000),
+                waitMs(5000),
                 follow(f, waitBase())
         );
     }
