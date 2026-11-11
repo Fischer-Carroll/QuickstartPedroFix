@@ -10,7 +10,7 @@ public class LM1TeleOp extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         LM1Robot LM1Robot = new LM1Robot(hardwareMap,gamepad1,gamepad2,telemetry);
-        LM1Robot.follower.setPose(new Pose(33,7.75,0));
+        LM1Robot.follower.setPose(OpModeStorage.autonomousEndPose);
         waitForStart();
         LM1Robot.start();
         while (opModeIsActive())

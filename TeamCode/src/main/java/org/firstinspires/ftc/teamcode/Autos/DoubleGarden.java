@@ -144,6 +144,7 @@ public class DoubleGarden extends LinearOpMode {
 
             telemetry.update();
         }
+        bot.stop();
     }
 
     public Path startGarden() {

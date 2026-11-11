@@ -16,6 +16,7 @@ import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.LM1Robot;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 @Autonomous(name = "Park and Push Auto", group = "Autonomous")
@@ -27,6 +28,7 @@ public class ParkAndPush extends LinearOpMode {
 
     private final Pose start = poseFactory.of(9, 66, 0);
     private final Pose startPark = poseFactory.of(12, 96, 0);
+    private LM1Robot bot;
 
     // Autonomous routine
     public Command autoRoutine() {
@@ -37,8 +39,9 @@ public class ParkAndPush extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        bot = new LM1Robot(hardwareMap,gamepad1,gamepad2,telemetry);
         Scheduler.reset();
-        follower = Constants.create(hardwareMap);
+        follower = bot.follower;
         follower.setPose(start);
         follower.update();
 
@@ -60,6 +63,8 @@ public class ParkAndPush extends LinearOpMode {
 
             telemetry.update();
         }
+        bot.stop();
+
     }
 
     public Path startPark() {

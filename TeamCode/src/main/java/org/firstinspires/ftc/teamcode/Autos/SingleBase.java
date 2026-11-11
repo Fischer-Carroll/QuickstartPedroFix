@@ -99,6 +99,7 @@ public class SingleBase extends LinearOpMode {
 
             telemetry.update();
         }
+        bot.stop();
     }
 
     public Path startFlower2() {
