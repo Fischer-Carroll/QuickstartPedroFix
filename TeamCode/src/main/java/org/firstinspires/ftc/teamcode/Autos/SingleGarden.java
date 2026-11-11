@@ -18,7 +18,7 @@ import com.pedropathing.paths.interpolator.Interpolator;
 
 import org.firstinspires.ftc.teamcode.LM1Robot;
 
-@Autonomous(name = "Single Garden", group = "Autonomous")
+@Autonomous(name = "Single Garden Auto", group = "Autonomous")
 public class SingleGarden extends LinearOpMode {
 
     private Follower f;
@@ -37,37 +37,38 @@ public class SingleGarden extends LinearOpMode {
     private final Pose hive1ParkSegment2End = poseFactory.of(14.75, 94.75, 120);
     private final Pose hive1ParkSegment4Start = poseFactory.of(14.75, 94.75, 98.0273);
     private final Pose hive1ParkSegment4End = poseFactory.of(14.75, 94.75, 0);
-    LM1Robot LM1Robot;
+    LM1Robot bot;
+
     // Autonomous routine
     public Command autoRoutine() {
         return sequential(
-                LM1Robot.cmdBlockerDown,
+                bot.cmdBlockerDown,
                 waitMs(250),
-                LM1Robot.cmdIntake,
-                LM1Robot.cmdShoot,
+                bot.cmdIntake,
+                bot.cmdShoot,
                 follow(f, startGarden()),
                 follow(f, gardenHive1()),
-                LM1Robot.cmdShoot,
-                LM1Robot.cmdNulltake,
+                bot.cmdShoot,
+                bot.cmdNulltake,
                 follow(f, hive1Park())
         );
     }
 
     @Override
     public void runOpMode() {
-        LM1Robot = new LM1Robot(hardwareMap,gamepad1,gamepad2,telemetry);
-        LM1Robot.Commands();
+        LM1Robot bot = new LM1Robot(hardwareMap,gamepad1,gamepad2,telemetry);
+        bot.Commands();
         Scheduler.reset();
-        f = LM1Robot.follower;
+        f = bot.follower;
         f.setPose(start);
         f.update();
 
         waitForStart();
-        LM1Robot.start();
+        bot.start();
         schedule(autoRoutine());
 
         while (opModeIsActive()) {
-            LM1Robot.positionUpdate();
+            bot.positionUpdate();
             f.update();
             Scheduler.execute();
 

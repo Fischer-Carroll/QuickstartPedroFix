@@ -122,9 +122,9 @@ public class LM1Robot {
                 .requiring(turret1,turret2,transfer,flywheel1,flywheel2,hood);
         cmdShoot = sequential(
                 cmdActivateShooter,
-                waitMs(500),
+                waitMs(900),
                 cmdBlockerUp,
-                waitMs(500),
+                waitMs(900),
                 cmdBlockerDown,
                 cmdIdleShooter
         );
