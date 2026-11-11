@@ -184,7 +184,9 @@ public class LM1Robot {
                 .setDone(() -> true)
                 .requiring(taker);
     }
-
+    public void stop() {
+        OpModeStorage.autonomousEndPose = follower.pose(); //saves your position in that file
+    }
     // Flywheel
     double flywheelVelocity;
     final double idleFlywheelVelocity = 2080;
