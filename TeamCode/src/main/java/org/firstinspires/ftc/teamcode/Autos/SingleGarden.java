@@ -25,9 +25,10 @@ public class SingleGarden extends LinearOpMode {
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(57, 7.75, 180);
+    private final Pose start = poseFactory.of(57, 7.75, 90);
     private final Pose startGarden = poseFactory.of(10, 9, 180);
-    private final Pose gardenHive1 = poseFactory.of(57, 9, 180);
+    private final Pose startGardenControl1 = poseFactory.of(56.0985, 13.3534, 0);
+    private final Pose gardenHive1 = poseFactory.of(56.75, 11.75, 180);
     private final Pose hive1Park = poseFactory.of(14.75, 94.75, 0);
     private final Pose hive1ParkControl1 = poseFactory.of(14.75, 9.75, 0);
     private final Pose hive1ParkControl2 = poseFactory.of(12.75, 66.75, 0);
@@ -35,7 +36,7 @@ public class SingleGarden extends LinearOpMode {
     private final Pose hive1ParkSegment1Heading = poseFactory.of(14.75, 94.75, 180);
     private final Pose hive1ParkSegment2Start = poseFactory.of(14.75, 94.75, 180);
     private final Pose hive1ParkSegment2End = poseFactory.of(14.75, 94.75, 120);
-    private final Pose hive1ParkSegment4Start = poseFactory.of(14.75, 94.75, 98.0273);
+    private final Pose hive1ParkSegment4Start = poseFactory.of(14.75, 94.75, 97.6559);
     private final Pose hive1ParkSegment4End = poseFactory.of(14.75, 94.75, 0);
     LM1Robot bot;
 
@@ -47,6 +48,7 @@ public class SingleGarden extends LinearOpMode {
                 waitMs(250),
                 bot.cmdIdleShooter,
                 bot.cmdIntake,
+                waitMs(100),
                 bot.cmdShoot,
                 follow(f, startGarden()),
                 follow(f, gardenHive1()),
@@ -88,7 +90,7 @@ public class SingleGarden extends LinearOpMode {
     }
 
     public Path startGarden() {
-        return Paths.line(start, startGarden).constant(startGarden);
+        return Paths.curve(start, startGardenControl1, startGarden).constant(startGarden);
     }
 
     public Path gardenHive1() {

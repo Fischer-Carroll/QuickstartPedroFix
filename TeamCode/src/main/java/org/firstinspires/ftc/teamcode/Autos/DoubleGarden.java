@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Autos;
 
-import static com.pedropathing.api.Paths.*;
 import com.pedropathing.api.Paths;
 
 import com.pedropathing.api.PoseFactory;
@@ -10,31 +9,33 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.ivy.Command;
 import com.pedropathing.ivy.Scheduler;
 import static com.pedropathing.ivy.Scheduler.schedule;
-import static com.pedropathing.ivy.commands.Commands.*;
+import static com.pedropathing.ivy.commands.Commands.waitMs;
 import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.pedropathing.paths.interpolator.Interpolator;
 
+import org.firstinspires.ftc.teamcode.LM1Robot;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
-@Autonomous(name = "Double Solo Auto", group = "Autonomous")
-public class DoubleSoloAuto extends LinearOpMode {
+@Autonomous(name = "Double Garden Auto", group = "Autonomous")
+public class DoubleGarden extends LinearOpMode {
 
-    private Follower follower;
+    private Follower f;
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(57, 7.75, 180);
-    private final Pose startGarden = poseFactory.of(10, 7.75, 180);
+    private final Pose start = poseFactory.of(57, 7.75, 90);
+    private final Pose startGarden = poseFactory.of(9.5, 8.25, 180);
+    private final Pose startGardenControl1 = poseFactory.of(54.75, 10.75, 0);
     private final Pose gardenAP = poseFactory.of(10.75, 70.75, 90);
     private final Pose gardenAPControl1 = poseFactory.of(26.75, 57.75, 0);
     private final Pose gardenAPControl2 = poseFactory.of(9.75, 60.75, 0);
     private final Pose gardenAPSegment1Heading = poseFactory.of(10.75, 70.75, 180);
     private final Pose gardenAPSegment2Start = poseFactory.of(10.75, 70.75, 180);
     private final Pose gardenAPSegment2End = poseFactory.of(10.75, 70.75, 82);
-    private final Pose gardenAPSegment4Start = poseFactory.of(10.75, 70.75, 97.1787);
+    private final Pose gardenAPSegment4Start = poseFactory.of(10.75, 70.75, 96.8048);
     private final Pose gardenAPSegment4End = poseFactory.of(10.75, 70.75, 90);
     private final Pose aPPush = poseFactory.of(13.75, 91.75, 90);
     private final Pose pushHive2 = poseFactory.of(59.75, 125.75, 145);
@@ -76,44 +77,54 @@ public class DoubleSoloAuto extends LinearOpMode {
     private final Pose hive2BaseSegment1Start = poseFactory.of(9.75, 118.75, 35);
     private final Pose hive2BaseSegment1End = poseFactory.of(9.75, 118.75, 0);
     private final Pose hive2BaseSegment2Heading = poseFactory.of(9.75, 118.75, 0);
+    LM1Robot bot;
 
     // Autonomous routine
     public Command autoRoutine() {
         return sequential(
-                //transfer should always be running throughout the auto
-                follow(follower, startGarden()), //before moving, should aim and shoot into hive and turn intake on
-                follow(follower, gardenAP()), //after, should turn off intake
-                follow(follower, aPPush()),
-                follow(follower, pushHive2()), //after, should aim and shoot into hive while lowering depollinator and turning on intake
-                follow(follower, hive2Flower2()),
-                follow(follower, flower2Hive2()), //after, should aim and shoot into hive
-                follow(follower, hive2Flower1()),
-                follow(follower, flower1Hive2()), //after, should aim and shoot into hive while raising depollinator and turning off intake
-                follow(follower, hive2Base()) //end
+                bot.cmdStart,
+                bot.cmdBlockerDown,
+                waitMs(250),
+                bot.cmdIdleShooter,
+                bot.cmdIntake,
+                waitMs(100),
+                bot.cmdShoot,
+                follow(f, startGarden()),
+                follow(f, gardenAP()),
+                follow(f, aPPush()),
+                follow(f, pushHive2()),
+                follow(f, hive2Flower2()),
+                follow(f, flower2Hive2()),
+                follow(f, hive2Flower1()),
+                follow(f, flower1Hive2()),
+                follow(f, hive2Base())
         );
     }
 
     @Override
     public void runOpMode() {
+        bot = new LM1Robot(hardwareMap,gamepad1,gamepad2,telemetry);
+        bot.commands();
         Scheduler.reset();
-        follower = Constants.create(hardwareMap);
-        follower.setPose(start);
-        follower.update();
+        f = bot.follower;
+        f.setPose(start);
+        f.update();
 
         waitForStart();
         schedule(autoRoutine());
 
         while (opModeIsActive()) {
-            follower.update();
+            bot.positionUpdate();
+            f.update();
             Scheduler.execute();
 
-            telemetry.addData("x", follower.pose().x());
-            telemetry.addData("y", follower.pose().y());
-            telemetry.addData("heading", follower.pose().heading());
+            telemetry.addData("x", f.pose().x());
+            telemetry.addData("y", f.pose().y());
+            telemetry.addData("heading", f.pose().heading());
 
-            if (follower.currentPath() != null) {
-                telemetry.addData("Current path distance remaining", follower.distanceToEndpoint());
-                telemetry.addData("Path number", follower.pathIndex());
+            if (f.currentPath() != null) {
+                telemetry.addData("Current path distance remaining", f.distanceToEndpoint());
+                telemetry.addData("Path number", f.pathIndex());
             }
 
             telemetry.update();
@@ -121,11 +132,11 @@ public class DoubleSoloAuto extends LinearOpMode {
     }
 
     public Path startGarden() {
-        return Paths.line(start, startGarden).constant(startGarden);
+        return Paths.curve(start, startGardenControl1, startGarden).constant(startGarden);
     }
 
     public Path gardenAP() {
-        return Paths.curve(startGarden, gardenAPControl1, gardenAPControl2, gardenAP).heading(Interpolator.piecewise().until(0.0635, Interpolator.constant(gardenAPSegment1Heading)).until(0.3267, Interpolator.linear(gardenAPSegment2Start, gardenAPSegment2End)).until(0.6633, Interpolator.tangent).until(1, Interpolator.linear(gardenAPSegment4Start, gardenAPSegment4End)));
+        return Paths.curve(startGarden, gardenAPControl1, gardenAPControl2, gardenAP).heading(Interpolator.piecewise().until(0.1063, Interpolator.constant(gardenAPSegment1Heading)).until(0.4328, Interpolator.linear(gardenAPSegment2Start, gardenAPSegment2End)).until(0.6633, Interpolator.tangent).until(1, Interpolator.linear(gardenAPSegment4Start, gardenAPSegment4End)));
     }
 
     public Path aPPush() {
