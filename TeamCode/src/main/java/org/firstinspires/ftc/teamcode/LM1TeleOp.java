@@ -24,7 +24,9 @@ public class LM1TeleOp extends LinearOpMode {
             LM1Robot.blockerControl();
 
             // Taker
-            LM1Robot.takerControl();
+            //LM1Robot.takerControl();
+            //LM1Robot.takerControlV3();
+            LM1Robot.takerControlV4();
             LM1Robot.takerTelemetry();
 
             // Depollinator
