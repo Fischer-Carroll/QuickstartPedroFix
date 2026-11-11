@@ -54,7 +54,8 @@ public class SingleGarden extends LinearOpMode {
                 follow(f, gardenHive1()),
                 bot.cmdShoot,
                 bot.cmdNulltake,
-                follow(f, hive1Park())
+                follow(f, hive1Park()),
+                bot.cmdStop
         );
     }
 
