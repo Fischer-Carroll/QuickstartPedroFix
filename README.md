@@ -121,7 +121,7 @@ voltage was not updated on driver station if OpMode did not send any telemetry.
 * New type of OpMode is now available. (`@Utility`)
    * Utility opmodes that are not disabled will show up in the Utility menu (requires 11.2 or later DS and RC) 
 * TestHardware Utility now available
-  * It allows you to test all servos, CR servos, motors, Color sensors, distance sensors, touch sensors, IMUs, webcams, and analog sensors in the config
+  * It allows you to LM1Robot all servos, CR servos, motors, Color sensors, distance sensors, touch sensors, IMUs, webcams, and analog sensors in the config
 * TestGamepad Utility now available
   * It allows you to see the results of your two gamepads to make sure it is what you expect and find problems with your gamepads. 
 * Adds methods to PwmControl interface to allow you to setPulseWidth and getPulseWidth 
@@ -489,7 +489,7 @@ voltage was not updated on driver station if OpMode did not send any telemetry.
     * [AprilTag Introduction](https://ftc-docs.firstinspires.org/apriltag-intro)
     * [AprilTag SDK Guide](https://ftc-docs.firstinspires.org/apriltag-sdk)
     * [AprilTag Detection Values](https://ftc-docs.firstinspires.org/apriltag-detection-values)
-    * [AprilTag Test Images](https://ftc-docs.firstinspires.org/apriltag-test-images)
+    * [AprilTag Test Images](https://ftc-docs.firstinspires.org/apriltag-LM1Robot-images)
     * [Camera Calibration](https://ftc-docs.firstinspires.org/camera-calibration)
 * Adds Driver Station support for Logitech Dual Action and Sony PS5 DualSense gamepads.
     * This **does not** include support for the Sony PS5 DualSense Edge gamepad.
@@ -1415,7 +1415,7 @@ This software is being released as an "alpha" version.  Use this version at your
 
 This pre-release software contains SIGNIFICANT changes, including changes to the Wi-Fi Direct pairing mechanism, rewrites of the I2C sensor classes, changes to the USB/FTDI layer, and the introduction of support for the REV Robotics Expansion Hub and the REV Robotics color-range-light sensor.  These changes were implemented to improve the reliability and resiliency of the FTC control system.
 
-Please note, however, that version 3.00 is considered "alpha" code.  This code is being released so that the FIRST community will have an opportunity to test the new REV Expansion Hub electronics module when it becomes available in May.  The developers do not recommend using this code for critical applications (i.e., competition use).
+Please note, however, that version 3.00 is considered "alpha" code.  This code is being released so that the FIRST community will have an opportunity to LM1Robot the new REV Expansion Hub electronics module when it becomes available in May.  The developers do not recommend using this code for critical applications (i.e., competition use).
 
 *** Use this version of the software at YOUR OWN RISK!!! ***
 

@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.pedropathing.paths.interpolator.Interpolator;
 
-import org.firstinspires.ftc.teamcode.Test;
+import org.firstinspires.ftc.teamcode.LM1Robot;
 
 @Autonomous(name = "Single Garden", group = "Autonomous")
 public class SingleGarden extends LinearOpMode {
@@ -37,37 +37,37 @@ public class SingleGarden extends LinearOpMode {
     private final Pose hive1ParkSegment2End = poseFactory.of(14.75, 94.75, 120);
     private final Pose hive1ParkSegment4Start = poseFactory.of(14.75, 94.75, 98.0273);
     private final Pose hive1ParkSegment4End = poseFactory.of(14.75, 94.75, 0);
-    Test test;
+    LM1Robot LM1Robot;
     // Autonomous routine
     public Command autoRoutine() {
         return sequential(
-                test.cmdBlockerDown,
+                LM1Robot.cmdBlockerDown,
                 waitMs(250),
-                test.cmdIntake,
-                test.cmdShoot,
+                LM1Robot.cmdIntake,
+                LM1Robot.cmdShoot,
                 follow(f, startGarden()),
                 follow(f, gardenHive1()),
-                test.cmdShoot,
-                test.cmdNulltake,
+                LM1Robot.cmdShoot,
+                LM1Robot.cmdNulltake,
                 follow(f, hive1Park())
         );
     }
 
     @Override
     public void runOpMode() {
-        test = new Test(hardwareMap,gamepad1,gamepad2,telemetry);
-        test.Commands();
+        LM1Robot = new LM1Robot(hardwareMap,gamepad1,gamepad2,telemetry);
+        LM1Robot.Commands();
         Scheduler.reset();
-        f = test.follower;
+        f = LM1Robot.follower;
         f.setPose(start);
         f.update();
 
         waitForStart();
-        test.start();
+        LM1Robot.start();
         schedule(autoRoutine());
 
         while (opModeIsActive()) {
-            test.positionUpdate();
+            LM1Robot.positionUpdate();
             f.update();
             Scheduler.execute();
 

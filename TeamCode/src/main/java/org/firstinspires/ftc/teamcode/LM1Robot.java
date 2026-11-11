@@ -8,7 +8,6 @@ import com.pedropathing.follower.ManualDrive;
 import com.pedropathing.ivy.Command;
 import com.pedropathing.math.Pose;
 import com.pedropathing.utils.Timer;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -19,7 +18,7 @@ import static com.pedropathing.ivy.commands.Commands.*;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
-public class Test {
+public class LM1Robot {
     // Miscellaneous
     HardwareMap hardwareMap;
     Gamepad gamepad1;
@@ -43,7 +42,7 @@ public class Test {
     Timer depollinatorTimer;
     Timer takerTimer;
 
-    public Test(HardwareMap hwMap, Gamepad gp1, Gamepad gp2, Telemetry tlm) {
+    public LM1Robot(HardwareMap hwMap, Gamepad gp1, Gamepad gp2, Telemetry tlm) {
         // Passed Objects
         hardwareMap = hwMap;
         gamepad1 = gp1;
