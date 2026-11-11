@@ -26,7 +26,7 @@ public class DoubleGarden extends LinearOpMode {
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(57, 7.75, 90);
+    private final Pose start = poseFactory.of(57, 7.75, 180);
     private final Pose startGarden = poseFactory.of(9.5, 8.25, 180);
     private final Pose startGardenControl1 = poseFactory.of(54.75, 10.75, 0);
     private final Pose gardenAP = poseFactory.of(10.75, 70.75, 90);
@@ -89,15 +89,30 @@ public class DoubleGarden extends LinearOpMode {
                 bot.cmdIntake,
                 waitMs(100),
                 bot.cmdShoot,
+                bot.cmdNulltake,
+                waitMs(250),
+                bot.cmdOuttake,
                 follow(f, startGarden()),
                 follow(f, gardenAP()),
                 follow(f, aPPush()),
                 follow(f, pushHive2()),
+                bot.cmdNulltake,
+                bot.cmdDepollinatorDown,
+                bot.cmdShoot,
+                bot.cmdIntake,
                 follow(f, hive2Flower2()),
+                waitMs(2000),
                 follow(f, flower2Hive2()),
+                waitMs(200),
+                bot.cmdShoot,
                 follow(f, hive2Flower1()),
+                waitMs(2000),
                 follow(f, flower1Hive2()),
-                follow(f, hive2Base())
+                bot.cmdDepollinatorUp,
+                bot.cmdNulltake,
+                bot.cmdShoot,
+                follow(f, hive2Base()),
+                bot.cmdStop
         );
     }
 

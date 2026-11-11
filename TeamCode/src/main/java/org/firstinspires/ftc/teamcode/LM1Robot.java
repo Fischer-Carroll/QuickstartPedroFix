@@ -94,9 +94,18 @@ public class LM1Robot {
         targetTakerPower = 0;
         intake();
     }
+    public void cmdStop() {
+        depollinatorUp();
+        setFlywheelVelocity(0);
+        setHoodPosition(idleHoodPosition);
+        setTurretPosition(idleTurretPosition);
+        setTransferPower(0);
+        nulltake();
+    }
 
     // Commands
     public Command cmdStart;
+    public Command cmdStop;
 
     public Command cmdBlockerUp;
     public Command cmdBlockerDown;
@@ -114,9 +123,14 @@ public class LM1Robot {
 
     public void commands() {
         cmdStart = Command.build()
-                .setExecute(this::cmdStart)
+                .setStart(this::cmdStart)
                 .setDone(() -> true)
                 .requiring(depollinator,taker,flywheel1,flywheel2,hood,transfer,turret1,turret2);
+        cmdStop = Command.build()
+                .setStart(this::cmdStop)
+                .setDone(() -> true)
+                .requiring(depollinator,taker,flywheel1,flywheel2,hood,transfer,turret1,turret2);
+
 
         // Blocker
         cmdBlockerUp = Command.build()
