@@ -10,7 +10,7 @@ public class TestTeleop extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Test test = new Test(hardwareMap,gamepad1,gamepad2,telemetry);
-        test.follower.setPose(new Pose(24,24,Math.toRadians(90)));
+        test.follower.setPose(new Pose(33,7.75,0));
         waitForStart();
         test.start();
         while (opModeIsActive())
@@ -18,6 +18,7 @@ public class TestTeleop extends LinearOpMode {
             // Shooter
             test.shooterControl();
             test.shooterTelemetry();
+            test.tuneAimpointControl();
 
             // Blocker
             test.blockerControl();

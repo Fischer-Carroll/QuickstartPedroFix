@@ -25,7 +25,7 @@ public class Test {
     Gamepad gamepad1;
     Gamepad gamepad2;
     Telemetry telemetry;
-    Follower follower;
+    public Follower follower;
 
     // Hardware
     DcMotorEx flywheel1;
@@ -60,14 +60,11 @@ public class Test {
         hood = hardwareMap.get(Servo.class, "hood");
         blocker = hardwareMap.get(Servo.class, "blocker");
         depollinator = hardwareMap.get(Servo.class, "depollinator");
-        follower = Constants.create(hardwareMap);
-        follower.setPose(new Pose(24,24,Math.toRadians(90)));
 
         // Configurations
         follower = Constants.create(hardwareMap);
         flywheel1.setDirection(DcMotorEx.Direction.REVERSE);
         flywheel2.setDirection(DcMotorEx.Direction.FORWARD);
-        taker.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Servo Scales
         turret1.scaleRange(0.025,0.975);
@@ -95,6 +92,7 @@ public class Test {
     public Command cmdBlockerDown;
 
     public Command cmdActivateShooter;
+    public Command cmdIdleShooter;
     public Command cmdShoot;
 
     public Command cmdDepollinatorUp;
@@ -116,15 +114,20 @@ public class Test {
 
         // Shooter
         cmdActivateShooter = Command.build()
-                .setStart(this::shooterActive)
+                .setStart(this::commandShooterActive)
+                .setDone(() -> true)
+                .requiring(turret1,turret2,transfer,flywheel1,flywheel2,hood);
+        cmdIdleShooter = Command.build()
+                .setStart(this::commandShooterIdle)
                 .setDone(() -> true)
                 .requiring(turret1,turret2,transfer,flywheel1,flywheel2,hood);
         cmdShoot = sequential(
                 cmdActivateShooter,
                 waitMs(500),
                 cmdBlockerUp,
-                waitMs(750),
-                cmdBlockerDown
+                waitMs(500),
+                cmdBlockerDown,
+                cmdIdleShooter
         );
 
         // Depollinator
@@ -159,7 +162,7 @@ public class Test {
     }
     private void setDynamicFlywheelVelocity() {
         double x = getHiveDistance();
-        setFlywheelVelocity((int)((1052*x*x*x*x - 4823*x*x*x + 7978*x*x - 5447*x + 3286) * 1.0175));
+        setFlywheelVelocity((int)((1052*x*x*x*x - 4823*x*x*x + 7978*x*x - 5447*x + 3286) * 1.017));
     }
 
     // Hood
@@ -207,15 +210,15 @@ public class Test {
         if (gamepad1.xWasPressed()) {
             targetTakerPower = nulltakePower;
             takerTimer.reset();
-        } else if (gamepad1.leftBumperWasPressed() && targetTakerPower != intakePower) {
+        } else if (gamepad1.rightBumperWasPressed() && targetTakerPower != intakePower) {
             targetTakerPower = intakePower;
             takerTimer.reset();
-        } else if (gamepad1.rightBumperWasPressed() && targetTakerPower != outtakePower) {
+        } else if (gamepad1.leftBumperWasPressed() && targetTakerPower != outtakePower) {
             targetTakerPower = outtakePower;
             takerTimer.reset();
         }
         if (takerTimer.seconds() < 1 && runtime.seconds() > 1) {
-            setTakerPower(-targetTakerPower + (Math.signum(targetTakerPower) * takerTimer.seconds() * 2));
+            setTakerPower(-targetTakerPower + (Math.signum(targetTakerPower) * takerTimer.seconds() * 4));
         }
     }
     public void takerTelemetry() {
@@ -289,12 +292,14 @@ public class Test {
     }
 
     // Drive
+    public double l = 9.0;
+    public double w = 7.75;
     double x;
     double y;
     double heading;
-    public Pose odometryResetPose = new Pose(24,24,Math.toRadians(90));
+    public Pose odometryResetPose = new Pose(24 + l,w,0);
 
-    private void positionUpdate() {
+    public void positionUpdate() {
         x = follower.pose().x();
         y = follower.pose().y();
         heading = follower.pose().heading();
@@ -334,14 +339,30 @@ public class Test {
     double dx;
     double dy;
     double da;
+    double ax = 58;
+    double ay = 55;
 
     private int getHive() {
         return (y < 72) ? 0 : 1;
     }
-    private double getAimpoint() {
+    public void tuneAimpointControl() {
+        if (gamepad2.dpadRightWasPressed()) {
+            ax -= 1;
+        }
+        if (gamepad2.dpadLeftWasPressed()) {
+            ax -= 1;
+        }
+        if (gamepad2.dpadUpWasPressed()) {
+            ay += 1;
+        }
+        if (gamepad2.dpadDownWasPressed()) {
+            ay -= 1;
+        }
+    }
+    private void getAimpoint() {
         hd = Math.toDegrees(heading);
-        dx = (58) - x - (Math.cos(Math.toRadians(hd)) * shooterOffset);
-        dy = (54 + (36 * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset);
+        dx = ax - x - (Math.cos(Math.toRadians(hd)) * shooterOffset);
+        dy = (ay + ((90 - ay) * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset);
         dy += Math.signum(dy) * Math.abs(dx/20); //shifts aimpoint as x grows farther from hive
     }
     private double getHiveAngle() { //returns angle in degrees
@@ -368,6 +389,12 @@ public class Test {
             active = false;
         }
     }
+    private void commandShooterIdle() {
+        setFlywheelVelocity(idleFlywheelVelocity);
+        setHoodPosition(idleHoodPosition);
+        setTurretPosition(idleTurretPosition);
+        setTransferPower(idleTransferPower);
+    }
     private void shooterActive() {
         if (!active) {setTransferPower(activeTransferPower);}
         getAimpoint();
@@ -375,11 +402,18 @@ public class Test {
         setDynamicFlywheelVelocity();
         setDynamicHoodPosition();
         active = true;
-
+    }
+    private void commandShooterActive() {
+        setTransferPower(activeTransferPower);
+        getAimpoint();
+        aimTurret();
+        setDynamicFlywheelVelocity();
+        setDynamicHoodPosition();
     }
     public void shooterControl() {
         if (!gamepad1.left_trigger_pressed){
             shooterIdle();
+            gamepad1.stopRumble();
         }
         if (!follower.holding()) {
             moving = true;
@@ -389,6 +423,7 @@ public class Test {
         } else if (moving && gamepad1.left_trigger_pressed && follower.holding()) {
             moving = false;
             shooterActive();
+            gamepad1.rumble(500);
         }
     }
 
@@ -397,6 +432,7 @@ public class Test {
         telemetry.addLine("Initiate Shooting - Hold Left Trigger");
         telemetry.addLine("Shoot - Hold Right Trigger");
         telemetry.addData("Hive Angle", getHiveAngle());
+        telemetry.addData("Flywheel Velocity (tps)", flywheel1.getVelocity());
         telemetry.addLine("==========================================");
     }
 }
