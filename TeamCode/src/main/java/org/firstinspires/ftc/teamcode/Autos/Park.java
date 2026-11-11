@@ -34,6 +34,7 @@ public class Park extends LinearOpMode {
     // Autonomous routine
     public Command autoRoutine() {
         return sequential(
+                waitMs(25000),
                 follow(follower, startBase())
         );
     }
