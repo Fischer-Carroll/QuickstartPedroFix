@@ -85,8 +85,19 @@ public class LM1Robot {
         intake();
         shooterIdle();
     }
+    public void cmdStart() {
+        runtime = new Timer();
+        depollinatorTimer = new Timer();
+        takerTimer = new Timer();
+
+        depollinatorUp();
+        targetTakerPower = 0;
+        intake();
+    }
 
     // Commands
+    public Command cmdStart;
+
     public Command cmdBlockerUp;
     public Command cmdBlockerDown;
 
@@ -99,8 +110,14 @@ public class LM1Robot {
 
     public Command cmdIntake;
     public Command cmdNulltake;
+    public Command cmdOuttake;
 
     public void commands() {
+        cmdStart = Command.build()
+                .setExecute(this::cmdStart)
+                .setDone(() -> true)
+                .requiring(depollinator,taker,flywheel1,flywheel2,hood,transfer,turret1,turret2);
+
         // Blocker
         cmdBlockerUp = Command.build()
                 .setStart(this::blockerUp)
@@ -146,6 +163,10 @@ public class LM1Robot {
                 .requiring(taker);
         cmdNulltake = Command.build()
                 .setStart(this::nulltake)
+                .setDone(() -> true)
+                .requiring(taker);
+        cmdOuttake = Command.build()
+                .setStart(this::outtake)
                 .setDone(() -> true)
                 .requiring(taker);
     }

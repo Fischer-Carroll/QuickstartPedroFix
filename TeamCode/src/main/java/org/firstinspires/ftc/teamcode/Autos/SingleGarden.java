@@ -42,8 +42,10 @@ public class SingleGarden extends LinearOpMode {
     // Autonomous routine
     public Command autoRoutine() {
         return sequential(
+                bot.cmdStart,
                 bot.cmdBlockerDown,
                 waitMs(250),
+                bot.cmdIdleShooter,
                 bot.cmdIntake,
                 bot.cmdShoot,
                 follow(f, startGarden()),
