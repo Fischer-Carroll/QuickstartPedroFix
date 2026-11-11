@@ -57,7 +57,7 @@ public class SingleGarden extends LinearOpMode {
     @Override
     public void runOpMode() {
         LM1Robot bot = new LM1Robot(hardwareMap,gamepad1,gamepad2,telemetry);
-        bot.Commands();
+        bot.commands();
         Scheduler.reset();
         f = bot.follower;
         f.setPose(start);

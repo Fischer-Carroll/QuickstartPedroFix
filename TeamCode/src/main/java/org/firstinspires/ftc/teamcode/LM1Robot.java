@@ -100,7 +100,7 @@ public class LM1Robot {
     public Command cmdIntake;
     public Command cmdNulltake;
 
-    public void Commands() {
+    public void commands() {
         // Blocker
         cmdBlockerUp = Command.build()
                 .setStart(this::blockerUp)
