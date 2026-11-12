@@ -259,13 +259,13 @@ public class LM1Robot {
 
             if (takerPower >= nulltakePower) {intake();} // if power is 0-1, immediately set the power to 1
             else { //if it's below 0 (outtaking), in order to not change rpm too fast
-                initialTakerPower = takerPower; //saves initial power (currently) before overwriting it
+                initialTakerPower = takerPower; //saves current power as initial power to lerp from
                 takerTimer.reset(); //resets timer so that it can be referenced from 0
             }
         }
         if (gamepad1.bWasPressed()) {
             if (targetTakerPower != outtakePower) {initialTargetTakerPower = targetTakerPower;} //stops from overriding initial target power if button is pressed multiple times
-            initialTakerPower = takerPower;
+            initialTakerPower = takerPower; //saves so it is not overwritten
             targetTakerPower = outtakePower;
             takerTimer.reset();
         }
