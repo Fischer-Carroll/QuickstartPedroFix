@@ -250,40 +250,40 @@ public class LM1Robot {
     private void nulltake() {setTakerPower(nulltakePower);}
 
     public void takerControl() {
-        if (gamepad1.xWasPressed()) {
-            targetTakerPower = nulltakePower;
+        if (gamepad1.xWasPressed()) { //turns off taker
+            targetTakerPower = nulltakePower; //saves as this value for reference
             nulltake();
         }
         if (gamepad1.rightBumperWasPressed()) {
             targetTakerPower = intakePower;
 
-            if (takerPower >= nulltakePower) {intake();}
-            else {
-                initialTakerPower = takerPower;
-                takerTimer.reset();
+            if (takerPower >= nulltakePower) {intake();} // if power is 0-1, immediately set the power to 1
+            else { //if it's below 0 (outtaking), in order to not change rpm too fast
+                initialTakerPower = takerPower; //saves initial power (currently) before overwriting it
+                takerTimer.reset(); //resets timer so that it can be referenced from 0
             }
         }
         if (gamepad1.bWasPressed()) {
-            if (targetTakerPower != outtakePower) {initialTargetTakerPower = targetTakerPower;}
+            if (targetTakerPower != outtakePower) {initialTargetTakerPower = targetTakerPower;} //stops from overriding initial target power if button is pressed multiple times
             initialTakerPower = takerPower;
             targetTakerPower = outtakePower;
             takerTimer.reset();
         }
-        if (targetTakerPower == intakePower && takerPower < intakePower) {
-            setTakerPower(lerp(initialTakerPower, targetTakerPower, takerTimer.seconds() * 1.5));
+        if (targetTakerPower == intakePower && takerPower < intakePower) { //only if it is not already intakePower, to not be redundant
+            setTakerPower(lerp(initialTakerPower, targetTakerPower, takerTimer.seconds() * 1.5)); //lerps power up to 1 from the initial power
         }
-        if (targetTakerPower == outtakePower) {
-            startLerpTime = Math.abs(takerPower - targetTakerPower) / 2;
-            endLerpTime = Math.abs(targetTakerPower - initialTakerPower) / 2;
-            if (takerTimer.seconds() < startLerpTime) {
-                setTakerPower(lerp(initialTakerPower, targetTakerPower, takerTimer.seconds() / startLerpTime));
+        if (targetTakerPower == outtakePower) { //lerps power down to outtake, then lerps back up to initial power
+            startLerpTime = Math.abs(takerPower - targetTakerPower) / 2; //duration of the lerp, the 2 is arbitrary to lower the time it takes
+            endLerpTime = Math.abs(targetTakerPower - initialTakerPower) / 2; //same, but for the return to the initial power
+            if (takerTimer.seconds() < startLerpTime) { //while executing the initial lerp
+                setTakerPower(lerp(initialTakerPower, targetTakerPower, takerTimer.seconds() / startLerpTime)); //scales the seconds from the timer by the lerp time to make it go 0-1
             }
-            if (takerTimer.seconds() > startLerpTime + outtakeTime && takerTimer.seconds() < startLerpTime + outtakeTime + endLerpTime) {
-                setTakerPower(lerp(targetTakerPower, initialTargetTakerPower, (takerTimer.seconds() - startLerpTime - outtakeTime) / endLerpTime));
+            if (takerTimer.seconds() > startLerpTime + outtakeTime && takerTimer.seconds() < startLerpTime + outtakeTime + endLerpTime) { //if it has been outtaking for long enough and is not done lerping back
+                setTakerPower(lerp(targetTakerPower, initialTargetTakerPower, (takerTimer.seconds() - startLerpTime - outtakeTime) / endLerpTime)); //subtracts elapsed time from the timer to still scale from 0-1
             }
-            if (takerTimer.seconds() > startLerpTime + outtakeTime + endLerpTime) {
-                targetTakerPower = initialTargetTakerPower;
-                setTakerPower(targetTakerPower);
+            if (takerTimer.seconds() > startLerpTime + outtakeTime + endLerpTime) { //if it is done lerping
+                targetTakerPower = initialTargetTakerPower; //passes power control back, afterwards ends the loop
+                setTakerPower(targetTakerPower); //finalises the initial position
             }
         }
     }
