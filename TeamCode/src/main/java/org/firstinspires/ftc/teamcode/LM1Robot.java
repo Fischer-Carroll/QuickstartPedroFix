@@ -271,7 +271,7 @@ public class LM1Robot {
             targetTakerPower = outtakePower;
             takerTimer.reset();
         }
-        if (targetTakerPower == intakePower && takerPower > intakePower) {
+        if (targetTakerPower == intakePower && takerPower < intakePower) {
             setTakerPower(lerp(initialTakerPower, targetTakerPower, takerTimer.seconds() * 1.5));
         }
         if (targetTakerPower == outtakePower) {
