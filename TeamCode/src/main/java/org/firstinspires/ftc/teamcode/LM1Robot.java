@@ -236,7 +236,7 @@ public class LM1Robot {
     double initialTargetTakerPower;
     double startLerpTime;
     double endLerpTime;
-    double outtakeTime = 0.5; //seconds
+    final double outtakeTime = 0.5; //seconds
     final double intakePower = 1;
     final double nulltakePower = 0;
     final double outtakePower = -1;
