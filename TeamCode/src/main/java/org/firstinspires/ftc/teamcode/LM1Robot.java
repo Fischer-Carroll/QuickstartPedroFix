@@ -8,10 +8,12 @@ import com.pedropathing.follower.ManualDrive;
 import com.pedropathing.ivy.Command;
 import com.pedropathing.math.Pose;
 import com.pedropathing.utils.Timer;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import static com.pedropathing.ivy.commands.Commands.*;
 import static com.pedropathing.utils.Utils.lerp;
@@ -25,6 +27,7 @@ public class LM1Robot {
     Gamepad gamepad1;
     Gamepad gamepad2;
     Telemetry telemetry;
+
     public Follower follower;
 
     // Hardware
@@ -37,6 +40,7 @@ public class LM1Robot {
     Servo hood;
     Servo blocker;
     Servo depollinator;
+    VoltageSensor voltageSensor;
 
     // Timers
     Timer runtime;
@@ -51,6 +55,7 @@ public class LM1Robot {
         telemetry = tlm;
 
         // Hardware Map
+        voltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
         flywheel1 = hardwareMap.get(DcMotorEx.class, "flywheel1");
         flywheel2 = hardwareMap.get(DcMotorEx.class, "flywheel2");
         taker = hardwareMap.get(DcMotorEx.class, "taker");
@@ -65,6 +70,8 @@ public class LM1Robot {
         follower = Constants.create(hardwareMap);
         flywheel1.setDirection(DcMotorEx.Direction.REVERSE);
         flywheel2.setDirection(DcMotorEx.Direction.FORWARD);
+        flywheel1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheel2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Servo Scales
         turret1.scaleRange(0.025,0.975);
@@ -190,6 +197,12 @@ public class LM1Robot {
     }
     // Flywheel
     double flywheelVelocity;
+    double targetFlywheelVelocity;
+    double kP;
+    double kF;
+    double flywheelPower;
+    double curFlywheelVelocity;
+    int bbThreshold = 85;
     final double idleFlywheelVelocity = 2080;
 
     private void setFlywheelVelocity(double velocity) {
@@ -197,9 +210,38 @@ public class LM1Robot {
         flywheel1.setVelocity(velocity);
         flywheel2.setVelocity(velocity);
     }
-    private void setDynamicFlywheelVelocity() {
+    private void setFlywheelPower(double power) {
+        flywheelPower = power;
+        flywheel1.setPower(power);
+        flywheel2.setPower(power);
+    }
+    private void setTargetFlywheelVelocity() {
         double x = getHiveDistance();
-        setFlywheelVelocity((int)((1052*x*x*x*x - 4823*x*x*x + 7978*x*x - 5447*x + 3286) * 1.017));
+        setFlywheelVelocity((1052*x*x*x*x - 4823*x*x*x + 7978*x*x - 5447*x + 3286) * 1.017);
+    }
+    private double getFlywheelVelocity() {
+        return (flywheel1.getVelocity() + flywheel2.getVelocity()) / 2;
+    }
+    private double getFlywheelKf() {
+        return voltageSensor.getVoltage() / 2706.0;
+    }
+    private void flywheelBBFF() {
+        curFlywheelVelocity = getFlywheelVelocity();
+        if (curFlywheelVelocity < targetFlywheelVelocity - bbThreshold) {
+            if (flywheelPower != 1) {setFlywheelPower(1);}
+        } else if (curFlywheelVelocity > targetFlywheelVelocity + bbThreshold) {
+            if (flywheelPower != 0) {setFlywheelPower(0);}
+        } else {
+            kP = (targetFlywheelVelocity - curFlywheelVelocity) * getFlywheelKf();
+            kF = targetFlywheelVelocity * getFlywheelKf();
+            setFlywheelPower((kP + kF) / voltageSensor.getVoltage());
+        }
+    }
+    public void flywheelTelemetry() {
+        curFlywheelVelocity = getFlywheelVelocity();
+        telemetry.addData("Flywheel Velocity", curFlywheelVelocity);
+        telemetry.addData("Target Flywheel Velocity", flywheelVelocity);
+        telemetry.addData("Flywheel Velocity Error", (flywheelVelocity - curFlywheelVelocity));
     }
 
     // Hood
@@ -210,7 +252,7 @@ public class LM1Robot {
         hoodPosition = position;
         hood.setPosition(position);
     }
-    private void setDynamicHoodPosition(){
+    private void setTargetHoodPosition(){
         double x = getHiveDistance();
         setHoodPosition(-0.9156*x*x*x*x + 4.322*x*x*x - 7.229*x*x + 4.634*x + 0.01);
     }
@@ -465,16 +507,16 @@ public class LM1Robot {
         if (!active) {setTransferPower(activeTransferPower);}
         getAimpoint();
         aimTurret();
-        setDynamicFlywheelVelocity();
-        setDynamicHoodPosition();
+        setTargetFlywheelVelocity();
+        setTargetHoodPosition();
         active = true;
     }
     private void commandShooterActive() {
         setTransferPower(activeTransferPower);
         getAimpoint();
         aimTurret();
-        setDynamicFlywheelVelocity();
-        setDynamicHoodPosition();
+        setTargetFlywheelVelocity();
+        setTargetHoodPosition();
     }
     public void shooterControl() {
         if (!gamepad1.left_trigger_pressed){
@@ -492,6 +534,8 @@ public class LM1Robot {
             gamepad1.rumble(500);
         }
     }
+
+
 
     public void shooterTelemetry() {
         telemetry.addLine("Shooter Controls: ");

@@ -19,6 +19,7 @@ public class LM1TeleOp extends LinearOpMode {
             LM1Robot.shooterControl();
             LM1Robot.shooterTelemetry();
             LM1Robot.tuneAimpointControl();
+            LM1Robot.flywheelTelemetry();
 
             // Blocker
             LM1Robot.blockerControl();
