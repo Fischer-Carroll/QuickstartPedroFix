@@ -82,7 +82,7 @@ public class LM1Robot {
         
         // Mechanisms
         depollinatorUp();
-        targetTakerPower = 0;
+        targetTakerPower = 1;
         intake();
         shooterIdle();
     }
@@ -93,7 +93,7 @@ public class LM1Robot {
 
         depollinatorUp();
         targetTakerPower = 0;
-        intake();
+        nulltake();
     }
     public void cmdStop() {
         depollinatorUp();
@@ -236,7 +236,7 @@ public class LM1Robot {
     double initialTargetTakerPower;
     double startLerpTime;
     double endLerpTime;
-    double outtakeTime = 0.75; //seconds
+    double outtakeTime = 0.5; //seconds
     final double intakePower = 1;
     final double nulltakePower = 0;
     final double outtakePower = -1;
@@ -263,11 +263,9 @@ public class LM1Robot {
                 takerTimer.reset();
             }
         }
-        if (gamepad1.aWasPressed()) {
-            if (targetTakerPower != outtakePower) {
-                initialTargetTakerPower = targetTakerPower;
-                initialTakerPower = takerPower;
-            }
+        if (gamepad1.bWasPressed()) {
+            if (targetTakerPower != outtakePower) {initialTargetTakerPower = targetTakerPower;}
+            initialTakerPower = takerPower;
             targetTakerPower = outtakePower;
             takerTimer.reset();
         }
