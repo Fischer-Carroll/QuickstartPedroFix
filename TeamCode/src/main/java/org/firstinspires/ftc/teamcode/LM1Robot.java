@@ -233,13 +233,10 @@ public class LM1Robot {
     double takerPower;
     double targetTakerPower;
     double initialTakerPower;
-    boolean initialTakerState;
+    double initialTargetTakerPower;
     double startLerpTime;
     double endLerpTime;
     double outtakeTime = 0.75; //seconds
-    boolean taking;
-    boolean intake;
-    boolean outtake;
     final double intakePower = 1;
     final double nulltakePower = 0;
     final double outtakePower = -1;
@@ -248,66 +245,11 @@ public class LM1Robot {
         takerPower = power;
         taker.setPower(power);
     }
-    private void intake() {setTakerPower(intakePower); intake = true;}
-    private void outtake() {setTakerPower(outtakePower); outtake = true;}
-    private void nulltake() {setTakerPower(0); taking = false;}
-    public void takerControl() {
-        if (gamepad1.xWasPressed()) {
-            targetTakerPower = nulltakePower;
-            takerTimer.reset();
-        } else if (gamepad1.rightBumperWasPressed() && targetTakerPower != intakePower) {
-            targetTakerPower = intakePower;
-            takerTimer.reset();
-        } else if (gamepad1.leftBumperWasPressed() && targetTakerPower != outtakePower) {
-            targetTakerPower = outtakePower;
-            takerTimer.reset();
-        }
-        if (takerTimer.seconds() < 1 && runtime.seconds() > 1) {
-            setTakerPower(-targetTakerPower + (Math.signum(targetTakerPower) * takerTimer.seconds() * 4));
-        }
-    }
-    public void takerControlV3() {
-        if (gamepad1.xWasPressed() && taking) {
-            intake = false;
-            targetTakerPower = nulltakePower;
-            nulltake();
-        } else if (gamepad1.rightBumperWasPressed() && !intake) {
-            taking = true;
-            intake = true;
-            takerTimer.reset();
-            targetTakerPower = intakePower;
-            if (takerPower == nulltakePower) {intake();}
-        } else if (gamepad1.aWasPressed()) {
-            initialTakerState = taking; //true if intake, false if nulltake
-            taking = true;
-            intake = false;
-            outtake = true;
-            takerTimer.reset();
-            initialTakerPower = targetTakerPower;
-            targetTakerPower = outtakePower;
-        }
-        if (targetTakerPower == intakePower && takerPower < intakePower && intake && taking) {
-            startLerpTime = Math.abs(targetTakerPower - takerPower) / 4;
-            setTakerPower(lerp(takerPower,targetTakerPower,takerTimer.seconds()));
-        }
-        if (targetTakerPower == outtakePower && takerTimer.seconds() < 1.75 && outtake && taking) {
-            startLerpTime = Math.abs(targetTakerPower - takerPower) / 4;
-            endLerpTime = Math.abs(targetTakerPower - initialTakerPower) / 4;
-            if (takerTimer.seconds() < startLerpTime) {
-                setTakerPower(lerp(takerPower,targetTakerPower,takerTimer.seconds()));
-            }
-            if (takerTimer.seconds() > startLerpTime + outtakeTime) {
-                setTakerPower(lerp(targetTakerPower,initialTakerPower,takerTimer.seconds() - startLerpTime + outtakeTime));
-            }
-            if (takerTimer.seconds() > endLerpTime + startLerpTime + outtakeTime) {
-                if (initialTakerState) {intake = true;}
-                else {taking = false;}
-                outtake = false;
-            }
-        }
-    }
+    private void intake() {setTakerPower(intakePower);}
+    private void outtake() {setTakerPower(outtakePower);}
+    private void nulltake() {setTakerPower(nulltakePower);}
 
-    public void takerControlV4() {
+    public void takerControl() {
         if (gamepad1.xWasPressed()) {
             targetTakerPower = nulltakePower;
             nulltake();
@@ -315,20 +257,19 @@ public class LM1Robot {
         if (gamepad1.rightBumperWasPressed()) {
             targetTakerPower = intakePower;
 
-            if (takerPower >= 0) {intake();}
+            if (takerPower >= nulltakePower) {intake();}
             else {
                 initialTakerPower = takerPower;
                 takerTimer.reset();
             }
         }
         if (gamepad1.aWasPressed()) {
-            targetTakerPower = outtakePower;
-
-            if (takerPower <= 0) {outtake();}
-            else {
+            if (targetTakerPower != outtakePower) {
+                initialTargetTakerPower = targetTakerPower;
                 initialTakerPower = takerPower;
-                takerTimer.reset();
             }
+            targetTakerPower = outtakePower;
+            takerTimer.reset();
         }
         if (targetTakerPower == intakePower && takerPower > intakePower) {
             setTakerPower(lerp(initialTakerPower, targetTakerPower, takerTimer.seconds() * 1.5));
@@ -339,11 +280,11 @@ public class LM1Robot {
             if (takerTimer.seconds() < startLerpTime) {
                 setTakerPower(lerp(initialTakerPower, targetTakerPower, takerTimer.seconds() / startLerpTime));
             }
-            if (takerTimer.seconds() > startLerpTime + outtakeTime) {
-                setTakerPower(lerp(targetTakerPower, initialTakerPower, takerTimer.seconds() / endLerpTime));
+            if (takerTimer.seconds() > startLerpTime + outtakeTime && takerTimer.seconds() < startLerpTime + outtakeTime + endLerpTime) {
+                setTakerPower(lerp(targetTakerPower, initialTargetTakerPower, (takerTimer.seconds() - startLerpTime - outtakeTime) / endLerpTime));
             }
             if (takerTimer.seconds() > startLerpTime + outtakeTime + endLerpTime) {
-                targetTakerPower = initialTakerPower;
+                targetTakerPower = initialTargetTakerPower;
                 setTakerPower(targetTakerPower);
             }
         }
