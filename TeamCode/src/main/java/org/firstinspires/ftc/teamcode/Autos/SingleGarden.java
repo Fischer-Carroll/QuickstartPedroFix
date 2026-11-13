@@ -9,6 +9,7 @@ import com.pedropathing.ivy.Command;
 import com.pedropathing.ivy.Scheduler;
 import static com.pedropathing.ivy.Scheduler.schedule;
 import static com.pedropathing.ivy.commands.Commands.waitMs;
+import static com.pedropathing.ivy.groups.Groups.deadline;
 import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -57,7 +58,7 @@ public class SingleGarden extends LinearOpMode {
                 bot.cmdIntake,
                 waitMs(100),
                 bot.cmdShoot,
-                follow(f, startGarden()),
+                deadline(waitMs(6000),follow(f, startGarden())),
                 follow(f, gardenHive1()),
 
         bot.cmdShoot,

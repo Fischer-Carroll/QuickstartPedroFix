@@ -11,6 +11,7 @@ import com.pedropathing.ivy.Scheduler;
 import static com.pedropathing.ivy.Scheduler.schedule;
 import static com.pedropathing.ivy.commands.Commands.waitMs;
 import static com.pedropathing.ivy.groups.Groups.parallel;
+import static com.pedropathing.ivy.groups.Groups.race;
 import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -86,6 +87,7 @@ public class DoubleGarden extends LinearOpMode {
                 bot.cmdStart,
                 bot.cmdBlockerDown,
                 waitMs(250),
+
                 bot.cmdIdleShooter,
                 bot.cmdIntake,
                 waitMs(100),
