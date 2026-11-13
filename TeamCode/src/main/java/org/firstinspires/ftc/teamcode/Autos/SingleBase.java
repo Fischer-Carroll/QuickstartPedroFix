@@ -34,14 +34,14 @@ public class SingleBase extends LinearOpMode {
     private final Pose startFlower2Segment1End = poseFactory.of(46.75, 124.75, 90);
     private final Pose startFlower2Segment2Heading = poseFactory.of(46.75, 124.75, 90);
     private final Pose flower2Hive2Start = poseFactory.of(46.75, 124.75, 90);
-    private final Pose flower2Hive2 = poseFactory.of(55.75, 124.75, 20);
+    private final Pose flower2Hive2 = poseFactory.of(55.75, 124.75, 10);
     private final Pose flower2Hive2Control1 = poseFactory.of(45.75, 114.75, 0);
     private final Pose flower2Hive2Control2 = poseFactory.of(54.75, 114.75, 0);
     private final Pose hive2Wait = poseFactory.of(12.75, 132.75, 0);
     private final Pose hive2WaitControl1 = poseFactory.of(35.75, 114.75, 0);
     private final Pose hive2WaitControl2 = poseFactory.of(13.75, 138.75, 0);
     private final Pose hive2WaitControl3 = poseFactory.of(17.75, 130.75, 0);
-    private final Pose hive2WaitSegment1Start = poseFactory.of(12.75, 132.75, 20);
+    private final Pose hive2WaitSegment1Start = poseFactory.of(12.75, 132.75, 10);
     private final Pose hive2WaitSegment1End = poseFactory.of(12.75, 132.75, 0);
     private final Pose hive2WaitSegment2Heading = poseFactory.of(12.75, 132.75, 0);
     private final Pose waitBase = poseFactory.of(12.75, 119.75, 0);
