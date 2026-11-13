@@ -39,5 +39,6 @@ public class LM1TeleOp extends LinearOpMode {
 
             telemetry.update();
         }
+        LM1Robot.stop();
     }
 }

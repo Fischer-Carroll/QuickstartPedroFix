@@ -10,6 +10,7 @@ import com.pedropathing.ivy.Command;
 import com.pedropathing.ivy.Scheduler;
 import static com.pedropathing.ivy.Scheduler.schedule;
 import static com.pedropathing.ivy.commands.Commands.waitMs;
+import static com.pedropathing.ivy.groups.Groups.parallel;
 import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -27,26 +28,26 @@ public class DoubleGarden extends LinearOpMode {
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
     private final Pose start = poseFactory.of(57, 7.75, 180);
-    private final Pose startGarden = poseFactory.of(9.5, 8.25, 180);
+    private final Pose startGarden = poseFactory.of(7.75, 10, -90);
     private final Pose startGardenControl1 = poseFactory.of(54.75, 10.75, 0);
-    private final Pose gardenAP = poseFactory.of(10.75, 70.75, 90);
+    private final Pose startGardenControl2 = poseFactory.of(7.2143, 38.3007, 0);
+    private final Pose startGardenSegment1Start = poseFactory.of(7.75, 9, 180);
+    private final Pose startGardenSegment1End = poseFactory.of(7.75, 9, 270);
+    private final Pose startGardenSegment2Heading = poseFactory.of(7.75, 9, -90);
+    private final Pose gardenAP = poseFactory.of(10.75, 70.75, -90);
     private final Pose gardenAPControl1 = poseFactory.of(26.75, 57.75, 0);
     private final Pose gardenAPControl2 = poseFactory.of(9.75, 60.75, 0);
-    private final Pose gardenAPSegment1Heading = poseFactory.of(10.75, 70.75, 180);
-    private final Pose gardenAPSegment2Start = poseFactory.of(10.75, 70.75, 180);
-    private final Pose gardenAPSegment2End = poseFactory.of(10.75, 70.75, 82);
-    private final Pose gardenAPSegment4Start = poseFactory.of(10.75, 70.75, 96.8048);
-    private final Pose gardenAPSegment4End = poseFactory.of(10.75, 70.75, 90);
-    private final Pose aPPush = poseFactory.of(13.75, 91.75, 90);
-    private final Pose pushHive2 = poseFactory.of(59.75, 125.75, 160);
+    private final Pose gardenAPSegment1Heading = poseFactory.of(10.75, 70.75, 270);
+    private final Pose aPPush = poseFactory.of(13.75, 91.75, 270);
+    private final Pose pushHive2 = poseFactory.of(59.75, 125.75, -200);
     private final Pose pushHive2Control1 = poseFactory.of(14.75, 64.75, 0);
     private final Pose pushHive2Control2 = poseFactory.of(45.75, 89.75, 0);
     private final Pose pushHive2Control3 = poseFactory.of(23.75, 118.75, 0);
     private final Pose pushHive2Control4 = poseFactory.of(59.75, 109.75, 0);
-    private final Pose pushHive2Segment1Heading = poseFactory.of(59.75, 125.75, 90);
-    private final Pose pushHive2Segment2Start = poseFactory.of(59.75, 125.75, 90);
-    private final Pose pushHive2Segment2End = poseFactory.of(59.75, 125.75, 60);
-    private final Pose pushHive2Segment4Start = poseFactory.of(59.75, 125.75, 58.8799);
+    private final Pose pushHive2Segment1Heading = poseFactory.of(59.75, 125.75, 270);
+    private final Pose pushHive2Segment2Start = poseFactory.of(59.75, 125.75, -90);
+    private final Pose pushHive2Segment2End = poseFactory.of(59.75, 125.75, -120);
+    private final Pose pushHive2Segment4Start = poseFactory.of(59.75, 125.75, -121.1201);
     private final Pose pushHive2Segment4End = poseFactory.of(59.75, 125.75, 160);
     private final Pose hive2Flower2 = poseFactory.of(46.75, 125.75, 90);
     private final Pose hive2Flower2Control1 = poseFactory.of(52.75, 111.75, 0);
@@ -89,9 +90,6 @@ public class DoubleGarden extends LinearOpMode {
                 bot.cmdIntake,
                 waitMs(100),
                 bot.cmdShoot,
-                bot.cmdNulltake,
-                waitMs(250),
-                bot.cmdOuttake,
                 follow(f, startGarden()),
                 follow(f, gardenAP()),
                 follow(f, aPPush()),
@@ -107,8 +105,7 @@ public class DoubleGarden extends LinearOpMode {
                 bot.cmdShoot,
                 follow(f, hive2Flower1()),
                 waitMs(2000),
-                follow(f, flower1Hive2()),
-                bot.cmdDepollinatorUp,
+                parallel(follow(f, flower1Hive2()),sequential(waitMs(1000),bot.cmdDepollinatorUp)),
                 bot.cmdNulltake,
                 bot.cmdShoot,
                 follow(f, hive2Base()),
@@ -148,11 +145,11 @@ public class DoubleGarden extends LinearOpMode {
     }
 
     public Path startGarden() {
-        return Paths.curve(start, startGardenControl1, startGarden).constant(startGarden);
+        return Paths.curve(start, startGardenControl1, startGardenControl2, startGarden).heading(Interpolator.piecewise().until(0.5, Interpolator.linear(startGardenSegment1Start, startGardenSegment1End)).until(1, Interpolator.constant(startGardenSegment2Heading)));
     }
 
     public Path gardenAP() {
-        return Paths.curve(startGarden, gardenAPControl1, gardenAPControl2, gardenAP).heading(Interpolator.piecewise().until(0.1063, Interpolator.constant(gardenAPSegment1Heading)).until(0.4328, Interpolator.linear(gardenAPSegment2Start, gardenAPSegment2End)).until(0.6633, Interpolator.tangent).until(1, Interpolator.linear(gardenAPSegment4Start, gardenAPSegment4End)));
+        return Paths.curve(startGarden, gardenAPControl1, gardenAPControl2, gardenAP).heading(Interpolator.piecewise().until(1, Interpolator.constant(gardenAPSegment1Heading)));
     }
 
     public Path aPPush() {
@@ -160,7 +157,7 @@ public class DoubleGarden extends LinearOpMode {
     }
 
     public Path pushHive2() {
-        return Paths.curve(aPPush, pushHive2Control1, pushHive2Control2, pushHive2Control3, pushHive2Control4, pushHive2).heading(Interpolator.piecewise().until(0.1561, Interpolator.constant(pushHive2Segment1Heading)).until(0.3303, Interpolator.linear(pushHive2Segment2Start, pushHive2Segment2End)).until(0.5064, Interpolator.tangent).until(1, Interpolator.linear(pushHive2Segment4Start, pushHive2Segment4End)));
+        return Paths.curve(aPPush, pushHive2Control1, pushHive2Control2, pushHive2Control3, pushHive2Control4, pushHive2).heading(Interpolator.piecewise().until(0.1561, Interpolator.constant(pushHive2Segment1Heading)).until(0.3303, Interpolator.linear(pushHive2Segment2Start, pushHive2Segment2End)).until(0.5064, Interpolator.tangent.reverse()).until(1, Interpolator.linear(pushHive2Segment4Start, pushHive2Segment4End)));
     }
 
     public Path hive2Flower2() {

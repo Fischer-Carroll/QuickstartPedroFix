@@ -78,7 +78,7 @@ public class LM1Robot {
         turret2.scaleRange(0.025,0.975);
         hood.scaleRange(0.2,0.625);
         blocker.scaleRange(0.21,0.4);
-        depollinator.scaleRange(0.227,0.57);
+        depollinator.scaleRange(0.232,0.57);
     }
 
     public void start() {
@@ -161,7 +161,7 @@ public class LM1Robot {
                 .requiring(turret1,turret2,transfer,flywheel1,flywheel2,hood);
         cmdShoot = sequential(
                 cmdActivateShooter,
-                waitMs(900),
+                waitMs(1200),
                 cmdBlockerUp,
                 waitMs(900),
                 cmdBlockerDown,
@@ -447,7 +447,7 @@ public class LM1Robot {
     double dx;
     double dy;
     double da;
-    double ax = 58;
+    double ax = 62;
     double ay = 55;
 
     private int getHive() {
@@ -534,8 +534,6 @@ public class LM1Robot {
             gamepad1.rumble(500);
         }
     }
-
-
 
     public void shooterTelemetry() {
         telemetry.addLine("Shooter Controls: ");

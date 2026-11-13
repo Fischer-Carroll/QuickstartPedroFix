@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Autos;
 
 import com.pedropathing.api.Paths;
-
 import com.pedropathing.api.PoseFactory;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Pose;
@@ -25,10 +24,18 @@ public class SingleGarden extends LinearOpMode {
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(57, 7.75, 90);
-    private final Pose startGarden = poseFactory.of(10, 9, 180);
+    private final Pose start = poseFactory.of(57, 7.75, 180);
+    private final Pose startGarden = poseFactory.of(7.75, 10, -90);
     private final Pose startGardenControl1 = poseFactory.of(56.0985, 13.3534, 0);
-    private final Pose gardenHive1 = poseFactory.of(56.75, 11.75, 180);
+    private final Pose startGardenControl2 = poseFactory.of(8.689, 38.2753, 0);
+    private final Pose startGardenSegment1Start = poseFactory.of(7.75, 9, 180);
+    private final Pose startGardenSegment1End = poseFactory.of(7.75, 9, 270);
+    private final Pose startGardenSegment2Heading = poseFactory.of(7.75, 9, -90);
+    private final Pose gardenHive1 = poseFactory.of(56.75, 11.75, -180);
+    private final Pose gardenHive1Control1 = poseFactory.of(27.4977, 26.9615, 0);
+    private final Pose gardenHive1Segment1Heading = poseFactory.of(56.75, 11.75, 270);
+    private final Pose gardenHive1Segment2Start = poseFactory.of(56.75, 11.75, -90);
+    private final Pose gardenHive1Segment2End = poseFactory.of(56.75, 11.75, 180);
     private final Pose hive1Park = poseFactory.of(14.75, 94.75, 0);
     private final Pose hive1ParkControl1 = poseFactory.of(14.75, 9.75, 0);
     private final Pose hive1ParkControl2 = poseFactory.of(12.75, 66.75, 0);
@@ -52,7 +59,8 @@ public class SingleGarden extends LinearOpMode {
                 bot.cmdShoot,
                 follow(f, startGarden()),
                 follow(f, gardenHive1()),
-                bot.cmdShoot,
+
+        bot.cmdShoot,
                 bot.cmdNulltake,
                 follow(f, hive1Park()),
                 bot.cmdStop
@@ -92,11 +100,11 @@ public class SingleGarden extends LinearOpMode {
     }
 
     public Path startGarden() {
-        return Paths.curve(start, startGardenControl1, startGarden).constant(startGarden);
+        return Paths.curve(start, startGardenControl1, startGardenControl2, startGarden).heading(Interpolator.piecewise().until(0.5, Interpolator.linear(startGardenSegment1Start, startGardenSegment1End)).until(1, Interpolator.constant(startGardenSegment2Heading)));
     }
 
     public Path gardenHive1() {
-        return Paths.line(startGarden, gardenHive1).constant(gardenHive1);
+        return Paths.curve(startGarden, gardenHive1Control1, gardenHive1).heading(Interpolator.piecewise().until(0.5, Interpolator.constant(gardenHive1Segment1Heading)).until(1, Interpolator.linear(gardenHive1Segment2Start, gardenHive1Segment2End)));
     }
 
     public Path hive1Park() {
