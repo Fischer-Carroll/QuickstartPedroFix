@@ -50,10 +50,10 @@ public class DoubleGarden extends LinearOpMode {
     private final Pose pushHive2Segment2Start = poseFactory.of(59.75, 125.75, -90);
     private final Pose pushHive2Segment2End = poseFactory.of(59.75, 125.75, -120);
     private final Pose pushHive2Segment4Start = poseFactory.of(59.75, 125.75, -121.1201);
-    private final Pose pushHive2Segment4End = poseFactory.of(59.75, 125.75, 160);
+    private final Pose pushHive2Segment4End = poseFactory.of(59.75, 125.75, 170);
     private final Pose hive2Flower2 = poseFactory.of(46.75, 125.75, 90);
     private final Pose hive2Flower2Control1 = poseFactory.of(52.75, 111.75, 0);
-    private final Pose hive2Flower2Segment1Start = poseFactory.of(46.75, 125.75, 160);
+    private final Pose hive2Flower2Segment1Start = poseFactory.of(46.75, 125.75, 170);
     private final Pose hive2Flower2Segment1End = poseFactory.of(46.75, 125.75, 90);
     private final Pose flower2Hive2 = poseFactory.of(59.75, 125.75, 270);
     private final Pose flower2Hive2Control1 = poseFactory.of(52.75, 111.75, 0);
@@ -75,11 +75,11 @@ public class DoubleGarden extends LinearOpMode {
     private final Pose flower1Hive2Segment1Start = poseFactory.of(59.75, 125.75, 180);
     private final Pose flower1Hive2Segment1End = poseFactory.of(59.75, 125.75, 90);
     private final Pose flower1Hive2Segment3Start = poseFactory.of(59.75, 125.75, 89.1559);
-    private final Pose flower1Hive2Segment3End = poseFactory.of(59.75, 125.75, 20);
+    private final Pose flower1Hive2Segment3End = poseFactory.of(59.75, 125.75, 10);
     private final Pose hive2Base = poseFactory.of(9.75, 118.75, 0);
     private final Pose hive2BaseControl1 = poseFactory.of(33.75, 123.75, 0);
     private final Pose hive2BaseControl2 = poseFactory.of(9.75, 141.5, 0);
-    private final Pose hive2BaseSegment1Start = poseFactory.of(9.75, 118.75, 20);
+    private final Pose hive2BaseSegment1Start = poseFactory.of(9.75, 118.75, 10);
     private final Pose hive2BaseSegment1End = poseFactory.of(9.75, 118.75, 0);
     private final Pose hive2BaseSegment2Heading = poseFactory.of(9.75, 118.75, 0);
     LM1Robot bot;
