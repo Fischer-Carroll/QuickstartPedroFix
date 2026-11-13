@@ -26,9 +26,9 @@ public class SingleBase extends LinearOpMode {
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(60, 134, 270);
+    private final Pose start = poseFactory.of(62.25, 136.25, 270);
     private final Pose startFlower2 = poseFactory.of(46.75, 124.75, 90);
-    private final Pose startFlower2Control1 = poseFactory.of(60.75, 108.75, 0);
+    private final Pose startFlower2Control1 = poseFactory.of(58.9428, 108.75, 0);
     private final Pose startFlower2Control2 = poseFactory.of(46.75, 108.75, 0);
     private final Pose startFlower2Segment1Start = poseFactory.of(46.75, 124.75, 270);
     private final Pose startFlower2Segment1End = poseFactory.of(46.75, 124.75, 90);
@@ -37,14 +37,14 @@ public class SingleBase extends LinearOpMode {
     private final Pose flower2Hive2 = poseFactory.of(55.75, 124.75, 20);
     private final Pose flower2Hive2Control1 = poseFactory.of(45.75, 114.75, 0);
     private final Pose flower2Hive2Control2 = poseFactory.of(54.75, 114.75, 0);
-    private final Pose hive2Base = poseFactory.of(12.75, 132.75, 0);
-    private final Pose hive2BaseControl1 = poseFactory.of(35.75, 114.75, 0);
-    private final Pose hive2BaseControl2 = poseFactory.of(13.75, 138.75, 0);
-    private final Pose hive2BaseControl3 = poseFactory.of(17.75, 130.75, 0);
-    private final Pose hive2BaseSegment1Start = poseFactory.of(12.75, 132.75, 20);
-    private final Pose hive2BaseSegment1End = poseFactory.of(12.75, 132.75, 0);
-    private final Pose hive2BaseSegment2Heading = poseFactory.of(12.75, 132.75, 0);
-    private final Pose base = poseFactory.of(12.75, 119.75, 0);
+    private final Pose hive2Wait = poseFactory.of(12.75, 132.75, 0);
+    private final Pose hive2WaitControl1 = poseFactory.of(35.75, 114.75, 0);
+    private final Pose hive2WaitControl2 = poseFactory.of(13.75, 138.75, 0);
+    private final Pose hive2WaitControl3 = poseFactory.of(17.75, 130.75, 0);
+    private final Pose hive2WaitSegment1Start = poseFactory.of(12.75, 132.75, 20);
+    private final Pose hive2WaitSegment1End = poseFactory.of(12.75, 132.75, 0);
+    private final Pose hive2WaitSegment2Heading = poseFactory.of(12.75, 132.75, 0);
+    private final Pose waitBase = poseFactory.of(12.75, 119.75, 0);
     LM1Robot bot;
 
     // Autonomous routine
@@ -60,13 +60,13 @@ public class SingleBase extends LinearOpMode {
                 bot.cmdDepollinatorDown,
                 bot.cmdShoot,
                 follow(f, startFlower2()),
-                waitMs(2000),
+                waitMs(3000),
                 follow(f, flower2Hive2()),
                 bot.cmdShoot,
                 bot.cmdNulltake,
                 follow(f, hive2Wait()),
                 bot.cmdStop,
-                waitMs(5000),
+                waitMs(4000),
                 follow(f, waitBase())
         );
     }
@@ -89,6 +89,7 @@ public class SingleBase extends LinearOpMode {
             f.update();
             Scheduler.execute();
 
+            bot.depollinatorJiggle();
             telemetry.addData("x", f.pose().x());
             telemetry.addData("y", f.pose().y());
             telemetry.addData("heading", f.pose().heading());
@@ -112,10 +113,10 @@ public class SingleBase extends LinearOpMode {
     }
 
     public Path hive2Wait() {
-        return Paths.curve(flower2Hive2, hive2BaseControl1, hive2BaseControl2, hive2BaseControl3, hive2Base).heading(Interpolator.piecewise().until(0.5, Interpolator.linear(hive2BaseSegment1Start, hive2BaseSegment1End)).until(1, Interpolator.constant(hive2BaseSegment2Heading)));
+        return Paths.curve(flower2Hive2, hive2WaitControl1, hive2WaitControl2, hive2WaitControl3, hive2Wait).heading(Interpolator.piecewise().until(0.5, Interpolator.linear(hive2WaitSegment1Start, hive2WaitSegment1End)).until(1, Interpolator.constant(hive2WaitSegment2Heading)));
     }
 
     public Path waitBase() {
-        return Paths.line(hive2Base, base).constant(base);
+        return Paths.line(hive2Wait, waitBase).constant(waitBase);
     }
 }

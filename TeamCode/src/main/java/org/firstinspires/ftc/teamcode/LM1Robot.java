@@ -367,9 +367,9 @@ public class LM1Robot {
     double depollinatorPosition;
     int depollinatorState = 0;
     final double depollinatorUpPosition = 1;
-    final double depollinatorDownPosition = 0.04;
+    final double depollinatorDownPosition = 0.05;
     final double[] depollinatorStates = new double[] {depollinatorUpPosition, depollinatorDownPosition};
-    final double depollinatorJiggleValue = 0.03;
+    final double depollinatorJiggleValue = 0.05;
 
     private void setDepollinatorPosition(double position) {
         depollinatorPosition = position;
@@ -377,9 +377,9 @@ public class LM1Robot {
     }
     private void depollinatorUp() {setDepollinatorPosition(depollinatorUpPosition);}
     private void depollinatorDown() {setDepollinatorPosition(depollinatorDownPosition);}
-    private void depollinatorJiggle() {
+    public void depollinatorJiggle() {
         if (depollinatorPosition == depollinatorDownPosition) {
-            if (depollinatorTimer.milliseconds() % 200 < 100) {
+            if (depollinatorTimer.milliseconds() % 400 < 200) {
                 setDepollinatorPosition(depollinatorDownPosition + depollinatorJiggleValue);
             } else {
                 setDepollinatorPosition(depollinatorDownPosition - depollinatorJiggleValue);
@@ -400,7 +400,7 @@ public class LM1Robot {
     }
 
     // Drive
-    public double l = 9.0;
+    public double l = 7.75;
     public double w = 7.75;
     double x;
     double y;

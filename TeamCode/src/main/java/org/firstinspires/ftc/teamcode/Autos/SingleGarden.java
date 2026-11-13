@@ -25,8 +25,8 @@ public class SingleGarden extends LinearOpMode {
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(57, 7.75, 180);
-    private final Pose startGarden = poseFactory.of(7.75, 10, -90);
+    private final Pose start = poseFactory.of(55.75, 7.75, 90);
+    private final Pose startGarden = poseFactory.of(7.75, 9, -90);
     private final Pose startGardenControl1 = poseFactory.of(56.0985, 13.3534, 0);
     private final Pose startGardenControl2 = poseFactory.of(8.689, 38.2753, 0);
     private final Pose startGardenSegment1Start = poseFactory.of(7.75, 9, 180);
