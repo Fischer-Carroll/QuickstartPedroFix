@@ -29,8 +29,8 @@ public class DoubleGarden extends LinearOpMode {
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(55.75, 7.75, 180);
-    private final Pose startGarden = poseFactory.of(7.75, 9, -90);
+    private final Pose start = poseFactory.of(55.75, 6.75, 180);
+    private final Pose startGarden = poseFactory.of(6.75, 9, 270);
     private final Pose startGardenControl1 = poseFactory.of(54.75, 10.75, 0);
     private final Pose startGardenControl2 = poseFactory.of(7.2143, 38.3007, 0);
     private final Pose startGardenSegment1Start = poseFactory.of(7.75, 9, 180);
@@ -92,11 +92,13 @@ public class DoubleGarden extends LinearOpMode {
                 waitMs(250),
                 bot.cmdIdleShooter,
                 bot.cmdIntake,
+                bot.cmdActivateShooter,
                 waitMs(200),
                 bot.cmdShoot,
-                deadline(waitMs(6000),
+                deadline(waitMs(2800),
                         follow(f, startGarden())),
                 follow(f, gardenAP()),
+
                 follow(f, aPPush()),
                 follow(f, pushHive2()),
                 bot.cmdNulltake,
@@ -104,21 +106,26 @@ public class DoubleGarden extends LinearOpMode {
                 bot.cmdShoot,
                 bot.cmdIntake,
                 follow(f, hive2Flower2()),
-                waitMs(3000),
-                follow(f, flower2Hive2()),
-                waitMs(500),
+                waitMs(2000),
+                parallel
+                        (follow(f, flower2Hive2()),
+                                sequential
+                                        (waitMs(200),
+                                                bot.cmdDepollinatorUp)),
                 bot.cmdShoot,
+                bot.cmdDepollinatorDown,
                 follow(f, hive2Flower1()),
-                waitMs(3000),
+                waitMs(2000),
                 parallel
                         (follow(f, flower1Hive2()),
                         sequential
-                                (waitMs(1000),
+                                (waitMs(350),
                                 bot.cmdDepollinatorUp)),
                 bot.cmdNulltake,
                 bot.cmdShoot,
                 follow(f, hive2Base()),
                 bot.cmdStop
+
         );
     }
 

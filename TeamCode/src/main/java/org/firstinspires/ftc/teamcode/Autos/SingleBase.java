@@ -11,6 +11,7 @@ import com.pedropathing.ivy.Command;
 import com.pedropathing.ivy.Scheduler;
 import static com.pedropathing.ivy.Scheduler.schedule;
 import static com.pedropathing.ivy.commands.Commands.*;
+import static com.pedropathing.ivy.groups.Groups.parallel;
 import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -27,21 +28,21 @@ public class SingleBase extends LinearOpMode {
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
     private final Pose start = poseFactory.of(62.25, 136.25, 270);
-    private final Pose startFlower2 = poseFactory.of(46.75, 124.75, 90);
+    private final Pose startFlower2 = poseFactory.of(46.75, 126, 90);
     private final Pose startFlower2Control1 = poseFactory.of(58.9428, 108.75, 0);
     private final Pose startFlower2Control2 = poseFactory.of(46.75, 108.75, 0);
     private final Pose startFlower2Segment1Start = poseFactory.of(46.75, 124.75, 270);
     private final Pose startFlower2Segment1End = poseFactory.of(46.75, 124.75, 90);
     private final Pose startFlower2Segment2Heading = poseFactory.of(46.75, 124.75, 90);
-    private final Pose flower2Hive2Start = poseFactory.of(46.75, 124.75, 90);
-    private final Pose flower2Hive2 = poseFactory.of(55.75, 124.75, 10);
+    private final Pose flower2Hive2Start = poseFactory.of(50.75, 125.75, 90);
+    private final Pose flower2Hive2 = poseFactory.of(50.75, 124.75, 0);
     private final Pose flower2Hive2Control1 = poseFactory.of(45.75, 114.75, 0);
     private final Pose flower2Hive2Control2 = poseFactory.of(54.75, 114.75, 0);
     private final Pose hive2Wait = poseFactory.of(12.75, 132.75, 0);
     private final Pose hive2WaitControl1 = poseFactory.of(35.75, 114.75, 0);
     private final Pose hive2WaitControl2 = poseFactory.of(13.75, 138.75, 0);
     private final Pose hive2WaitControl3 = poseFactory.of(17.75, 130.75, 0);
-    private final Pose hive2WaitSegment1Start = poseFactory.of(12.75, 132.75, 10);
+    private final Pose hive2WaitSegment1Start = poseFactory.of(12.75, 132.75, 0);
     private final Pose hive2WaitSegment1End = poseFactory.of(12.75, 132.75, 0);
     private final Pose hive2WaitSegment2Heading = poseFactory.of(12.75, 132.75, 0);
     private final Pose waitBase = poseFactory.of(12.75, 119.75, 0);
@@ -56,18 +57,21 @@ public class SingleBase extends LinearOpMode {
                 waitMs(250),
                 bot.cmdIdleShooter,
                 bot.cmdIntake,
-                waitMs(100),
+                waitMs(1000),
                 bot.cmdDepollinatorDown,
                 bot.cmdShoot,
                 follow(f, startFlower2()),
                 waitMs(3000),
-                follow(f, flower2Hive2()),
+                parallel
+                        (follow(f, flower2Hive2()),
+                                sequential
+                                        (waitMs(500),
+                                                bot.cmdDepollinatorUp)),
                 bot.cmdShoot,
                 bot.cmdNulltake,
                 follow(f, hive2Wait()),
-                bot.cmdStop,
-                waitMs(4000),
-                follow(f, waitBase())
+                follow(f, waitBase()),
+                bot.cmdStop
         );
     }
 

@@ -90,7 +90,7 @@ public class LM1Robot {
         // Mechanisms
         depollinatorUp();
         targetTakerPower = 1;
-        intake();
+        nulltake();
         shooterIdle();
     }
     public void cmdStart() {
@@ -161,9 +161,9 @@ public class LM1Robot {
                 .requiring(turret1,turret2,transfer,flywheel1,flywheel2,hood);
         cmdShoot = sequential(
                 cmdActivateShooter,
-                waitMs(1200),
+                waitMs(500),
                 cmdBlockerUp,
-                waitMs(900),
+                waitMs(500),
                 cmdBlockerDown,
                 cmdIdleShooter
         );
@@ -193,7 +193,7 @@ public class LM1Robot {
                 .requiring(taker);
     }
     public void stop() {
-        OpModeStorage.autonomousEndPose = follower.pose(); //saves your position in that file
+        OpModeStorage.autonomousEndPose = follower.pose();
     }
     // Flywheel
     double flywheelVelocity;
@@ -367,9 +367,9 @@ public class LM1Robot {
     double depollinatorPosition;
     int depollinatorState = 0;
     final double depollinatorUpPosition = 1;
-    final double depollinatorDownPosition = 0.05;
+    final double depollinatorDownPosition = 0.03;
     final double[] depollinatorStates = new double[] {depollinatorUpPosition, depollinatorDownPosition};
-    final double depollinatorJiggleValue = 0.05;
+    final double depollinatorJiggleValue = 0.03;
 
     private void setDepollinatorPosition(double position) {
         depollinatorPosition = position;
@@ -447,7 +447,8 @@ public class LM1Robot {
     double dx;
     double dy;
     double da;
-    double ax = 62;
+    double ax = 62
+            ;
     double ay = 55;
 
     private int getHive() {
@@ -467,11 +468,11 @@ public class LM1Robot {
             ay -= 1;
         }
     }
-    private void getAimpoint() {
+    public void updateAimpoint() {
         hd = Math.toDegrees(heading);
         dx = ax - x - (Math.cos(Math.toRadians(hd)) * shooterOffset);
-        dy = (ay + ((90 - ay) * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset);
-        dy += Math.signum(dy) * Math.abs(dx/20); //shifts aimpoint as x grows farther from hive
+        dy = (ay + ((92 - ay) * getHive())) - y - (Math.sin(Math.toRadians(hd)) * shooterOffset);
+        dy += Math.signum(dy) * Math.abs(dx/12); //shifts aimpoint as x grows farther from hive
     }
     private double getHiveAngle() { //returns angle in degrees
         da = Math.toDegrees(Math.atan2(dy,dx));
@@ -505,7 +506,7 @@ public class LM1Robot {
     }
     private void shooterActive() {
         if (!active) {setTransferPower(activeTransferPower);}
-        getAimpoint();
+        updateAimpoint();
         aimTurret();
         setTargetFlywheelVelocity();
         setTargetHoodPosition();
@@ -513,7 +514,7 @@ public class LM1Robot {
     }
     private void commandShooterActive() {
         setTransferPower(activeTransferPower);
-        getAimpoint();
+        updateAimpoint();
         aimTurret();
         setTargetFlywheelVelocity();
         setTargetHoodPosition();
