@@ -51,7 +51,7 @@ public class DoubleGarden extends LinearOpMode {
     private final Pose pushHive2Segment2End = poseFactory.of(59.75, 125.75, -120);
     private final Pose pushHive2Segment4Start = poseFactory.of(59.75, 125.75, -121.1201);
     private final Pose pushHive2Segment4End = poseFactory.of(59.75, 125.75, 170);
-    private final Pose hive2Flower2 = poseFactory.of(46.75, 125.75, 90);
+    private final Pose hive2Flower2 = poseFactory.of(46.75, 124.75, 90);
     private final Pose hive2Flower2Control1 = poseFactory.of(52.75, 111.75, 0);
     private final Pose hive2Flower2Segment1Start = poseFactory.of(46.75, 125.75, 170);
     private final Pose hive2Flower2Segment1End = poseFactory.of(46.75, 125.75, 90);
@@ -101,12 +101,12 @@ public class DoubleGarden extends LinearOpMode {
 
                 follow(f, aPPush()),
                 follow(f, pushHive2()),
-                bot.cmdNulltake,
                 bot.cmdDepollinatorDown,
-                bot.cmdShoot,
                 bot.cmdIntake,
-                follow(f, hive2Flower2()),
-                waitMs(2000),
+                bot.cmdShoot,
+                deadline(waitMs(1500),
+                        follow(f, hive2Flower2())),
+                waitMs(1500),
                 parallel
                         (follow(f, flower2Hive2()),
                                 sequential
